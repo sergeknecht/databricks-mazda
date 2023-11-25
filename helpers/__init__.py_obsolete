@@ -1,0 +1,15 @@
+# OBSOLETE. installPyPI is not supported in Databricks Runtime 11 and above.
+
+# Importing required libraries
+import pkg_resources
+
+# from databricks import dbutils
+
+# Check if python-dotenv is installed
+if "python-dotenv" in {pkg.key for pkg in pkg_resources.working_set}:
+    print("python-dotenv is installed.")
+else:
+    print("python-dotenv is NOT installed.")
+
+    dbutils.library.installPyPI("python-dotenv")
+    dbutils.library.restartPython()  # This is to ensure the installed library is used
