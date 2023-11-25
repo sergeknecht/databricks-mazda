@@ -13,7 +13,7 @@ for scope in scopes:
         subprocess.run(cmd, shell=True)
     else:
         dev_secrets = load_env_as_list(dev_mode=scope.name)
-        dev_secret_keys = [key for key, value in dev_secrets]
+        dev_secret_keys = [key for key, _ in dev_secrets]
         secret_keys = [secret.key for secret in w.dbutils.secrets.list(scope.name)]
         for secret_key in secret_keys:
             if secret_key not in dev_secret_keys:

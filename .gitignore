@@ -179,3 +179,4 @@ terraform-azurerm-naming
 
 
 venv
+config.json

@@ -1,8 +1,16 @@
 from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.compute import State
 
 w = WorkspaceClient()
 
 for c in w.clusters.list():
+    if c.state == State.TERMINATED:
+        # print("Deleting cluster: {}".format(c.cluster_name))
+        # w.clusters.delete(c.cluster_id)
+        continue
+
+    print(c.state, c.state_message)
+
     print(c.cluster_name)
     print(c.cluster_id)
     print(c.spark_context_id)
@@ -10,9 +18,8 @@ for c in w.clusters.list():
     print(c.node_type_id)
     print(c.driver_node_type_id)
     print(c.autoscale)
+    print(c.num_workers)
     print(c.cluster_source)
-    print(c.state)
-    print(c.state_message)
     print(c.start_time)
     print(c.terminated_time)
     print(c.last_state_loss_time)
