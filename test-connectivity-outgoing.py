@@ -11,7 +11,7 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC HTTPS out - to pypi library 
+# MAGIC HTTPS out - to pypi library
 
 # COMMAND ----------
 
@@ -75,18 +75,19 @@
 # MAGIC
 # MAGIC ```dos
 # MAGIC databricks secrets put-secret jdbc username --string-value %DBT_ORACLE_USER%
-# MAGIC databricks secrets put-secret jdbc password --string-value %DBT_ORACLE_PASSWORD% 
+# MAGIC databricks secrets put-secret jdbc password --string-value %DBT_ORACLE_PASSWORD%
 # MAGIC ```
 
 # COMMAND ----------
 
-username = dbutils.secrets.get(scope = "ACC", key = "DWH_BI1__JDBC_USERNAME")
-password = dbutils.secrets.get(scope = "ACC", key = "DWH_BI1__JDBC_PASSWORD")
+username = dbutils.secrets.get(scope="ACC", key="DWH_BI1__JDBC_USERNAME")
+password = dbutils.secrets.get(scope="ACC", key="DWH_BI1__JDBC_PASSWORD")
 
 assert username, "secret username not retrieved"
 assert password, "secret password not retrieved"
-for char in username:
-    print(char, end=" ")
+
+# for char in username:
+#     print(char, end=" ")
 
 # COMMAND ----------
 
@@ -100,14 +101,14 @@ print(jdbcUrl)
 
 # COMMAND ----------
 
-employees_table = (spark.read
-  .format("jdbc")
-  .option("driver", 'oracle.jdbc.driver.OracleDriver')
-  .option("url", jdbcUrl)
-  .option("dbtable", "LZ_MUM.TUSER")
-  .option("user", username)
-  .option("password", password)
-  .load()
+employees_table = (
+    spark.read.format("jdbc")
+    .option("driver", "oracle.jdbc.driver.OracleDriver")
+    .option("url", jdbcUrl)
+    .option("dbtable", "LZ_MUM.TUSER")
+    .option("user", username)
+    .option("password", password)
+    .load()
 )
 
 # COMMAND ----------
@@ -139,14 +140,14 @@ display(employees_table)
 # MAGIC OPTIONS (
 # MAGIC   url "jdbc:oracle:thin:@//10.230.2.32:1521/ACC_DWH",
 # MAGIC   dbtable "LZ_MUM.TUSER",
-# MAGIC   user secret('ACC', 'DWH_BI1__JDBC_USERNAME'), 
+# MAGIC   user secret('ACC', 'DWH_BI1__JDBC_USERNAME'),
 # MAGIC   password secret('ACC', 'DWH_BI1__JDBC_PASSWORD'),
 # MAGIC   driver 'oracle.jdbc.driver.OracleDriver'
 # MAGIC )
 
 # COMMAND ----------
 
-# MAGIC %sql 
+# MAGIC %sql
 # MAGIC select * from vw_employees_table;
 
 # COMMAND ----------
@@ -157,14 +158,12 @@ display(employees_table)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC **TODO**: download all views (data) from: 
+# MAGIC **TODO**: download all views (data) from:
 # MAGIC
 # MAGIC ```sql
-# MAGIC SELECT VIEW_NAME, OWNER FROM SYS.ALL_VIEWS 
+# MAGIC SELECT VIEW_NAME, OWNER FROM SYS.ALL_VIEWS
 # MAGIC WHERE OWNER = 'DWPBI'
 # MAGIC ORDER BY OWNER, VIEW_NAME
 # MAGIC ```
 
 # COMMAND ----------
-
-
