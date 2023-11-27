@@ -153,150 +153,77 @@ table_exists( 'ACC__DWH_BI1', 'LZ_LEM', 'DDN_VEHICLE_DISTRIBUTORS')
 
 # COMMAND ----------
 
-def perform_task(idx, idx_max, catalog_name, schema, table_name):
-    # Construct the fully-qualified table name
-    dbx_qualified_table_name = f"{catalog_name}.{schema}.{table_name}"
-    qualified_table_name = f"{schema}.{table_name}"
+# SuperFastPython.com
+# example of using starmap() with the thread pool
+from random import random
+from time import sleep
+from multiprocessing.pool import ThreadPool
+ 
+idx = 0
+count = df_list.count()
 
-    spark.sql(
-        f"CREATE SCHEMA IF NOT EXISTS {catalog_name}.{schema} WITH DBPROPERTIES (Scope='{scope}')"
-    )
+# task executed in a worker thread
+def task(identifier, catalog_name, schema, table_name, scope):
+    global idx
+    idx += 1
+    # catalog_name, schema, table_name, scope = value
+    # report a message
+    print(f'Task {idx}/{count} {identifier} executing')
+    # block for a moment
+    result = dbutils.notebook.run("load_table_2", 120, {"catalog_name": catalog_name, "schema": schema, "table_name": table_name, "scope": scope})
+    # return the resy
+    return (identifier, result)
+ 
 
-    if not table_exists(catalog_name, schema, table_name):
-      #     spark.sql(f"DROP TABLE {qualified_table_name}")
+# # create and configure the thread pool
+# with ThreadPool() as pool:
+#     # prepare arguments
+#     items = [(i, random()) for i in range(10)]
+#     # execute tasks and thread results in order
+#     for result in pool.starmap(task, items):
+#         print(f'Got result: {result}')
+# # thread pool is closed automatically
 
-      # if not spark.catalog.tableExists(qualified_table_name):
-      df = get_df_table(qualified_table_name)
-      print(f"writing: {idx} of {idx_max} " + dbx_qualified_table_name)
-      df.write.format("delta").mode("overwrite").saveAsTable(dbx_qualified_table_name)
-      print("\tOK")
+# COMMAND ----------
 
-      sql_pk_table = sql_pk.format(**{"schema": schema, "table_name": table_name})
-      df_pk = get_df_sql(sql_pk_table)
-      for row_pk in df_pk.collect():
-          column_name = row_pk["COLUMN_NAME"]
-          sqls = [
-              f"ALTER TABLE {dbx_qualified_table_name} ALTER COLUMN {column_name} SET NOT NULL",
-              f"ALTER TABLE {dbx_qualified_table_name} DROP PRIMARY KEY IF EXISTS CASCADE",
-              f"ALTER TABLE {dbx_qualified_table_name} ADD CONSTRAINT pk_{table_name}_{column_name} PRIMARY KEY({column_name})",
-              f"ALTER TABLE {dbx_qualified_table_name} ALTER COLUMN {column_name} SET TAGS ('db_schema' = 'pk')"
-          ]
-          for curr_sql in sqls:
-              print("\t", curr_sql)
-              spark.sql(curr_sql)
+import pprint as pp
+
+task_params = [ (f'{catalog_name}__{row["SCHEMA_NAME"]}__{row["TABLE_NAME"]}', catalog_name, row["SCHEMA_NAME"],  row["TABLE_NAME"] , scope) for row in df_list.collect() ]  
+
+pp.pprint(task_params[0:3])
 
 
 # COMMAND ----------
 
-from pyspark.sql.utils import AnalysisException
+from multiprocessing.pool import ThreadPool
 
-count = 0
-count_max = 0
-for row in df_list.collect():
-    count +=1
-    count_max = df_list.count()
-
-    schema = row["SCHEMA_NAME"]
-    table_name = row["TABLE_NAME"]
-
-
-    result = dbutils.notebook.run("load_table", 60, {"idx":str(count), "idx_max": str(count_max), "catalog_name": catalog_name, "schema": schema, "table_name": table_name, "scope": scope})
-    print(result)
-
-    
-
-    # %run ./load_table $idx=str(count) $idx_max=str(count_max) $catalog_name=catalog_name $schema=schema $table_name=table_name $scope=scope
-
-    # # Construct the fully-qualified table name
-    # dbx_qualified_table_name = f"{catalog_name}.{schema}.{table_name}"
-    # qualified_table_name = f"{schema}.{table_name}"
-
-    # try:
-    #     # Check if table exists in Spark catalog
-    #     spark.table(dbx_qualified_table_name)
-    # except AnalysisException:
-    #     # Handle exception if table does not exist
-    #     print(f"Table {dbx_qualified_table_name} does not exist.")
-    # else:
-    #     # Get schema of table from Spark catalog
-    #     df = spark.read.table(dbx_qualified_table_name)
-    #     schema = df.schema
-    #     print(schema)
-
-
+# callback function
+def custom_callback(result_iterable):
+	# iterate results
+	for result in result_iterable:
+		print(f'Got result: {result}')
+  
+with ThreadPool(5) as pool:
+    results = pool.starmap_async(task, task_params[:20])
+    # iterate results
+    for result in results.get():
+        print(f'Got result: {result}')
+    # # execute tasks and thread results in order
+    # for result in pool.starmap(task, task_params):
+    #     print(f'Got result: {result}')
+# thread pool is closed automatically
 
 # COMMAND ----------
 
-count = 0
-count_max = 0
-for row in df_list.collect():
-    count +=1
-    count_max = df_list.count()
-
-    schema = row["SCHEMA_NAME"]
-    table_name = row["TABLE_NAME"]
-    # perform_task(count, count_max, catalog_name, schema, table_name)
-
-    # Construct the fully-qualified table name
-    dbx_qualified_table_name = f"{catalog_name}.{schema}.{table_name}"
-    qualified_table_name = f"{schema}.{table_name}"
-
-    spark.sql(
-        f"USE CATALOG {catalog_name}"
-    )
-
-    spark.sql(
-        f"CREATE SCHEMA IF NOT EXISTS {catalog_name}.{schema} WITH DBPROPERTIES (Scope='{scope}')"
-    )
-
-    if not table_exists(catalog_name, schema, table_name):
-        #     spark.sql(f"DROP TABLE {qualified_table_name}")
-
-        # if not spark.catalog.tableExists(qualified_table_name):
-        df = get_df_table(qualified_table_name)
-        if df.count() > 0:
-            print(f"writing: {count} of {count_max} " + dbx_qualified_table_name)
-            df.write.format("delta").mode("overwrite").saveAsTable(dbx_qualified_table_name)
-            print("\tOK")
-
-            sql_pk_table = sql_pk.format(**{"schema": schema, "table_name": table_name})
-            df_pk = get_df_sql(sql_pk_table)
-
-            for row_pk in df_pk.collect():
-                column_name = row_pk["COLUMN_NAME"]
-                sqls = [
-                    f"ALTER TABLE {dbx_qualified_table_name} ALTER COLUMN {column_name} SET NOT NULL",
-                    f"ALTER TABLE {dbx_qualified_table_name} DROP PRIMARY KEY IF EXISTS CASCADE",
-                    f"ALTER TABLE {dbx_qualified_table_name} ADD CONSTRAINT pk_{table_name}_{column_name} PRIMARY KEY({column_name})",
-                    f"ALTER TABLE {dbx_qualified_table_name} ALTER COLUMN {column_name} SET TAGS ('db_schema' = 'pk')"
-                ]
-                for curr_sql in sqls:
-                    print("\t", curr_sql)
-                    spark.sql(curr_sql)
-
-    
-
-# COMMAND ----------
-
-# MAGIC %sql
-# MAGIC DESCRIBE DETAIL LZ_MUM.TUSER
-
-# COMMAND ----------
-
-# MAGIC %sql
-# MAGIC DESCRIBE TABLE EXTENDED LZ_MUM.TUSER
-
-# COMMAND ----------
-
-# MAGIC %sql
-# MAGIC CREATE TABLE acc__dwh_bi1.LZ_MUM.TUSER USING JDBC OPTIONS (
-# MAGIC   url "jdbc:oracle:thin:@//10.230.2.32:1521/ACC_DWH",
-# MAGIC   dbtable "LZ_MUM.TUSER",
-# MAGIC   user secret('ACC', 'DWH_BI1__JDBC_USERNAME'),
-# MAGIC   password secret('ACC', 'DWH_BI1__JDBC_PASSWORD'),
-# MAGIC   driver 'oracle.jdbc.driver.OracleDriver'
-# MAGIC ) AS
-# MAGIC SELECT
-# MAGIC   *
-# MAGIC FROM
-# MAGIC   LZ_MUM.TUSER
+# %sql
+# CREATE TABLE acc__dwh_bi1.LZ_MUM.TUSER USING JDBC OPTIONS (
+#   url "jdbc:oracle:thin:@//10.230.2.32:1521/ACC_DWH",
+#   dbtable "LZ_MUM.TUSER",
+#   user secret('ACC', 'DWH_BI1__JDBC_USERNAME'),
+#   password secret('ACC', 'DWH_BI1__JDBC_PASSWORD'),
+#   driver 'oracle.jdbc.driver.OracleDriver'
+# ) AS
+# SELECT
+#   *
+# FROM
+#   LZ_MUM.TUSER
