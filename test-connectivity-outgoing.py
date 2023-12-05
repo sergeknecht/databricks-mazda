@@ -49,8 +49,8 @@
 
 # COMMAND ----------
 
-# MAGIC %sh
-# MAGIC pip install --upgrade -r requirements.txt
+# %sh
+# pip install --upgrade -r requirements.txt
 
 # COMMAND ----------
 
@@ -165,5 +165,3 @@ display(employees_table)
 # MAGIC WHERE OWNER = 'DWPBI'
 # MAGIC ORDER BY OWNER, VIEW_NAME
 # MAGIC ```
-
-# COMMAND ----------

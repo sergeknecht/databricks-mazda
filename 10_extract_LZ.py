@@ -1,5 +1,5 @@
 # Databricks notebook source
-dbutils.widgets.removeAll()
+# dbutils.widgets.removeAll()
 dbutils.widgets.text("catalog", "DWH_BI1")
 dbutils.widgets.text("schema_filter", "like 'LZ_%'")
 dbutils.widgets.dropdown("scope", "ACC", ["ACC", "PRD", "DEV"])
@@ -28,9 +28,24 @@ print(catalog_name)
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC CREATE CATALOG IF NOT EXISTS ${scope}__${catalog} COMMENT "scope: ${catalog}";
-# MAGIC -- uses widget values !!!
+# TODO: following statement is not accepted by spark SQL, therefore move it to an INIT SQL notebook
+sql_catalog_create = f"CREATE CATALOG IF NOT EXISTS {scope}__{catalog} COMMENT 'scope: {catalog}'"
+# uses widget values !!!
+
+
+# COMMAND ----------
+
+def run_sql_cmd(sql:str):
+    """The `sql` API only supports statements with no side effects. Supported statements: `SELECT`, `DESCRIBE`, `SHOW TABLES`, `SHOW TBLPROPERTIES`, `SHOW NAMESPACES`, `SHOW COLUMNS IN`, `SHOW FUNCTIONS`, `SHOW VIEWS`, `SHOW CATALOGS`, `SHOW CREATE TABLE`.,None,Map(),Map(),List(),List(),Map())
+    """
+    print(sql)
+    df_cmd = spark.sql(sql)
+
+
+# COMMAND ----------
+
+# TODO: following statement is not accepted by spark SQL, therefore move it to an INIT SQL notebook
+# run_sql_cmd(sql_catalog_create)
 
 # COMMAND ----------
 
@@ -101,8 +116,9 @@ display(df_list)
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC USE CATALOG ${scope}__${catalog}
+# not supported by spark sql command, but we don't need it since we use spark with full schema naming
+# # sql_catalog_use = f"USE CATALOG {scope}__{catalog}"
+# run_sql_cmd(sql_catalog_use)
 
 # COMMAND ----------
 
@@ -203,8 +219,8 @@ def custom_callback(result_iterable):
 	for result in result_iterable:
 		print(f'Got result: {result}')
   
-with ThreadPool(5) as pool:
-    results = pool.starmap_async(task, task_params[:20])
+with ThreadPool(16) as pool:
+    results = pool.starmap_async(task, task_params)
     # iterate results
     for result in results.get():
         print(f'Got result: {result}')
