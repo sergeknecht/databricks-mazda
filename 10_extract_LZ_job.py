@@ -175,7 +175,7 @@ from random import random
 from time import sleep
 from multiprocessing.pool import ThreadPool
 import multiprocessing as mp
- 
+
 idx = 0
 count = df_list.count()
 
@@ -217,8 +217,7 @@ def custom_callback(result_iterable):
 	# iterate results
 	for result in result_iterable:
 		print(f'Got result: {result}')
-
-# bad example will probably cause iexecution f threads to all be executed on driver node
+  
 with ThreadPool(mp.cpu_count()) as pool:
     results = pool.starmap_async(task, task_params)
     # iterate results
