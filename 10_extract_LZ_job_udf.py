@@ -11,6 +11,19 @@ dbutils.widgets.dropdown("scope", "ACC", ["ACC", "PRD", "DEV"])
 
 # COMMAND ----------
 
+# testing environment and available login credentials
+username = dbutils.secrets.get(scope="ACC", key="DWH_BI1__JDBC_USERNAME")
+password = dbutils.secrets.get(scope="ACC", key="DWH_BI1__JDBC_PASSWORD")
+assert dbutils.secrets.get(
+    scope="ACC", key="DWH_BI1__JDBC_USERNAME"
+), "secret username not retrieved"
+assert dbutils.secrets.get(
+    scope="ACC", key="DWH_BI1__JDBC_PASSWORD"
+), "secret password not retrieved"
+
+
+# COMMAND ----------
+
 schema_filter = dbutils.widgets.get("schema_filter")
 scope = dbutils.widgets.get("scope")
 catalog = dbutils.widgets.get("catalog")
@@ -21,43 +34,42 @@ port = "1521"
 databaseName = f"{scope}_DWH"
 
 jdbcUrl = f"jdbc:oracle:thin:@//{hostName}:{port}/{databaseName}"
-print(jdbcUrl)
+# print(jdbcUrl)
 
 catalog_name = f"{scope}__{catalog}"
-print(catalog_name)
+# print(catalog_name)
+db_config = {
+    username = username,
+    password = password,
+    hostName = "accdw-scan.mle.mazdaeur.com",
+    port = "1521",
+    databaseName = databaseName,
+    scope = scope,
+    jdbcUrl = jdbcUrl
+}
+
+import pprint as pp
+pp.pprint(db_config)
 
 # COMMAND ----------
 
 # TODO: following statement is not accepted by spark SQL, therefore move it to an INIT SQL notebook
-sql_catalog_create = f"CREATE CATALOG IF NOT EXISTS {scope}__{catalog} COMMENT 'scope: {catalog}'"
+sql_catalog_create = (
+    f"CREATE CATALOG IF NOT EXISTS {scope}__{catalog} COMMENT 'scope: {catalog}'"
+)
 # uses widget values !!!
-
 
 # COMMAND ----------
 
-def run_sql_cmd(sql:str):
-    """The `sql` API only supports statements with no side effects. Supported statements: `SELECT`, `DESCRIBE`, `SHOW TABLES`, `SHOW TBLPROPERTIES`, `SHOW NAMESPACES`, `SHOW COLUMNS IN`, `SHOW FUNCTIONS`, `SHOW VIEWS`, `SHOW CATALOGS`, `SHOW CREATE TABLE`.,None,Map(),Map(),List(),List(),Map())
-    """
+def run_sql_cmd(sql: str):
+    """The `sql` API only supports statements with no side effects. Supported statements: `SELECT`, `DESCRIBE`, `SHOW TABLES`, `SHOW TBLPROPERTIES`, `SHOW NAMESPACES`, `SHOW COLUMNS IN`, `SHOW FUNCTIONS`, `SHOW VIEWS`, `SHOW CATALOGS`, `SHOW CREATE TABLE`.,None,Map(),Map(),List(),List(),Map())"""
     print(sql)
     df_cmd = spark.sql(sql)
-
 
 # COMMAND ----------
 
 # TODO: following statement is not accepted by spark SQL, therefore move it to an INIT SQL notebook
 # run_sql_cmd(sql_catalog_create)
-
-# COMMAND ----------
-
-# testing environment and available login credentials
-username = dbutils.secrets.get(scope="ACC", key="DWH_BI1__JDBC_USERNAME")
-password = dbutils.secrets.get(scope="ACC", key="DWH_BI1__JDBC_PASSWORD")
-assert dbutils.secrets.get(
-    scope="ACC", key="DWH_BI1__JDBC_USERNAME"
-), "secret username not retrieved"
-assert dbutils.secrets.get(
-    scope="ACC", key="DWH_BI1__JDBC_PASSWORD"
-), "secret password not retrieved"
 
 # COMMAND ----------
 
@@ -145,27 +157,31 @@ display(get_df_sql(sql_pk.format(**{"schema": "LZ_MUM", "table_name": "TUSER"}))
 
 # COMMAND ----------
 
-def schema_exists(catalog:str, schema_name:str):
-    query = spark.sql(f"""
+def schema_exists(catalog: str, schema_name: str):
+    query = spark.sql(
+        f"""
             SELECT 1 
             FROM {catalog}.information_schema.schemata 
             WHERE schema_name = '{schema_name}' 
-            LIMIT 1""")
-    
+            LIMIT 1"""
+    )
+
     return query.count() > 0
 
-def table_exists(catalog:str, schema:str, table_name:str):
-    query = spark.sql(f"""
+
+def table_exists(catalog: str, schema: str, table_name: str):
+    query = spark.sql(
+        f"""
             SELECT 1 
             FROM {catalog}.information_schema.tables 
             WHERE table_name = '{table_name}' 
             AND table_schema='{schema}' LIMIT 1""",
-        )
+    )
     return query.count() > 0
 
 # COMMAND ----------
 
-table_exists( 'ACC__DWH_BI1', 'LZ_LEM', 'DDN_VEHICLE_DISTRIBUTORS')
+table_exists("ACC__DWH_BI1", "LZ_LEM", "DDN_VEHICLE_DISTRIBUTORS")
 
 # COMMAND ----------
 
@@ -175,62 +191,115 @@ from random import random
 from time import sleep
 from multiprocessing.pool import ThreadPool
 import multiprocessing as mp
+from pyspark.sql.functions import col
 
 idx = 0
 count = df_list.count()
 
 # task executed in a worker thread
-def task(identifier, catalog_name, schema, table_name, scope):
-    global idx
-    idx += 1
+@udf(
+    "identifier string, catalog_name string, schema string, table_name string, scope string"
+)
+def do_task(identifier, catalog_name, schema, table_name, scope):
+    # global idx
+    # idx += 1
     # catalog_name, schema, table_name, scope = value
     # report a message
-    print(f'Task {idx}/{count} {identifier} executing')
+    # print(f"Task {idx}/{count} {identifier} executing")
+    print(f"Task {identifier} executing")
     # block for a moment
-    result = dbutils.notebook.run("load_table_2", 120, {"catalog_name": catalog_name, "schema": schema, "table_name": table_name, "scope": scope})
+    result = dbutils.notebook.run(
+        "load_table_2",
+        120,
+        {
+            "catalog_name": catalog_name,
+            "schema": schema,
+            "table_name": table_name,
+            "scope": scope,
+        },
+    )
     # return the resy
     return (identifier, result)
- 
 
-# # create and configure the thread pool
-# with ThreadPool() as pool:
-#     # prepare arguments
-#     items = [(i, random()) for i in range(10)]
-#     # execute tasks and thread results in order
-#     for result in pool.starmap(task, items):
+# COMMAND ----------
+
+# import pprint as pp
+
+task_params = [
+    (
+        f'{catalog_name}__{row["SCHEMA_NAME"]}__{row["TABLE_NAME"]}',
+        catalog_name,
+        row["SCHEMA_NAME"],
+        row["TABLE_NAME"],
+        scope,
+    )
+    for row in df_list.collect()
+]
+
+# pp.pprint(task_params[0:3])
+df = spark.createDataFrame(task_params)
+display(df)
+
+# COMMAND ----------
+
+res = df.withColumn(
+    "result",
+    do_task(
+        col("identifier"),
+        col("catalog_name"),
+        col("schema"),
+        col("table_name"),
+        col("scope"),
+    ),
+)
+display(res)
+
+# COMMAND ----------
+
+# example how you should write your program to parallelize  accross nodes
+# trick is to use dataframes and have databricks handle it
+# putting in def to avoid execution
+
+
+def an_example():
+    import urllib
+
+    df = spark.createDataFrame(
+        [("url1", "params1"), ("url2", "params2")], ("url", "params")
+    )
+
+    @udf("body string, status int")
+    def do_request(url: str, params: str):
+        full_url = url + "?" + params  # adjust this as required
+        with urllib.request.urlopen(full_url) as f:
+            status = f.status
+            body = f.read().decode("utf-8")
+
+        return {"status": status, "body": body}
+
+    res = df.withColumn("result", do_requests(col("url"), col("params")))
+
+# COMMAND ----------
+
+# BAD EXAMPLE: parralellized but not distributed. Work is only executed on worker !
+
+# # callback function
+# def custom_callback(result_iterable):
+# 	# iterate results
+# 	for result in result_iterable:
+# 		print(f'Got result: {result}')
+
+# cpu_count = 16 #   mp.cpu_count()
+
+# with ThreadPool(cpu_count) as pool:
+#     results = pool.starmap_async(task, task_params)
+#     # iterate results
+#     for result in results.get():
 #         print(f'Got result: {result}')
+#     # # execute tasks and thread results in order
+#     # for result in pool.starmap(task, task_params):
+#     #     print(f'Got result: {result}')
 # # thread pool is closed automatically
-
-# COMMAND ----------
-
-import pprint as pp
-
-task_params = [ (f'{catalog_name}__{row["SCHEMA_NAME"]}__{row["TABLE_NAME"]}', catalog_name, row["SCHEMA_NAME"],  row["TABLE_NAME"] , scope) for row in df_list.collect() ]  
-
-pp.pprint(task_params[0:3])
-
-
-# COMMAND ----------
-
-# BAD EXAMPLE: parralellized but not distributed. Work is only executed on worker ! 
-
-# callback function
-def custom_callback(result_iterable):
-	# iterate results
-	for result in result_iterable:
-		print(f'Got result: {result}')
-
-cpu_count = 16 #   mp.cpu_count()
-
-with ThreadPool(cpu_count) as pool:
-    results = pool.starmap_async(task, task_params)
-    # iterate results
-    for result in results.get():
-        print(f'Got result: {result}')
-    # # execute tasks and thread results in order
-    # for result in pool.starmap(task, task_params):
-    #     print(f'Got result: {result}')
-# thread pool is closed automatically
 
 # COMMAND ----------
 
