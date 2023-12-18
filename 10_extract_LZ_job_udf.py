@@ -1,13 +1,13 @@
+import pprint as pp
+from pyspark.sql.functions import col
+
+# COMMAND ----------
+
 # Databricks notebook source
 # dbutils.widgets.removeAll()
 dbutils.widgets.text("catalog", "DWH_BI1")
 dbutils.widgets.text("schema_filter", "like 'LZ_%'")
 dbutils.widgets.dropdown("scope", "ACC", ["ACC", "PRD", "DEV"])
-
-# Examples:
-# owner LIKE 'LZ_%'
-# ( owner LIKE 'LZ_%' OR owner = 'STG'  or
-# owner = 'DWH'
 
 # COMMAND ----------
 
@@ -21,9 +21,6 @@ assert dbutils.secrets.get(
     scope="ACC", key="DWH_BI1__JDBC_PASSWORD"
 ), "secret password not retrieved"
 
-
-# COMMAND ----------
-
 schema_filter = dbutils.widgets.get("schema_filter")
 scope = dbutils.widgets.get("scope")
 catalog = dbutils.widgets.get("catalog")
@@ -32,23 +29,19 @@ hostName = "accdw-scan.mle.mazdaeur.com"
 # hostName="10.230.2.32"
 port = "1521"
 databaseName = f"{scope}_DWH"
-
 jdbcUrl = f"jdbc:oracle:thin:@//{hostName}:{port}/{databaseName}"
-# print(jdbcUrl)
-
 catalog_name = f"{scope}__{catalog}"
-# print(catalog_name)
+
 db_config = {
-    username = username,
-    password = password,
-    hostName = "accdw-scan.mle.mazdaeur.com",
-    port = "1521",
-    databaseName = databaseName,
-    scope = scope,
-    jdbcUrl = jdbcUrl
+    username: username,
+    password: password,
+    hostName: "accdw-scan.mle.mazdaeur.com",
+    port: "1521",
+    databaseName: databaseName,
+    scope: scope,
+    jdbcUrl: jdbcUrl,
 }
 
-import pprint as pp
 pp.pprint(db_config)
 
 # COMMAND ----------
@@ -61,10 +54,12 @@ sql_catalog_create = (
 
 # COMMAND ----------
 
+
 def run_sql_cmd(sql: str):
     """The `sql` API only supports statements with no side effects. Supported statements: `SELECT`, `DESCRIBE`, `SHOW TABLES`, `SHOW TBLPROPERTIES`, `SHOW NAMESPACES`, `SHOW COLUMNS IN`, `SHOW FUNCTIONS`, `SHOW VIEWS`, `SHOW CATALOGS`, `SHOW CREATE TABLE`.,None,Map(),Map(),List(),List(),Map())"""
     print(sql)
     df_cmd = spark.sql(sql)
+
 
 # COMMAND ----------
 
@@ -72,6 +67,7 @@ def run_sql_cmd(sql: str):
 # run_sql_cmd(sql_catalog_create)
 
 # COMMAND ----------
+
 
 def get_df_sql(sql):
     df_sql = (
@@ -96,7 +92,9 @@ def get_df_sql(sql):
 
     return df_sql
 
+
 # COMMAND ----------
+
 
 def get_df_table(table_name):
     df_sql = (
@@ -110,6 +108,7 @@ def get_df_table(table_name):
     )
 
     return df_sql
+
 
 # COMMAND ----------
 
@@ -157,6 +156,7 @@ display(get_df_sql(sql_pk.format(**{"schema": "LZ_MUM", "table_name": "TUSER"}))
 
 # COMMAND ----------
 
+
 def schema_exists(catalog: str, schema_name: str):
     query = spark.sql(
         f"""
@@ -179,6 +179,7 @@ def table_exists(catalog: str, schema: str, table_name: str):
     )
     return query.count() > 0
 
+
 # COMMAND ----------
 
 table_exists("ACC__DWH_BI1", "LZ_LEM", "DDN_VEHICLE_DISTRIBUTORS")
@@ -187,25 +188,17 @@ table_exists("ACC__DWH_BI1", "LZ_LEM", "DDN_VEHICLE_DISTRIBUTORS")
 
 # SuperFastPython.com
 # example of using starmap() with the thread pool
-from random import random
-from time import sleep
-from multiprocessing.pool import ThreadPool
-import multiprocessing as mp
-from pyspark.sql.functions import col
+
 
 idx = 0
 count = df_list.count()
+
 
 # task executed in a worker thread
 @udf(
     "identifier string, catalog_name string, schema string, table_name string, scope string"
 )
-def do_task(identifier, catalog_name, schema, table_name, scope):
-    # global idx
-    # idx += 1
-    # catalog_name, schema, table_name, scope = value
-    # report a message
-    # print(f"Task {idx}/{count} {identifier} executing")
+def do_task(db_config, identifier, catalog_name, schema, table_name, scope):
     print(f"Task {identifier} executing")
     # block for a moment
     result = dbutils.notebook.run(
@@ -221,12 +214,13 @@ def do_task(identifier, catalog_name, schema, table_name, scope):
     # return the resy
     return (identifier, result)
 
+
 # COMMAND ----------
 
 # import pprint as pp
 
 task_params = [
-    (
+    (   db_config,
         f'{catalog_name}__{row["SCHEMA_NAME"]}__{row["TABLE_NAME"]}',
         catalog_name,
         row["SCHEMA_NAME"],
@@ -245,6 +239,7 @@ display(df)
 res = df.withColumn(
     "result",
     do_task(
+        col("db_config")
         col("identifier"),
         col("catalog_name"),
         col("schema"),
@@ -278,6 +273,7 @@ def an_example():
         return {"status": status, "body": body}
 
     res = df.withColumn("result", do_requests(col("url"), col("params")))
+
 
 # COMMAND ----------
 
