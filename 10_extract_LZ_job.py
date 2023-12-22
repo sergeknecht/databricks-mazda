@@ -69,6 +69,7 @@ def get_df_sql(sql):
         .option("query", sql)
         .option("user", username)
         .option("password", password)
+        .option("numPartitions",5) 
         .load()
     )
 
@@ -94,6 +95,7 @@ def get_df_table(table_name):
         .option("dbtable", table_name)
         .option("user", username)
         .option("password", password)
+        .option("numPartitions",5) 
         .load()
     )
 
