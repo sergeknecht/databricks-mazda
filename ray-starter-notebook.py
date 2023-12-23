@@ -20,7 +20,7 @@
 
 # COMMAND ----------
 
-# MAGIC %pip install ray[default]>=2.3.0
+# MAGIC %pip install ray[default]>=2.3.0 >/dev/null
 
 # COMMAND ----------
 
