@@ -141,35 +141,76 @@ print(count_max)
 
 # COMMAND ----------
 
+# MAGIC %pip install ray[default]>=2.3.0
+
+# COMMAND ----------
+
+from ray.util.spark import setup_ray_cluster, shutdown_ray_cluster, MAX_NUM_WORKER_NODES
+
+
+setup_ray_cluster(
+  num_worker_nodes=2,
+  num_cpus_per_node=4,
+  collect_log_to_path="/dbfs/tmp/raylogs",
+)
+
+# COMMAND ----------
+
+import ray
+ray.init()
+ray.cluster_resources()
+
+# COMMAND ----------
+
+df_tasks.collect()
+
+# COMMAND ----------
+
 from helpers.unity_helper import unity_table_exists, get_fqn
 
 # task executed in a worker thread
 # signature return type
-schema_result = StructType().add("identifier", StringType()).add("result", StringType())
+# schema_result = StructType().add("identifier", StringType()).add("result", StringType())
 
 
-@udf(returnType=StringType())
+# @udf(returnType=StringType())
+@ray.remote
 def do_task(db_config, identifier, catalog_name, schema, table_name, scope):
     # block for a moment
     # Construct the fully-qualified table name
     dbx_qualified_table_name = f"{catalog_name}.{schema}.{table_name}"
     qualified_table_name = f"{schema}.{table_name}"
 
-    func_result = unity_table_exists(catalog, schema, table_name)
+    return dbx_qualified_table_name
 
-    # return the resy
-    return func_result
+    # func_result = unity_table_exists(catalog, schema, table_name)
+
+    # # return the resy
+    # return func_result
 
 
-res = df_tasks.withColumn(
-    "result",
-    do_task(
-        col("db_config"),
-        col("identifier"),
-        col("catalog_name"),
-        col("schema"),
-        col("table_name"),
-        col("scope"),
-    ),
-)
-display(res)
+results = []
+for row in df_tasks.collect():
+    results.append(do_task.remote(
+        row["db_config"],
+        row["identifier"],
+        row["catalog_name"],
+        row["schema"],
+        row["table_name"],
+        row["scope"]
+    ))
+output = ray.get(results)
+
+display(output)
+# res = df_tasks.withColumn(
+#     "result",
+#     do_task.remote(
+#         col("db_config"),
+#         col("identifier"),
+#         col("catalog_name"),
+#         col("schema"),
+#         col("table_name"),
+#         col("scope"),
+#     ),
+# )
+# display(res)
