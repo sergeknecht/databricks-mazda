@@ -10,6 +10,18 @@
 
 # COMMAND ----------
 
+# MAGIC %sql
+# MAGIC --create unity catalog
+# MAGIC CREATE CATALOG IF NOT EXISTS element61
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC --create unity catalog.schema
+# MAGIC CREATE SCHEMA IF NOT EXISTS element61.uc_reporting
+
+# COMMAND ----------
+
 # get table with all CXU segments
 response = cxu_get_segments()
 segments_df = pd.DataFrame.from_records(response['items'])[['name', 'uniqueId']] # convert JSON response to table
@@ -27,6 +39,17 @@ for index, row in segments_df.iterrows():
 segments_df = segments_df[segments_df['uniqueId'].isin(segment_ids)]
 segments_df["segment_count_cxu"] = -3.0
 display(segments_df)
+
+# this should be a seperate step where the segment list is saved to unity catalog
+# next step should be run 2,3 times with 15 minutes seperation as job so that it stops resources
+# should read this table and load all segments with segment_count_cxu < 0
+# for those segments the count is retrieved
+# this step has very low resource requirements (just api call with a single count as result) and tehrefore should be run on single node, small sku cluster §(with multiple cores and small memory)
+
+
+
+# COMMAND ----------
+
 
 
 # COMMAND ----------
@@ -63,7 +86,7 @@ def task(identifier, segment_id):
 
 # COMMAND ----------
 
-task_params = [ (segment_id, segment_id) for segment_id in segment_ids]
+task_params = [ (segment_id, segment_id) for segment_id in segments_df[segments_df['segment_count_cxu']<0]['uniqueId']]
 
 pp.pprint(task_params[0:3])
 
@@ -110,12 +133,17 @@ segment_counts_df
 
 # COMMAND ----------
 
-test = segments_df.set_index('uniqueId').join(segment_counts_df.set_index('uniqueId'), rsuffix='_new')
-test['segment_count_cxu'] = test['segment_count_cxu_new'].combine_first(test['segment_count_cxu'])
-test.reset_index(inplace=True)
-test = test[['name', 'uniqueId', 'segment_count_cxu']]
-segments_df = test
-segments_df
+segment_counts_df.empty
+
+# COMMAND ----------
+
+if not segment_counts_df.empty:
+  test = segments_df.set_index('uniqueId').join(segment_counts_df.set_index('uniqueId'), rsuffix='_new')
+  test['segment_count_cxu'] = test['segment_count_cxu_new'].combine_first(test['segment_count_cxu'])
+  test.reset_index(inplace=True)
+  test = test[['name', 'uniqueId', 'segment_count_cxu']]
+  segments_df = test
+  display(segments_df)
 
 
 # COMMAND ----------
@@ -127,19 +155,8 @@ print("segments#:" + str(len(task_params)))
 
 # COMMAND ----------
 
-segments_df_task_params[segments_df_task_params['segment_count_cxu']>=0]
-
-# COMMAND ----------
-
-segments_df_task_params
-
-# COMMAND ----------
-
-# set segment_cxu_count only in cases where the result is not -1
-for row in result_counts:
-    if row[1] >= 0:
-        segments_df_task_params.loc[segments_df_task_params['uniqueId'] == row[0], 'segment_cxu_count'] = row[1]
-
+spark_df = spark.createDataFrame(segments_df)
+spark_df.write.format('delta').mode("overwrite").saveAsTable('element61.uc_reporting.cxu_segment_counts')
 
 # COMMAND ----------
 
