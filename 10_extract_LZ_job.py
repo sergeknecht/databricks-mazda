@@ -176,7 +176,7 @@ table_exists( 'ACC__DWH_BI1', 'LZ_LEM', 'DDN_VEHICLE_DISTRIBUTORS')
 from random import random
 from time import sleep
 from multiprocessing.pool import ThreadPool
-import multiprocessing as mp
+# import multiprocessing as mp
 
 idx = 0
 count = df_list.count()

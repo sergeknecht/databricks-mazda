@@ -136,17 +136,28 @@ display(df_tasks)
 
 # COMMAND ----------
 
-count_max = df_tasks.rdd.count()
-print(count_max)
+task_params = [
+    {  #
+        "db_config": row["db_config"],
+        "id": row["identifier"],
+        "catalog": row["catalog_name"],
+        "schema": row["schema"],
+        "table": row["table_name"],
+        "scope": row["scope"],
+    }
+    for row in df_task_collected
+]
+display(task_params[:3])
 
 # COMMAND ----------
 
-# MAGIC %pip install ray[default]>=2.3.0 >/dev/null
+# MAGIC %pip install ray[default]==2.3.0 >/dev/null
 
 # COMMAND ----------
 
 from ray.util.spark import setup_ray_cluster, shutdown_ray_cluster, MAX_NUM_WORKER_NODES
 
+# COMMAND ----------
 
 setup_ray_cluster(
   num_worker_nodes=2,
@@ -162,55 +173,33 @@ ray.cluster_resources()
 
 # COMMAND ----------
 
-df_tasks.collect()
-
-# COMMAND ----------
-
 from helpers.unity_helper import unity_table_exists, get_fqn
 
-# task executed in a worker thread
-# signature return type
-# schema_result = StructType().add("identifier", StringType()).add("result", StringType())
-
-
-# @udf(returnType=StringType())
 @ray.remote
-def do_task(db_config, identifier, catalog_name, schema, table_name, scope):
+def do_task(db_config, identifier, catalog_name, schema_name, table_name, scope):
     # block for a moment
     # Construct the fully-qualified table name
-    dbx_qualified_table_name = f"{catalog_name}.{schema}.{table_name}"
-    qualified_table_name = f"{schema}.{table_name}"
+    dbx_qualified_table_name = f"{catalog_name}.{schema_name}.{table_name}"
+    qualified_table_name = f"{schema_name}.{table_name}"
 
-    return dbx_qualified_table_name
+    table_exists = unity_table_exists(catalog_name, schema_name, table_name)
 
-    # func_result = unity_table_exists(catalog, schema, table_name)
-
-    # # return the resy
-    # return func_result
-
+    return {"table_fqn": dbx_qualified_table_name, "table_exists": table_exists, "table_qn": qualified_table_name}
 
 results = []
-for row in df_tasks.collect():
+for row in task_params:
     results.append(do_task.remote(
         row["db_config"],
-        row["identifier"],
-        row["catalog_name"],
+        row["id"],
+        row["catalog"],
         row["schema"],
-        row["table_name"],
+        row["table"],
         row["scope"]
     ))
 output = ray.get(results)
 
 display(output)
-# res = df_tasks.withColumn(
-#     "result",
-#     do_task.remote(
-#         col("db_config"),
-#         col("identifier"),
-#         col("catalog_name"),
-#         col("schema"),
-#         col("table_name"),
-#         col("scope"),
-#     ),
-# )
-# display(res)
+
+# COMMAND ----------
+
+shutdown_ray_cluster()
