@@ -46,6 +46,7 @@ hostName = "accdw-scan.mle.mazdaeur.com"
 # hostName="10.230.2.32"
 port = "1521"
 databaseName = "ACC_DWH"
+driver = "oracle.jdbc.driver.OracleDriver"
 
 jdbcUrl = f"jdbc:oracle:thin:@//{hostName}:{port}/{databaseName}"
 print(jdbcUrl)
@@ -53,14 +54,17 @@ print(jdbcUrl)
 # COMMAND ----------
 
 connectionProperties = {
-  "user" : username,
-  "password" : password,
-  "driver" : "oracle.jdbc.driver.OracleDriver",
-  "fetchSize": "100"
+    "user": username,
+    "password": password,
+    "driver": driver,
+    "fetchSize": "100",
+    "url": jdbcUrl,
 }
 
-# COMMAND ----------
+# 'inferschema':'True',
+# 'header':'true'
 
+# COMMAND ----------
 
 pushdown_query = """(
 select  1 as MIN_ID, count(*) as MAX_ID
@@ -69,9 +73,9 @@ from LZ_MUM.TUSER
 """
 
 # alternative  min(some_uniform_dictributed_int_column) as MIN_ID, max(some_uniform_dictributed_int_column) as MAX_ID
-
-spark.read.jdbc(url=jdbcUrl, table=pushdown_query, properties=connectionProperties).collect()
-bounds = spark.read.jdbc(url=jdbcUrl, table=pushdown_query, properties=connectionProperties).collect()[0]
+bounds = spark.read.jdbc(
+    url=jdbcUrl, table=pushdown_query, properties=connectionProperties
+).collect()[0]
 
 bounds
 
@@ -81,6 +85,8 @@ type(bounds)
 
 # COMMAND ----------
 
+# query with ROWNULber which will allow us to create partitions
+# when writing the writes will be distributed by partition
 pushdown_query = """(
 select ROWNUM, d.*
 from LZ_MUM.TUSER d
@@ -90,57 +96,62 @@ order by d.GUID
 
 # COMMAND ----------
 
-df_mum = spark.read.jdbc(url=jdbcUrl, table=pushdown_query, 
-                             properties=connectionProperties, 
-                             numPartitions=4,
-                             column="ROWNUM",
-                             lowerBound=bounds.MIN_ID, 
-                             upperBound=bounds.MAX_ID + 1)
-
-display(df_mum)
-
-# COMMAND ----------
-
-df_mum = (spark.read
-  .format("jdbc")
-  .option("url", jdbcUrl)
-  .option("dbtable", pushdown_query)
-  .option("driver", "oracle.jdbc.driver.OracleDriver")
-  .option("user", username)
-  .option("password", password)
-  # a column that can be used that has a uniformly distributed range of values that can be used for parallelization
-  .option("partitionColumn", "ROWNUM")
-  # lowest value to pull data for with the partitionColumn
-  .option("lowerBound", f"{bounds.MIN_ID:.0f}")
-  # max value to pull data for with the partitionColumn
-  .option("upperBound", f"{bounds.MAX_ID+1:.0f}")
-  # number of partitions to distribute the data into. Do not set this very large (~hundreds)
-  .option("numPartitions", 4)
-  # Oracle’s default fetchSize is 10
-  .option("fetchSize", "100")
-  .load()
+df_mum = spark.read.jdbc(
+    url=jdbcUrl,
+    table=pushdown_query,
+    properties=connectionProperties,
+    numPartitions=4,
+    column="ROWNUM",
+    lowerBound=bounds.MIN_ID,
+    upperBound=bounds.MAX_ID + 1,
 )
+
 display(df_mum)
 
 # COMMAND ----------
 
-df_mum.rdd.getNumPartitions()
-
-# COMMAND ----------
-
-employees_table = (
+df_mum_parts = (
     spark.read.format("jdbc")
-    .option("driver", "oracle.jdbc.driver.OracleDriver")
-    .option("url", jdbcUrl)
+    # .option("url", jdbcUrl)
+    .option("dbtable", pushdown_query)
+    # .option("driver", driver)
+    # .option("user", username)
+    # .option("password", password)
+    # a column that can be used that has a uniformly distributed range of values that can be used for parallelization
+    .option("partitionColumn", "ROWNUM")
+    # lowest value to pull data for with the partitionColumn
+    .option("lowerBound", f"{bounds.MIN_ID:.0f}")
+    # max value to pull data for with the partitionColumn
+    .option("upperBound", f"{bounds.MAX_ID+1:.0f}")
+    # number of partitions to distribute the data into. Do not set this very large (~hundreds)
+    .option("numPartitions", 4)
+    # # Oracle’s default fetchSize is 10
+    # .option("fetchSize", "100")
+    .options(**connectionProperties).load()
+)
+display(df_mum_parts)
+
+# COMMAND ----------
+
+df_mum_parts.rdd.getNumPartitions()
+
+# COMMAND ----------
+
+# single partition
+df_mum_1_part = (
+    spark.read.format("jdbc")
+    # .option("driver", driver)
+    # .option("url", jdbcUrl)
     .option("dbtable", "LZ_MUM.TUSER")
-    .option("user", username)
-    .option("password", password)
-    .load()
+    # .option("user", username)
+    # .option("password", password)
+    # .option("fetchSize", "100")
+    .options(**connectionProperties).load()
 )
 
 # COMMAND ----------
 
-display(employees_table)
+display(df_mum_1_part)
 
 # COMMAND ----------
 
@@ -157,30 +168,37 @@ display(employees_table)
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC SELECT secret('ACC', 'DWH_BI1__JDBC_DRIVER');
+# MAGIC SELECT
+# MAGIC   secret('ACC', 'DWH_BI1__JDBC_DRIVER');
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC CREATE TEMPORARY VIEW vw_employees_table
-# MAGIC USING JDBC
-# MAGIC OPTIONS (
-# MAGIC   url "jdbc:oracle:thin:@//10.230.2.32:1521/ACC_DWH",
+# MAGIC CREATE
+# MAGIC OR REPLACE TEMPORARY VIEW vw_employees_table USING JDBC OPTIONS (
+# MAGIC   url "jdbc:oracle:thin:@//accdw-scan.mle.mazdaeur.com:1521/ACC_DWH",
 # MAGIC   dbtable "LZ_MUM.TUSER",
 # MAGIC   user secret('ACC', 'DWH_BI1__JDBC_USERNAME'),
 # MAGIC   password secret('ACC', 'DWH_BI1__JDBC_PASSWORD'),
-# MAGIC   driver 'oracle.jdbc.driver.OracleDriver'
+# MAGIC   driver "oracle.jdbc.driver.OracleDriver",
+# MAGIC   fetchSize '100'
 # MAGIC )
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC select * from vw_employees_table;
+# MAGIC select
+# MAGIC   *
+# MAGIC from
+# MAGIC   vw_employees_table;
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC select count(*) from vw_employees_table;
+# MAGIC select
+# MAGIC   count(*)
+# MAGIC from
+# MAGIC   vw_employees_table;
 
 # COMMAND ----------
 
