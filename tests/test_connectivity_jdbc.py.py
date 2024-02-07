@@ -19,20 +19,24 @@
 # MAGIC set DBT_ORACLE_PASSWORD=
 # MAGIC
 # MAGIC databricks configure --host https://mazdaeur-mazdaeur-mazda-bi20-nonprdvpc.cloud.databricks.com --profile DEFAULT
-# MAGIC databricks secrets create-scope jdbc
+# MAGIC databricks secrets create-scope ACC
 # MAGIC ```
 # MAGIC
 # MAGIC and secrets to have been saved to scope:
 # MAGIC
 # MAGIC ```dos
-# MAGIC databricks secrets put-secret jdbc username --string-value %DBT_ORACLE_USER%
-# MAGIC databricks secrets put-secret jdbc password --string-value %DBT_ORACLE_PASSWORD%
+# MAGIC databricks secrets put-secret ACC username --string-value %DBT_ORACLE_USER%
+# MAGIC databricks secrets put-secret ACC password --string-value %DBT_ORACLE_PASSWORD%
 # MAGIC ```
 
 # COMMAND ----------
 
-username = dbutils.secrets.get(scope="ACC", key="DWH_BI1__JDBC_USERNAME")
-password = dbutils.secrets.get(scope="ACC", key="DWH_BI1__JDBC_PASSWORD")
+SCOPE = "PRD" or "ACC"
+
+# COMMAND ----------
+
+username = dbutils.secrets.get(scope=SCOPE, key="DWH_BI1__JDBC_USERNAME")
+password = dbutils.secrets.get(scope=SCOPE, key="DWH_BI1__JDBC_PASSWORD")
 
 assert username, "secret username not retrieved"
 assert password, "secret password not retrieved"
@@ -42,10 +46,10 @@ assert password, "secret password not retrieved"
 
 # COMMAND ----------
 
-hostName = "accdw-scan.mle.mazdaeur.com"
+hostName = SCOPE.lower() + "dw-scan.mle.mazdaeur.com"
 # hostName="10.230.2.32"
 port = "1521"
-databaseName = "ACC_DWH"
+databaseName = SCOPE + "_DWH"
 driver = "oracle.jdbc.driver.OracleDriver"
 
 jdbcUrl = f"jdbc:oracle:thin:@//{hostName}:{port}/{databaseName}"
