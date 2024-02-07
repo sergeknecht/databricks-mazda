@@ -1,0 +1,37 @@
+{
+    "ACC": {
+        "DEFAULT": {
+            "driver": "oracle.jdbc.driver.OracleDriver",
+            "fetchSize": "100",
+            "pooling": "true",
+            "port": "1521",
+            "db_type": "oracle",
+            "allowed_keys": "url, port, driver, fetchSize, pooling, db_type"
+        },
+        "DWH_BI1": {
+            "hostName": "accdw-scan.mle.mazdaeur.com",
+            "databaseName": "ACC_DWH"
+        },
+        "DEFAULT_CSV": {
+            "inferschema": "true",
+            "header": "true",
+            "delimiter": ",",
+            "multiline": "true",
+            "charset": "UTF-8",
+            "db_type": "csv"
+        }
+    },
+    "PRD": {
+        "DEFAULT": {
+            "driver": "oracle.jdbc.driver.OracleDriver",
+            "fetchSize": "100",
+            "pooling": "true",
+            "port": "1521",
+            "db_type": "oracle"
+        },
+        "DWH_BI1": {
+            "hostName": "prddw-scan.mle.mazdaeur.com",
+            "databaseName": "PRD_DWH"
+        }
+    }
+}
