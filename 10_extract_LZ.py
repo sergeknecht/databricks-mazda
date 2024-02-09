@@ -16,7 +16,6 @@ scope = dbutils.widgets.get("scope")
 catalog = dbutils.widgets.get("catalog")
 
 hostName = "accdw-scan.mle.mazdaeur.com"
-# hostName="10.230.2.32"
 port = "1521"
 databaseName = f"{scope}_DWH"
 

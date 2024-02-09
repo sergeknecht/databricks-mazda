@@ -1,6 +1,5 @@
 import json
 
-
 def get_db_dict(scope: str, db_key: str = "DWH_BI1", default="DEFAULT"):
     # load file db_configs.json as a dictionary
     with open("db_configs.json") as f:
