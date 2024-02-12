@@ -108,7 +108,7 @@ def table_exists(catalog:str, schema:str, table_name:str):
 
 # code to get primary key of table if it exists
 
-sql_pk = """SELECT 
+sql_pk_statement = """SELECT 
   tc.owner, tc.TABLE_NAME, tc.COLUMN_NAME, tc.DATA_TYPE, tc.NULLABLE, tc.NUM_NULLS, tc.NUM_DISTINCT, tc.DATA_DEFAULT, tc.AVG_COL_LEN, tc.CHAR_LENGTH,
   con.cons, ac.CONSTRAINT_NAME, ac.CONSTRAINT_TYPE, ac.STATUS, ac.INDEX_NAME
 FROM DBA_TAB_COLUMNS tc

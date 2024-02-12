@@ -1,11 +1,13 @@
 import json
 
+from helpers.dbx_init import (spark, dbutils)
+
 def get_db_dict(scope: str, db_key: str = "DWH_BI1", default="DEFAULT"):
     # load file db_configs.json as a dictionary
-    with open("db_configs.json") as f:
+    with open("./config/db_configs.json") as f:
         db_configs = json.load(f)
 
-    return {**db_configs[default], **db_configs[scope][db_key]}
+    return {**db_configs[scope][default], **db_configs[scope][db_key]}
 
 
 def get_jdbc_url(db_dict: dict):
@@ -48,12 +50,13 @@ def get_connection_properties__by_key(scope: str, db_key: str = "DWH_BI1"):
 def get_data(
     db_dict: dict,
     table_name: str,  # SQL SELECT STATEMENT
+    query_type = "dbtable"
 ):
     # TODO: get attribute name from primary key and use it as the partitionColumn or order by
 
     df = (
         spark.read.format("jdbc")
-        .option("dbtable", table_name)
+        .option(query_type, table_name)
         .options(**db_dict)
         .load()
     )
@@ -136,3 +139,22 @@ def get_data_partitioned__by_rownum(
     )
 
     return df
+
+
+def schema_exists(catalog:str, schema_name:str):
+    query = spark.sql(f"""
+            SELECT 1 
+            FROM {catalog}.information_schema.schemata 
+            WHERE schema_name = '{schema_name}' 
+            LIMIT 1""")
+    
+    return query.count() > 0
+
+def table_exists(catalog:str, schema:str, table_name:str):
+    query = spark.sql(f"""
+            SELECT 1 
+            FROM {catalog}.information_schema.tables 
+            WHERE table_name = '{table_name}' 
+            AND table_schema='{schema}' LIMIT 1""",
+        )
+    return query.count() > 0
