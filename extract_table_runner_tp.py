@@ -1,7 +1,14 @@
 # Databricks notebook source
+# MAGIC %load_ext autoreload
+# MAGIC %autoreload 2
+
+# COMMAND ----------
+
+import os
 import json
 import time
 from helpers.status_helper import create_status
+import concurrent.futures
 
 # COMMAND ----------
 
@@ -142,30 +149,50 @@ from py4j.protocol import Py4JJavaError
 
 results = []
 
-try:
-    for extract in extracts:
-        start_time = time.time()
-        p_schema_name_source = extract["schema"]
-        p_table_name_source = extract["table"]
-        print(f"Extracting {p_schema_name_source}.{p_table_name_source}")
-        # Run the extract_table notebook
-        result = dbutils.notebook.run(
-            "extract_table",
-            0,
-            {
-                "p_scope": p_scope,
-                "p_catalog_name_target": p_catalog_name_target,
-                "p_schema_name_source": p_schema_name_source,
-                "p_table_name_source": p_table_name_source,
-            },
-        )
-        print(result)
-        # parse string to json
-        result = json.loads(result)
-        if result["status_code"] >= 300:
-            raise Exception(result["status_message"])
+def do_task(extract):
+    start_time = time.time()
+    p_schema_name_source = extract["schema"]
+    p_table_name_source = extract["table"]
+    print(f"Extracting {p_schema_name_source}.{p_table_name_source}")
+    # Run the extract_table notebook
+    result = dbutils.notebook.run(
+        "extract_table",
+        0,
+        {
+            "p_scope": p_scope,
+            "p_catalog_name_target": p_catalog_name_target,
+            "p_schema_name_source": p_schema_name_source,
+            "p_table_name_source": p_table_name_source,
+        },
+    )
+    return result
+    print(result)
+    # parse string to json
+    result = json.loads(result)
+    if result["status_code"] >= 300:
+        raise Exception(result["status_message"])
+    end_time = time.time()
+    time_duration = int(end_time - start_time)
+    return f"OK: {p_schema_name_source}.{p_table_name_source} completed in {time_duration} seconds"
 
-        results.append(result)
+try:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+        # Submit the conversion tasks to the thread pool
+        futures = []
+
+        for extract in extracts:
+            # Submit the conversion task to the thread pool
+            future = executor.submit(do_task, extract=extract)
+            futures.append(future)
+        
+        # Wait for all conversion tasks to complete
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                result = future.result()
+                print(result)
+                results.append(result)
+            except Exception as e:
+                print(f"An error occurred: with {result}\n{e}")
 
 except Py4JJavaError as jex:
     print(str(jex.java_exception))
