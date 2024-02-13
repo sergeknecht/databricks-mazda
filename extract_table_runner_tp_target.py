@@ -1,9 +1,4 @@
 # Databricks notebook source
-# MAGIC %load_ext autoreload
-# MAGIC %autoreload 2
-
-# COMMAND ----------
-
 import os
 import json
 import time
@@ -56,6 +51,8 @@ def get_schema(x):
         return "LZ_LEM"
     elif schema == "STG":
         return "STG"
+    elif schema == "STAGING_TEMP":
+        return "STG_TMP"
     else:
         raise Exception(f"Unkown schema: {x}")
 get_table = lambda x: x["name"].split(".")[1]

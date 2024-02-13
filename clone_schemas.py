@@ -1,9 +1,4 @@
 # Databricks notebook source
-# MAGIC %load_ext autoreload
-# MAGIC %autoreload 2
-
-# COMMAND ----------
-
 import sys
 import json
 import traceback
@@ -29,7 +24,7 @@ import time
 start_time = time.time()
 catalog_source = "impetus_ref"
 catalog_target = "impetus_poc"
-schemas = ["stg"]
+schemas = ["stg", "stg_tmp", "lz_lem"]
 
 def get_tables(catalog: str, schema: str):
     query = spark.sql(
@@ -68,9 +63,10 @@ def run_sql(sql: str):
 tables = []
 for schema in schemas:
     if schema_exists(catalog_source, schema):
-        df = get_tables(catalog_source, "stg")
-        df = [{"table": row["tableName"], "schema": row["database"]} for row in df]
-        df = [row for row in df if not table_exists(catalog_target, row["schema"], row["table"])]
+        df = get_tables(catalog_source, schema)
+        if df.count() > 0:
+            df = [{"table": row["tableName"], "schema": row["database"]} for row in df]
+            df = [row for row in df if not table_exists(catalog_target, row["schema"], row["table"])]
 
 
 display(df)
