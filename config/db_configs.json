@@ -2,7 +2,7 @@
     "ACC": {
         "DEFAULT": {
             "driver": "oracle.jdbc.driver.OracleDriver",
-            "fetchSize": "100",
+            "fetchSize": "200",
             "pooling": "true",
             "port": "1521",
             "db_type": "oracle",
@@ -24,7 +24,7 @@
     "PRD": {
         "DEFAULT": {
             "driver": "oracle.jdbc.driver.OracleDriver",
-            "fetchSize": "100",
+            "fetchSize": "200",
             "pooling": "true",
             "port": "1521",
             "db_type": "oracle"

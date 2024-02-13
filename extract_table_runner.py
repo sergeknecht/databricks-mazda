@@ -1,4 +1,9 @@
 # Databricks notebook source
+import json
+from helpers.status_helper import create_status
+
+# COMMAND ----------
+
 table_names = ['IOT_DIM_CMPD', 
 'IOT_DIM_COC_TYPE_APPROVAL', 
 'IOT_DIM_COUNTRY', 
@@ -147,28 +152,36 @@ extracts
 
 # COMMAND ----------
 
-from pyspark.sql.utils import AnalysisException
+# from pyspark.sql.utils import AnalysisException
+from py4j.protocol import Py4JJavaError
 
 results = []
 
 try:
-    # Check if table exists in Spark catalog
-    # spark.table(dbx_qualified_table_name)
-    # result = perform_task(catalog_name, schema, table_name)
-    result = dbutils.notebook.run("table_load", 3, {"p_scope": p_scope, "p_catalog_name_target": p_catalog_name_target, "p_schema_name_source": p_schema_name_source, "p_table_name_source": p_table_name_source})
-    print(result)
+    for extract in extracts:
+        p_schema_name_source = extract["schema"]
+        p_table_name_source = extract["table"]
+        print(f"Extracting {p_schema_name_source}.{p_table_name_source}")
+        # Run the extract_table notebook
+        result = dbutils.notebook.run("extract_table", 300, {"p_scope": p_scope, "p_catalog_name_target": p_catalog_name_target, "p_schema_name_source": p_schema_name_source, "p_table_name_source": p_table_name_source})
+        print(result)
+        # parse string to json
+        result = json.loads(result)
+        if result["status_code"] >= 300:
+            raise Exception(result["status_message"])
+        
+        results.append(result)
+
+except Py4JJavaError as jex:
+    print(str(jex.java_exception))
+    print("TIMEDOUT" in str(jex.java_exception))
+    raise Exception("TIMEDOUT") from jex
     
-except AnalysisException as ex:
-    # Handle exception if table does not exist
-    #print(f"Table {dbx_qualified_table_name} does not exist.")
-    dbutils.notebook.exit(str(ex))
-# else:
-#     dbutils.notebook.exit(f"Table {dbx_qualified_table_name} EXISTS.")
-    # # Get schema of table from Spark catalog
-    # df = spark.read.table(dbx_qualified_table_name)
-    # schema = df.schema
-    # print(schema)
+# except AnalysisException as ex:
+    # dbutils.notebook.exit(str(ex))
+# except Exception as e:
+    # dbutils.notebook.exit(str(e))
 
 # COMMAND ----------
 
-dbutils.notebook.exit({"status" : "OK"})
+dbutils.notebook.exit(create_status("OK: Notebook Completed"))
