@@ -22,7 +22,7 @@ import time
 
 # COMMAND ----------
 
-%md # Impetus Clone
+# MAGIC %md # Impetus Clone
 
 # COMMAND ----------
 
@@ -76,6 +76,7 @@ for schema in schemas:
 display(df)
 
 # COMMAND ----------
+
 schema = ""
 
 sql = f"USE CATALOG {catalog_source}"
