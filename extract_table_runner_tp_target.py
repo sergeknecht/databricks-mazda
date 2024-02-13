@@ -44,6 +44,7 @@ table_names = [
 ]
 p_scope = "ACC"
 p_catalog_name_target = "impetus_target"
+cpu_count = 6 if os.cpu_count() > 6 else os.cpu_count()
 
 # COMMAND ----------
 
@@ -99,7 +100,7 @@ def do_task(extract):
     return f"OK: {p_schema_name_source}.{p_table_name_source} completed in {time_duration} seconds"
 
 try:
-    with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=cpu_count) as executor:
         # Submit the conversion tasks to the thread pool
         futures = []
 
