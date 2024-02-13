@@ -63,13 +63,14 @@ def run_sql(sql: str):
 tables = []
 for schema in schemas:
     if schema_exists(catalog_source, schema):
-        df = get_tables(catalog_source, schema)
-        if df.count() > 0:
-            df = [{"table": row["tableName"], "schema": row["database"]} for row in df]
-            df = [row for row in df if not table_exists(catalog_target, row["schema"], row["table"])]
+        results = get_tables(catalog_source, schema)
+        if len(results) > 0:
+            results = [{"table": row["tableName"], "schema": row["database"]} for row in results]
+            results = [row for row in results if not table_exists(catalog_target, row["schema"], row["table"])]
+            tables.extend(results)
 
 
-display(df)
+display(tables)
 
 # COMMAND ----------
 
@@ -78,7 +79,7 @@ schema = ""
 sql = f"USE CATALOG {catalog_source}"
 run_sql(sql)
 
-for row in df:
+for row in tables:
     schema_new = row["schema"]
     if schema != schema_new:
         schema = schema_new
