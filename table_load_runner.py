@@ -1,5 +1,5 @@
 # Databricks notebook source
-tables = ['IOT_DIM_CMPD', 
+table_names = ['IOT_DIM_CMPD', 
 'IOT_DIM_COC_TYPE_APPROVAL', 
 'IOT_DIM_COUNTRY', 
 'IOT_DIM_CUR', 
@@ -140,7 +140,10 @@ p_table_name_source = 'IOT_DIM_CMPD'
 
 # COMMAND ----------
 
-print([table for table in tables if table.startswith('STG_TMP_')])
+get_schema_by_table = lambda x: "STG_TMP" if x.startswith('STG_TMP_') else "STG"
+extracts = [{"table":table_name, "schema": get_schema_by_table(table_name)} for table_name in table_names]
+#extracts = [ get_schema_by_table(table_name) for table_name in table_names]
+extracts
 
 # COMMAND ----------
 
