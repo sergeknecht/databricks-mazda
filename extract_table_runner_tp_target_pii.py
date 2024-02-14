@@ -39,7 +39,7 @@ table_names = [
     {"name": "STAGING.STG_DIM_VIN", "pii": True},
 ]
 p_scope = "ACC"
-extract_pii = False
+extract_pii = True
 p_catalog_name_target = "impetus_target" if not extract_pii else "impetus_target_pii"
 cpu_count = 6 if os.cpu_count() > 6 else os.cpu_count() -1
 timeout_sec = 3600

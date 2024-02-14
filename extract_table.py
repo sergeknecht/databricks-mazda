@@ -39,7 +39,7 @@ start_time = time.time()
 p_scope = dbutils.widgets.get("p_scope")
 p_catalog_name_target = dbutils.widgets.get("p_catalog_name_target").lower()
 p_schema_name_target = dbutils.widgets.get("p_schema_name_source").lower()
-p_table_name_target = dbutils.widgets.get("p_table_name_source").lower()
+p_table_name_target = dbutils.widgets.get("p_table_name_source").lower().replace("$", "_")
 p_schema_name_source = dbutils.widgets.get("p_schema_name_source")
 p_table_name_source = dbutils.widgets.get("p_table_name_source")
 
@@ -145,6 +145,7 @@ class DelayedResult:
         return json.dumps(self.result)
 
 # COMMAND ----------
+
     
 # dr = DelayedResult()
 # dr.test_exception()
