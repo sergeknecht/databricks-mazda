@@ -11,9 +11,8 @@ from helpers.db_helper import (
     get_db_dict,
     get_bounds__by_rownum,
     get_connection_properties__by_key,
-    get_data,
+    get_jdbc_data_by_dict,
     get_data_partitioned__by_rownum,
-    schema_exists,
     table_exists,
 )
 from helpers.db_helper_oracle_sql import sql_pk_statement
@@ -22,27 +21,38 @@ import time
 
 # COMMAND ----------
 
-dbutils.widgets.dropdown(
-    "p_scope", "ACC", choices=["ACC", "PRD"], label="Development Scope"
-)
+# dbutils.widgets.dropdown(
+#     "p_scope", "ACC", choices=["ACC", "PRD"], label="Development Scope"
+# )
+# dbutils.widgets.text(
+#     "p_catalog_name_target", "impetus_ref", label="Catalog Name Target"
+# )
+# dbutils.widgets.text("p_schema_name_source", "STG", label="Schema Name Source")
+# dbutils.widgets.text(
+#     "p_table_name_source", "STG_LEM_TRANSPORT_MODES", label="Table Name Source"
+# )
+# dbutils.widgets.text(
+#     "p_db_key", "DWH_BI1", label="Database Key"
+# )
 dbutils.widgets.text(
-    "p_catalog_name_target", "impetus_ref", label="Catalog Name Target"
-)
-dbutils.widgets.text("p_schema_name_source", "STG", label="Schema Name Source")
-dbutils.widgets.text(
-    "p_table_name_source", "STG_LEM_TRANSPORT_MODES", label="Table Name Source"
+    "p_work_json", "{}", label="Database Table Extract JSON Config"
 )
 
 # COMMAND ----------
 
 start_time = time.time()
-p_scope = dbutils.widgets.get("p_scope")
-p_catalog_name_target = dbutils.widgets.get("p_catalog_name_target").lower()
-p_schema_name_target = dbutils.widgets.get("p_schema_name_source").lower()
-p_table_name_target = dbutils.widgets.get("p_table_name_source").lower().replace("$", "_")
-p_schema_name_source = dbutils.widgets.get("p_schema_name_source")
-p_table_name_source = dbutils.widgets.get("p_table_name_source")
 
+p_work_json: dict = json.loads(dbutils.widgets.get("p_work_json"))
+assert p_work_json, "p_work_json not set"
+
+p_scope = p_work_json["scope"]
+p_db_key = p_work_json["db_key"]
+p_catalog_name_source = p_work_json["catalog_name_source"]
+p_schema_name_source = p_work_json["schema_name_source"]
+p_table_name_source = p_work_json["table_name_source"]
+p_catalog_name_target = p_work_json["catalog_name_target"]
+p_schema_name_target = p_work_json["schema_name_target"]
+p_table_name_target = p_work_json["table_name_target"]
 
 dbx_qualified_table_name = (
     f"{p_catalog_name_target}.{p_schema_name_target}.{p_table_name_target}"
@@ -51,14 +61,17 @@ print(dbx_qualified_table_name)
 
 # COMMAND ----------
 
-SCOPE = "ACC" or "PRD" or "ACC"
-DB_KEY = "DWH_BI1"
+db_conn_props: dict = get_connection_properties__by_key(p_scope, p_db_key)
+work_item = {
+    **p_work_json,
+    "db_conn_props": db_conn_props,
+}  # merge p_work_json with db_conn_props (=overwrite)
 
-db_conn_props = get_connection_properties__by_key(SCOPE, DB_KEY)
-
-print(db_conn_props["url"])
+# print(db_conn_props["url"])
 
 # COMMAND ----------
+
+# dbutils.notebook.exit(json.dumps(work_item))
 
 # bounds = get_bounds__by_rownum(db_dict=db_conn_props, table_name=f"{p_schema_name_source}.{p_table_name_source}")
 # display(bounds)
@@ -67,48 +80,69 @@ print(db_conn_props["url"])
 
 
 class DelayedResult:
-    def __init__(self):
+    def __init__(self, work_item: dict):
         self.exc_info = None
         self.result = None
-        self.fqn = None
+        self.catalog_name_source = work_item["catalog_name_source"]
+        self.schema_name_source = work_item["schema_name_source"]
+        self.table_name_source = work_item["table_name_source"]
+        self.catalog_name_target = work_item["catalog_name_target"]
+        self.schema_name_target = work_item["schema_name_target"]
+        self.table_name_target = work_item["table_name_target"]
+        self.query_type = work_item["query_type"]
+        self.query_sql = work_item["query_sql"]
+        self.scope = work_item["scope"]
+        self.db_conn_props = work_item["db_conn_props"]
+        self.work_item = work_item
+
+        self.fqn = f"{self.catalog_name_target}.{self.schema_name_target}.{self.table_name_target}"
 
     def test_exception(self):
-        # raise Exception("This is a test exception")
         try:
             raise Exception("This is a test exception")
         except Exception as e:
-            # import sys
             self.exc_info = (e, traceback.format_exc())
 
-    def do_work(self, df, catalog_name, schema_name, table_name):
-        self.fqn = f"{catalog_name}.{schema_name}.{table_name}"
+    def do_work(self):
         try:
+            # create the target schema if it does not exist
             spark.sql(
-                f"CREATE SCHEMA IF NOT EXISTS {catalog_name}.{schema_name} WITH DBPROPERTIES (Scope='{p_scope}')"
+                f"CREATE SCHEMA IF NOT EXISTS {self.catalog_name_target}.{self.schema_name_target} WITH DBPROPERTIES (Scope='{self.scope}')"
             )
 
-            print(f"writing: " + dbx_qualified_table_name)
-            df.write.format("delta").mode("overwrite").saveAsTable(
-                dbx_qualified_table_name
+            # get all primary keys and indexes so that we can also apply it in the target table
+            pk_sql = sql_pk_statement.format(
+                **{
+                    "schema": self.schema_name_source,
+                    "table_name": self.table_name_source,
+                }
             )
-            # print("\tOK")
+            df_pk = get_jdbc_data_by_dict(
+                db_conn_props=db_conn_props,
+                work_item={
+                    "query_sql": pk_sql,
+                    "query_type": "query",
+                },
+            )
 
-            sql_pk_table = sql_pk_statement.format(
-                **{"schema": schema_name, "table_name": table_name}
-            )
-            # print(sql_pk_table)
-            df_pk = get_data(
-                db_dict=db_conn_props,
-                table_name=sql_pk_table,
-                query_type="query",
-            )
+            # get the data
+            df = get_jdbc_data_by_dict(
+                db_conn_props=db_conn_props,
+                work_item={**self.work_item,
+                    "table_sql": f"{self.schema_name_source}.{self.table_name_source}",
+                },
+            ).collect()
+
+            print(f"writing: {self.fqn}")
+            df.write.format("delta").mode("overwrite").saveAsTable(self.fqn)
+
             for row_pk in df_pk.collect():
                 column_name = row_pk["COLUMN_NAME"]
                 sqls = [
-                    f"ALTER TABLE {dbx_qualified_table_name} ALTER COLUMN {column_name} SET NOT NULL",
-                    f"ALTER TABLE {dbx_qualified_table_name} DROP PRIMARY KEY IF EXISTS CASCADE",
-                    f"ALTER TABLE {dbx_qualified_table_name} ADD CONSTRAINT pk_{table_name}_{column_name} PRIMARY KEY({column_name})",
-                    f"ALTER TABLE {dbx_qualified_table_name} ALTER COLUMN {column_name} SET TAGS ('db_schema' = 'pk')",
+                    f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET NOT NULL",
+                    f"ALTER TABLE {self.fqn} DROP PRIMARY KEY IF EXISTS CASCADE",
+                    f"ALTER TABLE {self.fqn} ADD CONSTRAINT pk_{table_name}_{column_name} PRIMARY KEY({column_name})",
+                    f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET TAGS ('db_schema' = 'pk')",
                 ]
                 for curr_sql in sqls:
                     # print("\t", curr_sql)
@@ -120,7 +154,18 @@ class DelayedResult:
             result["row_count"] = df.count()
             self.result = result
         except Exception as e:
-            self.exc_info = (e, sys.exc_info())
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            tb = traceback.TracebackException(exc_type, exc_value, exc_tb)
+            stack_trace = traceback.format_exc(limit=2, chain=True)
+            if "JVM stacktrace" in stack_trace:
+                stack_trace = stack_trace.split("JVM stacktrace:")[0]
+            status_message = "".join(tb.format_exception_only())
+            if "JVM stacktrace" in status_message:
+                status_message = status_message.split("JVM stacktrace:")[0]
+            self.exc_info = (
+                status_message,
+                stack_trace,
+            )
 
     def get_result(self):
         end_time = time.time()
@@ -132,9 +177,9 @@ class DelayedResult:
             # _, _, traceback = exc_info
 
             result = create_status(
-                status_code=508, status_message="ERROR:" + str(e)
+                status_code=500, status_message="ERROR:" + e
             )
-            result["fqn"] = dbx_qualified_table_name
+            result["fqn"] = self.fqn
             result["traceback"] = traceback
             result["time_duration"] = time_duration
             return json.dumps(result)
@@ -144,9 +189,10 @@ class DelayedResult:
         self.result["time_duration"] = time_duration
         return json.dumps(self.result)
 
+
 # COMMAND ----------
 
-    
+
 # dr = DelayedResult()
 # dr.test_exception()
 # dbutils.notebook.exit(dr.get_result())
@@ -156,17 +202,10 @@ class DelayedResult:
 if not table_exists(
     p_catalog_name_target, p_schema_name_target, p_table_name_target
 ):
-    # df = get_data_partitioned__by_rownum(db_dict=db_conn_props, table_name=f"{p_schema_name_source}.{p_table_name_source}", bounds=bounds)
-    df = get_data(
-        db_dict=db_conn_props,
-        table_name=f"{p_schema_name_source}.{p_table_name_source}",
-    )
 
     # try:
-    dr = DelayedResult()
-    dr.do_work(
-        df, p_catalog_name_target, p_schema_name_target, p_table_name_target
-    )
+    dr = DelayedResult(work_item=work_item)
+    dr.do_work()
 
     dbutils.notebook.exit(dr.get_result())
 else:

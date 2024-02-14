@@ -1,18 +1,14 @@
 # Databricks notebook source
-# MAGIC %load_ext autoreload
-# MAGIC %autoreload 2
-
-# COMMAND ----------
-
 import os
 import json
 import time
 from helpers.db_helper import table_exists
 from helpers.status_helper import create_status
+import concurrent.futures
 
 # COMMAND ----------
 
-work_jsons = [
+table_names = [
     # {"name": "STAGING.STG_LEM_NO_WORKING_DAYS", "pii": False},
     # {"name": "STAGING.STG_LEM_COUNTRIES", "pii": False},
     # {"name": "STAGING.IOT_STG_DLR_DIST_INTERFACE", "pii": False},
@@ -30,12 +26,7 @@ work_jsons = [
     # {"name": "STAGING.STG_LEM_VEHICLE_STATE_FLOW", "pii": False},
     # {"name": "STAGING.STG_LEM_VEHICLE_STATE_VALUES", "pii": False},
     # {"name": "STAGING.STG_LEM_VEHICLE_STATE_TYPES", "pii": False},
-    {
-        "name": "STAGING.STG_EMOT_BTNPPLNH",
-        "pii": False,
-        "query_type": "query",
-        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '01-JAN-22'",
-    },
+    {"name": "STAGING.STG_EMOT_BTNPPLNH", "pii": False},
     # {"name": "STAGING.STG_EPD_CUSTCLASSIFICATION", "pii": False},
     # {"name": "STAGING.STG_EPD_CSTCLSSIFICATIONASSIGN", "pii": False},
     # {"name": "STAGING.STG_EPD_CUSTASSIGN", "pii": False},
@@ -127,17 +118,14 @@ work_jsons = [
 p_scope = "ACC"
 p_db_key = "DWH_BI1__100000" or "DWH_BI1"
 extract_pii = False
-catalog_name_target = "impetus_ref"
-p_catalog_name_target = (
-    catalog_name_target if not extract_pii else catalog_name_target + "_pii"
-)
-cpu_count = 6 if os.cpu_count() > 6 else os.cpu_count() - 1
+p_catalog_name_target = "impetus_ref" if not extract_pii else "impetus_ref_pii"
+cpu_count = 6 if os.cpu_count() > 6 else os.cpu_count() -1
 timeout_sec = 3600
 
 # COMMAND ----------
 
-def get_schema_name_source(x):
-    schema = x["name"].split(".")[0]
+def get_schema(x):
+    schema =  x["name"].split(".")[0]
     if schema == "STAGING":
         return "STG"
     elif schema == "LANDING_ZONE_LEMANS":
@@ -147,61 +135,40 @@ def get_schema_name_source(x):
     elif schema == "STAGING_TEMP":
         return "STG_TMP"
     else:
-        raise Exception(f"Unknown schema: {x}")
-
-get_table_name_source = lambda x: x["name"].split(".")[1]
-
-work_items = [
-    {
-        "pii": work_json["pii"],
-        "timeout_sec": timeout_sec,
-        "scope": p_scope,
-        "catalog_name_source": "",
-        "schema_name_source": get_schema_name_source(work_json),
-        "table_name_source": get_table_name_source(work_json),
-        "catalog_name_target": p_catalog_name_target,
-        "schema_name_target": get_schema_name_source(work_json).lower().replace("$", "_"),
-        "table_name_target": get_table_name_source(work_json).lower().replace("$", "_"),
-        "db_key": p_db_key,
-        "query_type" : work_json.get("query_type", "dbtable"),
-        "query_sql" : work_json.get("query_sql", None),
-    }
-    for work_json in work_jsons
-    if work_json["pii"] == extract_pii
+        raise Exception(f"Unkown schema: {x}")
+get_table = lambda x: x["name"].split(".")[1]
+extracts = [
+    {"table": get_table(table_name), "schema": get_schema(table_name)}
+    for table_name in table_names if table_name["pii"] == extract_pii
 ]
-
-# pre-filtering - only import tables we not already have
-work_items = [
-    work_item
-    for work_item in work_items
-    if not table_exists(
-        work_item["catalog_name_target"],
-        work_item["schema_name_target"],
-        work_item["table_name_target"]
-    )
+extracts = [
+    extract
+    for extract in extracts if not table_exists(p_catalog_name_target, extract["schema"].lower(), extract["table"].lower().replace("$", "_"))
 ]
-work_items
+extracts
 
 # COMMAND ----------
 
 # from pyspark.sql.utils import AnalysisException
-# from py4j.protocol import Py4JJavaError
+from py4j.protocol import Py4JJavaError
 
 results = []
 
-results = []
-
-def do_task(work_item):
+def do_task(extract):
     start_time = time.time()
-    p_schema_name_source = work_item["schema_name_source"]
-    p_table_name_source = work_item["table_name_source"]
+    p_schema_name_source = extract["schema"]
+    p_table_name_source = extract["table"]
     print(f"Extracting {p_schema_name_source}.{p_table_name_source}")
     # Run the extract_table notebook
     result = dbutils.notebook.run(
         "extract_table",
         timeout_sec,
         {
-            "p_work_json": json.dumps(work_item),
+            "p_scope": p_scope,
+            "p_catalog_name_target": p_catalog_name_target,
+            "p_schema_name_source": p_schema_name_source,
+            "p_table_name_source": p_table_name_source,
+            "p_db_key": p_db_key
         },
     )
     return result
@@ -214,19 +181,31 @@ def do_task(work_item):
     time_duration = int(end_time - start_time)
     return f"OK: {p_schema_name_source}.{p_table_name_source} completed in {time_duration} seconds"
 
+try:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=cpu_count) as executor:
+        # Submit the conversion tasks to the thread pool
+        futures = []
 
-# COMMAND ----------
+        for extract in extracts:
+            # Submit the conversion task to the thread pool
+            future = executor.submit(do_task, extract=extract)
+            futures.append(future)
+        
+        # Wait for all conversion tasks to complete
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                result = future.result()
+                print(result)
+                results.append(result)
+            except Exception as e:
+                print(f"An error occurred: with {result}\n{e}")
 
-for work_item in work_items:
-    result = do_task(work_item)
-    results.append(result)
-
-# except Py4JJavaError as jex:
-#     print(str(jex.java_exception))
-#     print("TIMEDOUT" in str(jex.java_exception))
-#     end_time = time.time()
-#     time_duration = int(end_time - start_time)
-#     raise Exception(f"ERROR: TIMEDOUT: {time_duration} seconds") from jex
+except Py4JJavaError as jex:
+    print(str(jex.java_exception))
+    print("TIMEDOUT" in str(jex.java_exception))
+    end_time = time.time()
+    time_duration = int(end_time - start_time)
+    raise Exception(f"ERROR: TIMEDOUT: {time_duration} seconds") from jex
 
 # except AnalysisException as ex:
 # dbutils.notebook.exit(str(ex))
@@ -235,10 +214,8 @@ for work_item in work_items:
 
 # COMMAND ----------
 
-last_entry = results[-1]
-last_entry = json.loads(last_entry)
 import pprint as pp
-pp.pprint(last_entry)
+pp.pprint(results)
 
 # COMMAND ----------
 
