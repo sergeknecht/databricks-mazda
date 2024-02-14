@@ -12,6 +12,11 @@
             "hostName": "accdw-scan.mle.mazdaeur.com",
             "databaseName": "ACC_DWH"
         },
+        "DWH_BI1__100000": {
+            "hostName": "accdw-scan.mle.mazdaeur.com",
+            "databaseName": "ACC_DWH",
+            "fetchSize": "100000"
+        },
         "DEFAULT_CSV": {
             "inferschema": "true",
             "header": "true",
