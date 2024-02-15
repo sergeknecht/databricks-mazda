@@ -73,6 +73,9 @@ def get_jdbc_data_by_dict(
 ):
     query_type = work_item["query_type"]
     query_sql = work_item["query_sql"] if query_type == "query" else work_item["table_sql"]
+
+    print(query_sql)
+    
     db_conn_props = {k:v for k,v in db_conn_props.items() if k in JDBC_KEYS_ALLOWED}
     # import pprint as pp
     # pp.pprint(db_conn_props)

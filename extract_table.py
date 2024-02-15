@@ -53,11 +53,13 @@ p_table_name_source = p_work_json["table_name_source"]
 p_catalog_name_target = p_work_json["catalog_name_target"]
 p_schema_name_target = p_work_json["schema_name_target"]
 p_table_name_target = p_work_json["table_name_target"]
+p_mode = p_work_json.get("mode", "overwrite")
 
 dbx_qualified_table_name = (
     f"{p_catalog_name_target}.{p_schema_name_target}.{p_table_name_target}"
 )
 print(dbx_qualified_table_name)
+print(p_mode)
 
 # COMMAND ----------
 
@@ -94,6 +96,7 @@ class DelayedResult:
         self.scope = work_item["scope"]
         self.db_conn_props = work_item["db_conn_props"]
         self.work_item = work_item
+        self.mode = work_item["mode"]
 
         self.fqn = f"{self.catalog_name_target}.{self.schema_name_target}.{self.table_name_target}"
 
@@ -126,27 +129,45 @@ class DelayedResult:
             )
 
             # get the data
+            import pprint as pp
+
+            pp.pprint(self.work_item)
             df = get_jdbc_data_by_dict(
                 db_conn_props=db_conn_props,
-                work_item={**self.work_item,
+                work_item={
+                    **self.work_item,
                     "table_sql": f"{self.schema_name_source}.{self.table_name_source}",
                 },
-            ).collect()
+            )
 
-            print(f"writing: {self.fqn}")
-            df.write.format("delta").mode("overwrite").saveAsTable(self.fqn)
+            if df.count() == 0:
+                result = create_status(
+                    status_code=404, status_message=f"NO_DATA: {self.fqn}"
+                )
+                result["fqn"] = self.fqn
+                result["row_count"] = df.count()
+                result["work_item"] = {
+                    **self.work_item,
+                    "table_sql": f"{self.schema_name_source}.{self.table_name_source}",
+                }
+                self.result = result
+                return
 
-            for row_pk in df_pk.collect():
-                column_name = row_pk["COLUMN_NAME"]
-                sqls = [
-                    f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET NOT NULL",
-                    f"ALTER TABLE {self.fqn} DROP PRIMARY KEY IF EXISTS CASCADE",
-                    f"ALTER TABLE {self.fqn} ADD CONSTRAINT pk_{table_name}_{column_name} PRIMARY KEY({column_name})",
-                    f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET TAGS ('db_schema' = 'pk')",
-                ]
-                for curr_sql in sqls:
-                    # print("\t", curr_sql)
-                    spark.sql(curr_sql)
+            df.write.format("delta").mode(self.mode).saveAsTable(self.fqn)
+
+            if self.mode == "overwrite":
+                for row_pk in df_pk.collect():
+                    column_name = row_pk["COLUMN_NAME"]
+                    sqls = [
+                        f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET NOT NULL",
+                        f"ALTER TABLE {self.fqn} DROP PRIMARY KEY IF EXISTS CASCADE",
+                        f"ALTER TABLE {self.fqn} ADD CONSTRAINT pk_{table_name}_{column_name} PRIMARY KEY({column_name})",
+                        f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET TAGS ('db_schema' = 'pk')",
+                    ]
+                    for curr_sql in sqls:
+                        # print("\t", curr_sql)
+                        spark.sql(curr_sql)
+
             result = create_status(
                 status_code=201, status_message=f"CREATED: {self.fqn}"
             )
@@ -199,8 +220,11 @@ class DelayedResult:
 
 # COMMAND ----------
 
-if not table_exists(
-    p_catalog_name_target, p_schema_name_target, p_table_name_target
+if (
+    not table_exists(
+        p_catalog_name_target, p_schema_name_target, p_table_name_target
+    )
+    or p_mode == "append"
 ):
 
     # try:
