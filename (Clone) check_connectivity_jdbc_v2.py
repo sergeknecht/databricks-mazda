@@ -35,6 +35,7 @@ from helpers.db_helper import (
     get_bounds__by_rownum,
     get_connection_properties__by_key,
     get_data_partitioned__by_rownum,
+    get_data,
     get_jdbc_data_by_dict
 )
 
@@ -50,6 +51,12 @@ db_conn_props = get_connection_properties__by_key(SCOPE, DB_KEY)
 
 print(db_conn_props["url"])
 
+
+# COMMAND ----------
+
+df = get_data(db_conn_props, "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2023-12-01' AND CREATE_TS <= '2023-12-31'", query_type="query")
+
+display(df)
 
 # COMMAND ----------
 
