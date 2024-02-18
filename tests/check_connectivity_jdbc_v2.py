@@ -35,20 +35,20 @@ from helpers.db_helper import (
     get_bounds__by_rownum,
     get_connection_properties__by_key,
     get_data_partitioned__by_rownum,
-    get_jdbc_data_by_dict
+    get_jdbc_data_by_dict,
 )
 
 # COMMAND ----------
 
-SCOPE = "ACC" or "PRD" or "ACC"
-DB_KEY = "DWH_BI1"
+SCOPE = 'ACC' or 'PRD' or 'ACC'
+DB_KEY = 'DWH_BI1'
 
 
 # COMMAND ----------
 
 db_conn_props = get_connection_properties__by_key(SCOPE, DB_KEY)
 
-print(db_conn_props["url"])
+print(db_conn_props['url'])
 
 
 # COMMAND ----------
@@ -64,7 +64,7 @@ print(db_conn_props["url"])
 #     url=jdbcUrl, table=pushdown_query, properties=connectionProperties
 # ).collect()[0]
 
-bounds = get_bounds__by_rownum(db_conn_props, "LZ_MUM.TUSER")
+bounds = get_bounds__by_rownum(db_conn_props, 'LZ_MUM.TUSER')
 bounds
 
 
@@ -74,7 +74,7 @@ bounds
 # when writing the writes will be distributed by partition
 
 df_mum = get_data_partitioned__by_rownum(
-    db_conn_props, "LZ_MUM.TUSER", bounds, order_by_column="GUID"
+    db_conn_props, 'LZ_MUM.TUSER', bounds, order_by_column='GUID'
 )
 
 display(df_mum)
@@ -85,7 +85,7 @@ display(df_mum)
 # query with ROWNULber which will allow us to create partitions
 # when writing the writes will be distributed by partition
 
-df_mum = get_data(db_conn_props, "SELECT * FROM LZ_MUM.TUSER ORDER BY GUID")
+df_mum = get_data(db_conn_props, 'SELECT * FROM LZ_MUM.TUSER ORDER BY GUID')
 
 display(df_mum)
 
@@ -104,7 +104,7 @@ df_mum = spark.read.jdbc(
     table=pushdown_query,
     properties=connectionProperties,
     numPartitions=4,
-    column="ROWNUM",
+    column='ROWNUM',
     lowerBound=bounds.MIN_ID,
     upperBound=bounds.MAX_ID + 1,
 )
@@ -114,20 +114,20 @@ display(df_mum)
 # COMMAND ----------
 
 df_mum_parts = (
-    spark.read.format("jdbc")
+    spark.read.format('jdbc')
     # .option("url", jdbcUrl)
-    .option("dbtable", pushdown_query)
+    .option('dbtable', pushdown_query)
     # .option("driver", driver)
     # .option("user", username)
     # .option("password", password)
     # a column that can be used that has a uniformly distributed range of values that can be used for parallelization
-    .option("partitionColumn", "ROWNUM")
+    .option('partitionColumn', 'ROWNUM')
     # lowest value to pull data for with the partitionColumn
-    .option("lowerBound", f"{bounds.MIN_ID:.0f}")
+    .option('lowerBound', f'{bounds.MIN_ID:.0f}')
     # max value to pull data for with the partitionColumn
-    .option("upperBound", f"{bounds.MAX_ID+1:.0f}")
+    .option('upperBound', f'{bounds.MAX_ID+1:.0f}')
     # number of partitions to distribute the data into. Do not set this very large (~hundreds)
-    .option("numPartitions", 4)
+    .option('numPartitions', 4)
     # # Oracle’s default fetchSize is 10
     # .option("fetchSize", "100")
     .options(**connectionProperties).load()
@@ -142,10 +142,10 @@ df_mum_parts.rdd.getNumPartitions()
 
 # single partition
 df_mum_1_part = (
-    spark.read.format("jdbc")
+    spark.read.format('jdbc')
     # .option("driver", driver)
     # .option("url", jdbcUrl)
-    .option("dbtable", "LZ_MUM.TUSER")
+    .option('dbtable', 'LZ_MUM.TUSER')
     # .option("user", username)
     # .option("password", password)
     # .option("fetchSize", "100")

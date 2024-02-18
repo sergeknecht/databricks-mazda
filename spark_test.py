@@ -1,13 +1,15 @@
-from pyspark.sql import SparkSession
 import pytest
+from pyspark.sql import SparkSession
+
 
 # Define a fixture to create a SparkSession on the cluster in the remote
-@pytest.fixture(scope="module")
+@pytest.fixture(scope='module')
 def spark() -> SparkSession:
-  # Create a SparkSession (the entry point to Spark functionality) on
-  # the cluster in the remote Databricks workspace. Unit tests do not
-  # have access to this SparkSession by default.
-  return SparkSession.builder.getOrCreate()
+    # Create a SparkSession (the entry point to Spark functionality) on
+    # the cluster in the remote Databricks workspace. Unit tests do not
+    # have access to this SparkSession by default.
+    return SparkSession.builder.getOrCreate()
+
 
 # Now add your unit tests.
 
@@ -25,7 +27,9 @@ def spark() -> SparkSession:
 # ...
 #
 def test_spark(spark):
-  spark.sql('USE catalog samples')
-  spark.sql('USE tpch')
-  data = spark.sql('SELECT c_custkey, c_name FROM customer WHERE c_custkey = 412452 LIMIT 1')
-  assert data.collect()[0][1] == 'Customer#000412452'
+    spark.sql('USE catalog samples')
+    spark.sql('USE tpch')
+    data = spark.sql(
+        'SELECT c_custkey, c_name FROM customer WHERE c_custkey = 412452 LIMIT 1'
+    )
+    assert data.collect()[0][1] == 'Customer#000412452'

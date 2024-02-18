@@ -1,5 +1,5 @@
 # Databricks notebook source
-display(dbutils.fs.ls("s3://mazda-bi20-data-nonprd/data/Bronze/"))
+display(dbutils.fs.ls('s3://mazda-bi20-data-nonprd/data/Bronze/'))
 
 
 # COMMAND ----------
@@ -19,7 +19,12 @@ display(dbutils.fs.ls("s3://mazda-bi20-data-nonprd/data/Bronze/"))
 
 # COMMAND ----------
 
-df1 = spark.read.format('csv').option('inferSchema','true').option('header','true').load("s3://mazda-bi20-data-nonprd/data/Bronze/tbcoc_product.csv")
+df1 = (
+    spark.read.format('csv')
+    .option('inferSchema', 'true')
+    .option('header', 'true')
+    .load('s3://mazda-bi20-data-nonprd/data/Bronze/tbcoc_product.csv')
+)
 display(df1)
 
 # COMMAND ----------
@@ -29,34 +34,54 @@ display(df1)
 
 # COMMAND ----------
 
-path = "s3://mazda-bi20-data-nonprd/data/Bronze/LZBTNCOCV.csv"
+path = 's3://mazda-bi20-data-nonprd/data/Bronze/LZBTNCOCV.csv'
 
-BTNCOCV = spark.read.format("csv").option("inforeSchema", "true").option("header", "true").load(path)
+BTNCOCV = (
+    spark.read.format('csv')
+    .option('inforeSchema', 'true')
+    .option('header', 'true')
+    .load(path)
+)
 
-#BTNCOCV.write.format("delta").mode("overwrite").saveAsTable("COC.BTNCOCV")
+# BTNCOCV.write.format("delta").mode("overwrite").saveAsTable("COC.BTNCOCV")
 
 display(BTNCOCV)
 
 # COMMAND ----------
 
 
-LZTBCOC_VALUE = spark.read.format("csv").option("inforeSchema", "true").option("header", "true").load("s3://mazda-bi20-data-nonprd/data/Bronze/LZTBCOC_VALUE.csv")
+LZTBCOC_VALUE = (
+    spark.read.format('csv')
+    .option('inforeSchema', 'true')
+    .option('header', 'true')
+    .load('s3://mazda-bi20-data-nonprd/data/Bronze/LZTBCOC_VALUE.csv')
+)
 
-#LZTBCOC_VALUE.write.format("delta").mode("inferSchema","true").mode("overwrite").saveAsTable("COC.LZTBCOC_VALUE")
-
-display(LZTBCOC_VALUE)
-
-# COMMAND ----------
-
-LZTBCOC_VALUE = spark.read.format("csv").option("inforeSchema", "true").option("header", "true").load("s3://mazda-bi20-data-nonprd/data/Bronze/LZTBCOC_VALUE.csv")
-
-#LZTBCOC_VALUE.write.format("delta").mode("inferSchema","true").mode("overwrite").saveAsTable("COC.LZTBCOC_VALUE")
+# LZTBCOC_VALUE.write.format("delta").mode("inferSchema","true").mode("overwrite").saveAsTable("COC.LZTBCOC_VALUE")
 
 display(LZTBCOC_VALUE)
 
 # COMMAND ----------
 
-df1 = spark.read.format('csv').option('inferSchema','true').option('header','true').load("s3://mazda-bi20-data-nonprd/data/Bronze/tbcoc_product.csv")
+LZTBCOC_VALUE = (
+    spark.read.format('csv')
+    .option('inforeSchema', 'true')
+    .option('header', 'true')
+    .load('s3://mazda-bi20-data-nonprd/data/Bronze/LZTBCOC_VALUE.csv')
+)
+
+# LZTBCOC_VALUE.write.format("delta").mode("inferSchema","true").mode("overwrite").saveAsTable("COC.LZTBCOC_VALUE")
+
+display(LZTBCOC_VALUE)
+
+# COMMAND ----------
+
+df1 = (
+    spark.read.format('csv')
+    .option('inferSchema', 'true')
+    .option('header', 'true')
+    .load('s3://mazda-bi20-data-nonprd/data/Bronze/tbcoc_product.csv')
+)
 display(df1)
 
 # COMMAND ----------

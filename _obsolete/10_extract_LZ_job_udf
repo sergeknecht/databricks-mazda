@@ -114,11 +114,11 @@ def get_df_table(table_name):
 
 # COMMAND ----------
 
-sql = f"""SELECT 
+sql = f"""SELECT
 OWNER SCHEMA_NAME, TABLE_NAME, cast(NUM_ROWS as INT) NUM_ROWS, cast(AVG_ROW_LEN as INT) AVG_ROW_LEN, (NUM_ROWS * AVG_ROW_LEN)/1024/1024/1024 EST_SIZE_IN_GB
-FROM all_tables 
+FROM all_tables
 WHERE owner {schema_filter}
-AND TABLE_NAME not like 'SNAP_%' and  TABLE_NAME not like '%$%' 
+AND TABLE_NAME not like 'SNAP_%' and  TABLE_NAME not like '%$%'
 AND NUM_ROWS > 0
 ORDER BY NUM_ROWS ASC"""
 
@@ -137,16 +137,16 @@ display(df_list)
 
 # code to get primary key of table if it exists
 
-sql_pk = """SELECT 
+sql_pk = """SELECT
   tc.owner, tc.TABLE_NAME, tc.COLUMN_NAME, tc.DATA_TYPE, tc.NULLABLE, tc.NUM_NULLS, tc.NUM_DISTINCT, tc.DATA_DEFAULT, tc.AVG_COL_LEN, tc.CHAR_LENGTH,
   con.cons, ac.CONSTRAINT_NAME, ac.CONSTRAINT_TYPE, ac.STATUS, ac.INDEX_NAME
 FROM DBA_TAB_COLUMNS tc
 left join
-  ( select  listagg( cc.constraint_name, ',') within group (order by cc.constraint_name)  cons, 
-         table_name, owner , column_name 
-         from  DBA_CONS_COLUMNS cc 
+  ( select  listagg( cc.constraint_name, ',') within group (order by cc.constraint_name)  cons,
+         table_name, owner , column_name
+         from  DBA_CONS_COLUMNS cc
           group by  table_name, owner , column_name ) con
-  on con.table_name = tc.table_name and 
+  on con.table_name = tc.table_name and
      con.owner = tc.owner and
      con.column_name = tc.column_name
 left join all_constraints ac
@@ -162,9 +162,9 @@ display(get_df_sql(sql_pk.format(**{"schema": "LZ_MUM", "table_name": "TUSER"}))
 def schema_exists(catalog: str, schema_name: str):
     query = spark.sql(
         f"""
-            SELECT 1 
-            FROM {catalog}.information_schema.schemata 
-            WHERE schema_name = '{schema_name}' 
+            SELECT 1
+            FROM {catalog}.information_schema.schemata
+            WHERE schema_name = '{schema_name}'
             LIMIT 1"""
     )
 
@@ -174,9 +174,9 @@ def schema_exists(catalog: str, schema_name: str):
 def table_exists(catalog: str, schema: str, table_name: str):
     query = spark.sql(
         f"""
-            SELECT 1 
-            FROM {catalog}.information_schema.tables 
-            WHERE table_name = '{table_name}' 
+            SELECT 1
+            FROM {catalog}.information_schema.tables
+            WHERE table_name = '{table_name}'
             AND table_schema='{schema}' LIMIT 1""",
     )
     return query.count() > 0

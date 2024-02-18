@@ -155,14 +155,18 @@
 
 # COMMAND ----------
 
-df_active_product =spark.read.option('inferSchema','true').option('header','true').csv('/FileStore/tables/COC_PRODUCT.csv')
+df_active_product = (
+    spark.read.option('inferSchema', 'true')
+    .option('header', 'true')
+    .csv('/FileStore/tables/COC_PRODUCT.csv')
+)
 display(df_active_product)
 df_active_product.createOrReplaceTempView('active_product')
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC Insert into silver.STG_TMP_COC_ACTIVE_PRODUCTS 
+# MAGIC Insert into silver.STG_TMP_COC_ACTIVE_PRODUCTS
 # MAGIC select trim(PRODUCTCODE) from  active_product
 
 # COMMAND ----------
@@ -291,11 +295,11 @@ df_active_product.createOrReplaceTempView('active_product')
 
 # MAGIC %sql
 # MAGIC
-# MAGIC INSERT INTO silver.IOT_DIM_COC_TYPE_APPROVAL 
-# MAGIC ( 
+# MAGIC INSERT INTO silver.IOT_DIM_COC_TYPE_APPROVAL
+# MAGIC (
 # MAGIC 	PRODUCTCODE ,
 # MAGIC 	LINEOFFBEGIN ,
-# MAGIC 	LINEOFFEND , 
+# MAGIC 	LINEOFFEND ,
 # MAGIC 	LINEOFFSHIFTLEVEL  ,
 # MAGIC   TYPE_APPROVAL_SK ,
 # MAGIC 	CREATE_USER ,
@@ -304,8 +308,8 @@ df_active_product.createOrReplaceTempView('active_product')
 # MAGIC 	UPDATE_TS ,
 # MAGIC 	ETL_JOB_NAME ,
 # MAGIC 	SOURCE ,
-# MAGIC 	LOAD_NR 
-# MAGIC ) 
+# MAGIC 	LOAD_NR
+# MAGIC )
 # MAGIC SELECT
 # MAGIC   DISTINCT BP.PRODUCTCODE,
 # MAGIC   BP.LINEOFFBEGIN,
@@ -327,7 +331,7 @@ df_active_product.createOrReplaceTempView('active_product')
 # MAGIC 	getdate(),
 # MAGIC 	'COC  -  TBCOC_PRODUCT  -  CTAS  -  IOT_DIM_COC_TYPE_APPROVAL',
 # MAGIC 	'C_SOURCE_COC',
-# MAGIC 	'V_DWH_LOAD_12C_LOAD_NR' 
+# MAGIC 	'V_DWH_LOAD_12C_LOAD_NR'
 # MAGIC FROM
 # MAGIC   bronze.lztbcoc_product BP
 # MAGIC WHERE
@@ -344,23 +348,23 @@ df_active_product.createOrReplaceTempView('active_product')
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC INSERT INTO silver.STG_DIM_COC_TYPE_APPROVAL  
-# MAGIC           ( TYPE_APPROVAL_SK,  
-# MAGIC             TYPE_APPROVAL,  
-# MAGIC             VARIANT,  
-# MAGIC             VERSION,  
-# MAGIC             PRODUCTCODE,  
-# MAGIC             LINEOFFSHIFTLEVEL,  
-# MAGIC             LINEOFFBEGIN,  
-# MAGIC             LINEOFFEND,  
-# MAGIC             CREATE_USER,  
-# MAGIC             CREATE_TS,  
-# MAGIC             UPDATE_USER,  
-# MAGIC             UPDATE_TS,  
-# MAGIC             ETL_JOB_NAME,  
-# MAGIC             SOURCE,  
-# MAGIC             LOAD_NR  
-# MAGIC           )  
+# MAGIC INSERT INTO silver.STG_DIM_COC_TYPE_APPROVAL
+# MAGIC           ( TYPE_APPROVAL_SK,
+# MAGIC             TYPE_APPROVAL,
+# MAGIC             VARIANT,
+# MAGIC             VERSION,
+# MAGIC             PRODUCTCODE,
+# MAGIC             LINEOFFSHIFTLEVEL,
+# MAGIC             LINEOFFBEGIN,
+# MAGIC             LINEOFFEND,
+# MAGIC             CREATE_USER,
+# MAGIC             CREATE_TS,
+# MAGIC             UPDATE_USER,
+# MAGIC             UPDATE_TS,
+# MAGIC             ETL_JOB_NAME,
+# MAGIC             SOURCE,
+# MAGIC             LOAD_NR
+# MAGIC           )
 # MAGIC SELECT
 # MAGIC   IOTAP.TYPE_APPROVAL_SK AS TYPE_APPROVAL_SK,
 # MAGIC   trim(APH.TYPE_APPROVAL) AS TYPE_APPROVAL,
@@ -370,13 +374,13 @@ df_active_product.createOrReplaceTempView('active_product')
 # MAGIC   IOTAP.LINEOFFSHIFTLEVEL AS  LINEOFFSHIFTLEVEL,
 # MAGIC   IOTAP.LINEOFFBEGIN AS  LINEOFFBEGIN,
 # MAGIC   IOTAP.LINEOFFEND AS LINEOFFEND,
-# MAGIC   'DWSRV' AS CREATE_USER,  
-# MAGIC   cast(getdate() as date)  AS CREATE_TS,  
-# MAGIC   'DWSRV' AS UPDATE_USER,  
-# MAGIC   cast(getdate() AS DATE) AS UPDATE_TS,  
-# MAGIC   'LOOKUP_SK  -  CTAS  -  STG_DIM_COC_TYPE_APPROVAL' AS ETL_JOB_NAME,  
-# MAGIC   '#MAZDA__BI.C_SOURCE_COC' AS SOURCE,  
-# MAGIC   null AS LOAD_NR   
+# MAGIC   'DWSRV' AS CREATE_USER,
+# MAGIC   cast(getdate() as date)  AS CREATE_TS,
+# MAGIC   'DWSRV' AS UPDATE_USER,
+# MAGIC   cast(getdate() AS DATE) AS UPDATE_TS,
+# MAGIC   'LOOKUP_SK  -  CTAS  -  STG_DIM_COC_TYPE_APPROVAL' AS ETL_JOB_NAME,
+# MAGIC   '#MAZDA__BI.C_SOURCE_COC' AS SOURCE,
+# MAGIC   null AS LOAD_NR
 # MAGIC FROM
 # MAGIC   silver.IOT_DIM_COC_TYPE_APPROVAL IOTAP
 # MAGIC   INNER JOIN silver.STG_TMP_COC_VERSION_HIST VSH
@@ -391,7 +395,7 @@ df_active_product.createOrReplaceTempView('active_product')
 # MAGIC   ON IOTAP.PRODUCTCODE = APH.PRODUCTCODE
 # MAGIC     AND IOTAP.LINEOFFSHIFTLEVEL = APH.LINEOFFSHIFTLEVEL
 # MAGIC     AND IOTAP.LINEOFFBEGIN BETWEEN APH.LINEOFFBEGIN AND APH.LINEOFFEND
-# MAGIC   
+# MAGIC
 
 # COMMAND ----------
 

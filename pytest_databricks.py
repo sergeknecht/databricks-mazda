@@ -1,6 +1,7 @@
-import pytest
 import os
 import sys
+
+import pytest
 
 # Run all tests in the connected directory in the remote Databricks workspace.
 # By default, pytest searches through all files with filenames ending with
@@ -31,6 +32,6 @@ sys.dont_write_bytecode = True
 #
 
 
-print("dbutils: ", dbutils)
+print('dbutils: ', dbutils)
 
 retcode = pytest.main(sys.argv[1:])

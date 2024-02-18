@@ -1,2 +1,17 @@
 [tool.black]
-line-length = 79
+line-length = 90
+
+[tool.isort]
+profile = "black"
+force_to_top = [ "logging" ]
+balanced_wrapping = true
+
+[black]
+line-length = 90
+
+[tool.pycln]
+all = true
+
+[tool.refurb]
+quiet = true
+ignore = []

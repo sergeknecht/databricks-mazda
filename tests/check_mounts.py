@@ -3,7 +3,9 @@ display(dbutils.fs.mounts())
 
 # COMMAND ----------
 
-instance_profile = "arn:aws:iam::289450402608:instance-profile/rl-cross-databricks-nonprod"
+instance_profile = (
+    'arn:aws:iam::289450402608:instance-profile/rl-cross-databricks-nonprod'
+)
 
 # COMMAND ----------
 
@@ -12,10 +14,10 @@ instance_profile = "arn:aws:iam::289450402608:instance-profile/rl-cross-databric
 
 # COMMAND ----------
 
-aws_bucket_name = "<aws-bucket-name>"
-mount_name = "<mount-name>"
-dbutils.fs.mount(f"s3a://{aws_bucket_name}", f"/mnt/{mount_name}")
-display(dbutils.fs.ls(f"/mnt/{mount_name}"))
+aws_bucket_name = '<aws-bucket-name>'
+mount_name = '<mount-name>'
+dbutils.fs.mount(f's3a://{aws_bucket_name}', f'/mnt/{mount_name}')
+display(dbutils.fs.ls(f'/mnt/{mount_name}'))
 
 # COMMAND ----------
 
@@ -24,14 +26,16 @@ display(dbutils.fs.ls(f"/mnt/{mount_name}"))
 
 # COMMAND ----------
 
-access_key = dbutils.secrets.get(scope = "aws", key = "aws-access-key")
-secret_key = dbutils.secrets.get(scope = "aws", key = "aws-secret-key")
-encoded_secret_key = secret_key.replace("/", "%2F")
-aws_bucket_name = "<aws-bucket-name>"
-mount_name = "<mount-name>"
+access_key = dbutils.secrets.get(scope='aws', key='aws-access-key')
+secret_key = dbutils.secrets.get(scope='aws', key='aws-secret-key')
+encoded_secret_key = secret_key.replace('/', '%2F')
+aws_bucket_name = '<aws-bucket-name>'
+mount_name = '<mount-name>'
 
-dbutils.fs.mount(f"s3a://{access_key}:{encoded_secret_key}@{aws_bucket_name}", f"/mnt/{mount_name}")
-display(dbutils.fs.ls(f"/mnt/{mount_name}"))
+dbutils.fs.mount(
+    f's3a://{access_key}:{encoded_secret_key}@{aws_bucket_name}', f'/mnt/{mount_name}'
+)
+display(dbutils.fs.ls(f'/mnt/{mount_name}'))
 
 # COMMAND ----------
 
@@ -43,11 +47,13 @@ display(dbutils.fs.ls(f"/mnt/{mount_name}"))
 
 # COMMAND ----------
 
-dbutils.fs.mount("s3a://<s3-bucket-name>", "/mnt/<s3-bucket-name>",
-  extra_configs = {
-    "fs.s3a.credentialsType": "AssumeRole",
-    "fs.s3a.stsAssumeRole.arn": "arn:aws:iam::<bucket-owner-acct-id>:role/MyRoleB",
-    "fs.s3a.canned.acl": "BucketOwnerFullControl",
-    "fs.s3a.acl.default": "BucketOwnerFullControl"
-  }
+dbutils.fs.mount(
+    's3a://<s3-bucket-name>',
+    '/mnt/<s3-bucket-name>',
+    extra_configs={
+        'fs.s3a.credentialsType': 'AssumeRole',
+        'fs.s3a.stsAssumeRole.arn': 'arn:aws:iam::<bucket-owner-acct-id>:role/MyRoleB',
+        'fs.s3a.canned.acl': 'BucketOwnerFullControl',
+        'fs.s3a.acl.default': 'BucketOwnerFullControl',
+    },
 )

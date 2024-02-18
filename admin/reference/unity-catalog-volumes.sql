@@ -59,7 +59,7 @@ SHOW GRANTS ON CATALOG quickstart_catalog;
 
 -- COMMAND ----------
 
---- Make sure that all required users have USE CATALOG priviledges on the catalog. 
+--- Make sure that all required users have USE CATALOG priviledges on the catalog.
 --- In this example, we grant the priviledge to all account users.
 GRANT USE CATALOG
 ON CATALOG quickstart_catalog
@@ -105,7 +105,7 @@ USE SCHEMA quickstart_schema;
 -- MAGIC %md
 -- MAGIC ### Create a Volume
 -- MAGIC
--- MAGIC You can create `managed` or `external` volumes in Unity Catalog. 
+-- MAGIC You can create `managed` or `external` volumes in Unity Catalog.
 -- MAGIC
 -- MAGIC We demonstrate how to create a managed volume. Please check teh documentaion for details on creating external volumes.
 -- MAGIC
@@ -134,8 +134,8 @@ COMMENT 'This is my example managed volume'
 
 -- COMMAND ----------
 
--- MAGIC %md 
--- MAGIC ###Browse the Volume 
+-- MAGIC %md
+-- MAGIC ###Browse the Volume
 -- MAGIC
 -- MAGIC Use the path below - works with Spark APIs, shell, dbutils, and local file system utilities:
 -- MAGIC
@@ -182,7 +182,7 @@ SHOW VOLUMES IN quickstart_schema;
 
 -- COMMAND ----------
 
--- MAGIC %md 
+-- MAGIC %md
 -- MAGIC ### Alter a Volume
 -- MAGIC - Change volume name
 -- MAGIC - Transfer ownership
@@ -210,11 +210,11 @@ COMMENT ON VOLUME quickstart_catalog.quickstart_schema.quickstart_volume IS 'Thi
 -- MAGIC
 -- MAGIC If a *managed volume* is dropped, the files stored in this volume are also deleted from your cloud tenant within 30 days.
 -- MAGIC
--- MAGIC If an *external volume* is dropped, the metadata about the volume is removed from the catalog but the underlying files are not deleted. 
+-- MAGIC If an *external volume* is dropped, the metadata about the volume is removed from the catalog but the underlying files are not deleted.
 
 -- COMMAND ----------
 
---- Drop the managed Volume. Uncomment the following line to try it out. 
+--- Drop the managed Volume. Uncomment the following line to try it out.
 --- DROP VOLUME IF EXISTS quickstart_catalog.quickstart_schema.quickstart_volume
 
 -- COMMAND ----------
@@ -222,7 +222,7 @@ COMMENT ON VOLUME quickstart_catalog.quickstart_schema.quickstart_volume IS 'Thi
 -- MAGIC %md
 -- MAGIC ## Manage Volume permissions
 -- MAGIC
--- MAGIC Use `GRANT` and `REVOKE` statements to manage access to your Volume. 
+-- MAGIC Use `GRANT` and `REVOKE` statements to manage access to your Volume.
 -- MAGIC
 -- MAGIC #### Volume privileges
 -- MAGIC The following privileges can be granted on Volume objects:
@@ -231,9 +231,9 @@ COMMENT ON VOLUME quickstart_catalog.quickstart_schema.quickstart_volume IS 'Thi
 -- MAGIC - `READ VOLUME`: Allows the grantee to read files in a Volume.
 -- MAGIC - `WRITE VOLUME`: Allows the grantee to add/remove/update files in a Volume.
 -- MAGIC
--- MAGIC Like for all Unity Catalog securables, access is not automatically granted. 
--- MAGIC - Initially, all users have no access. 
--- MAGIC - Metastore admins and object owners can grant and revoke access to users and groups. 
+-- MAGIC Like for all Unity Catalog securables, access is not automatically granted.
+-- MAGIC - Initially, all users have no access.
+-- MAGIC - Metastore admins and object owners can grant and revoke access to users and groups.
 -- MAGIC - Granting a privilege on a securable grants the privilege on its child securables.
 -- MAGIC
 -- MAGIC #### Volume Ownership
@@ -289,10 +289,10 @@ FROM `account users`;
 
 -- COMMAND ----------
 
--- MAGIC %md 
+-- MAGIC %md
 -- MAGIC
 -- MAGIC #### dbutils.fs
--- MAGIC You can use any of the <a href="https://docs.databricks.com/dev-tools/databricks-utils.html#file-system-utility-dbutilsfs">dbutils file system utilities</a>, except for the mounts-related utilities. 
+-- MAGIC You can use any of the <a href="https://docs.databricks.com/dev-tools/databricks-utils.html#file-system-utility-dbutilsfs">dbutils file system utilities</a>, except for the mounts-related utilities.
 -- MAGIC
 -- MAGIC We show some examples:
 -- MAGIC - create a directory inside a Volume
@@ -348,7 +348,7 @@ SELECT * FROM csv.`dbfs:/Volumes/quickstart_catalog/quickstart_schema/quickstart
 
 -- MAGIC %md
 -- MAGIC #### Local file system access
--- MAGIC Volumes are FUSE-mounted under `/Volumes/` on the local file system on cluster nodes. 
+-- MAGIC Volumes are FUSE-mounted under `/Volumes/` on the local file system on cluster nodes.
 -- MAGIC
 -- MAGIC You can use shell commands and other operating system utility libraries to explore Volumes via thee FUSE mount.
 

@@ -32,10 +32,10 @@ CREATE OR REFRESH STREAMING LIVE TABLE lztbcoc_value
 	VALUEID INT,
 	VALUE STRING,
 	STATUS  INT
-) 
+)
 COMMENT "Raw data of tbcoc_value"
-SELECT 
- 
+SELECT
+
     Cast(DISTRIBUTOR as  INT),
 	Cast(LANGUAGE as  INT),
 	Cast(COCNUMBER as  INT),
@@ -64,9 +64,9 @@ SEND_FLG string,
 SEND_TST string,
 SEND_NBR int,
 END_OF_SERIE string
-) 
+)
 COMMENT "Raw data of btncocv"
-SELECT 
+SELECT
 VIN,
     DISTCD,
     MODEL,

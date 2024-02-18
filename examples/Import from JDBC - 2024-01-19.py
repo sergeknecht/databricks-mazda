@@ -19,11 +19,11 @@
 
 # COMMAND ----------
 
-driver = "org.postgresql.Driver"
-url = "jdbc:postgresql://database_server"
-table = "schema.tablename"
-user = ""
-password = ""
+driver = 'org.postgresql.Driver'
+url = 'jdbc:postgresql://database_server'
+table = 'schema.tablename'
+user = ''
+password = ''
 
 # COMMAND ----------
 
@@ -38,12 +38,12 @@ password = ""
 # COMMAND ----------
 
 remote_table = (
-  spark.read.format("jdbc") \
-    .option("driver", driver)
-    .option("url", url)
-    .option("dbtable", table)
-    .option("user", user)
-    .option("password", password)
+    spark.read.format('jdbc')
+    .option('driver', driver)
+    .option('url', url)
+    .option('dbtable', table)
+    .option('user', user)
+    .option('password', password)
     # The following options configure parallelism for the query. This is required to get better performance, otherwise only a single thread will read all the data
     # a column that can be used that has a uniformly distributed range of values that can be used for parallelization
     # .option("partitionColumn", "partition_key")
@@ -66,7 +66,7 @@ remote_table = (
 
 # COMMAND ----------
 
-display(remote_table.select("EXAMPLE_COLUMN"))
+display(remote_table.select('EXAMPLE_COLUMN'))
 
 # COMMAND ----------
 
@@ -78,7 +78,7 @@ display(remote_table.select("EXAMPLE_COLUMN"))
 
 # COMMAND ----------
 
-remote_table.createOrReplaceTempView("YOUR_TEMP_VIEW_NAME")
+remote_table.createOrReplaceTempView('YOUR_TEMP_VIEW_NAME')
 
 # COMMAND ----------
 
@@ -100,7 +100,7 @@ remote_table.createOrReplaceTempView("YOUR_TEMP_VIEW_NAME")
 
 # COMMAND ----------
 
-remote_table.write.format("delta").saveAsTable("MY_PERMANENT_TABLE_NAME")
+remote_table.write.format('delta').saveAsTable('MY_PERMANENT_TABLE_NAME')
 
 # COMMAND ----------
 

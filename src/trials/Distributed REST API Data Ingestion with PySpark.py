@@ -8,31 +8,37 @@
 
 import requests
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import udf, explode, lit, col
-from pyspark.sql.types import ArrayType, StructType, StructField, StringType, IntegerType, MapType
+from pyspark.sql.functions import col, explode, lit, udf
+from pyspark.sql.types import (
+    ArrayType,
+    IntegerType,
+    MapType,
+    StringType,
+    StructField,
+    StructType,
+)
 
 # spark = SparkSession.builder.appName("REST_API_with_PySpark_DF").getOrCreate()
 
-schema = StructType([
-    StructField("length", IntegerType(), True),
-    StructField("fact", StringType(), True),
-    # ... Define other fields based on the API's response
-])
-
+schema = StructType(
+    [
+        StructField('length', IntegerType(), True),
+        StructField('fact', StringType(), True),
+        # ... Define other fields based on the API's response
+    ]
+)
 
 
 # @udf(returnType=MapType(schema))
 # @udf(returnType=MapType(StringType(), IntegerType()))
 @udf(returnType=MapType(IntegerType(), StringType()))
 def fetch_data(offset: int, limit: int):
-    endpoint = "https://catfact.ninja/fact"
-    params = {
-        "offset": offset,
-        "limit": limit
-    }
+    endpoint = 'https://catfact.ninja/fact'
+    params = {'offset': offset, 'limit': limit}
     params = None
     response = requests.get(endpoint, params=params)
     return response.json()  # assuming API returns a list of records
+
 
 # total_records = requests.get("https://catfact.ninja/fact", params={"offset": 0, "limit": 1}).json().get('total', 0)
 records_per_page = 1
@@ -48,9 +54,11 @@ display(total_records)
 
 # COMMAND ----------
 
-offsets_df = spark.range(0, total_records, records_per_page).select(col("id").alias("offset"), lit(records_per_page).alias("limit"))
-response_df = offsets_df.withColumn("response", fetch_data("offset", "limit"))
-results_df = response_df.select(explode("response"))
+offsets_df = spark.range(0, total_records, records_per_page).select(
+    col('id').alias('offset'), lit(records_per_page).alias('limit')
+)
+response_df = offsets_df.withColumn('response', fetch_data('offset', 'limit'))
+results_df = response_df.select(explode('response'))
 
 # COMMAND ----------
 
@@ -79,7 +87,7 @@ display(results_df)
 # MAGIC   }
 # MAGIC   ...
 # MAGIC ]
-# MAGIC ``` 
+# MAGIC ```
 # MAGIC
 # MAGIC Based on this we would expect and array of objects, each object having three attributes: name, age, and isActive. Our schema would map these to Spark types as such:
 # MAGIC
@@ -95,6 +103,7 @@ display(results_df)
 # COMMAND ----------
 
 from pyspark.sql.functions import schema_of_json
+
 json_data = """ {
     "fact": "Cats respond better to women than to men, probably due to the fact that women's voices have a higher pitch.",
     "length": 107
@@ -106,7 +115,7 @@ display(schema_of_json(json_data))
 import org.apache.spark.sql.types.StructType
 
 jsData = Seq(
-  ("""{
+    """{
     "name":"test","id":"12","category":[
     {
       "products":[
@@ -125,5 +134,5 @@ jsData = Seq(
     }
   ],
   "createdAt":"",
-  "createdBy":""}""")
+  "createdBy":""}"""
 )

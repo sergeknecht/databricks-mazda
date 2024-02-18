@@ -17,6 +17,16 @@
             "databaseName": "ACC_DWH",
             "fetchSize": "100000"
         },
+        "DWH_BI1__250000": {
+            "hostName": "accdw-scan.mle.mazdaeur.com",
+            "databaseName": "ACC_DWH",
+            "fetchSize": "250000"
+        },
+        "DWH_BI1__500000": {
+            "hostName": "accdw-scan.mle.mazdaeur.com",
+            "databaseName": "ACC_DWH",
+            "fetchSize": "500000"
+        },
         "DEFAULT_CSV": {
             "inferschema": "true",
             "header": "true",

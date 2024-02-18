@@ -88,7 +88,7 @@ SELECT
  *
 FROM
   impetus_ref_pii.stg.stg_emot_btncustcontract
-  WHERE 
+  WHERE
   CONTRACT_ENTRY_USR <> 'MIGRATION' AND RETURN_PLATE IS NOT NULL;
 -------------------------
 ALTER TABLE
@@ -302,4 +302,3 @@ SELECT
   *
 FROM
   impetus_ref_pii.stg.stg_emot_btncdhdr;
-

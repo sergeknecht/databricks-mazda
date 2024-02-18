@@ -1,5 +1,5 @@
 -- Databricks notebook source
-truncate 
+truncate
 
 -- COMMAND ----------
 

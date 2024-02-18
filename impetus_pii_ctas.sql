@@ -19,7 +19,7 @@ SELECT
  *
 FROM
   impetus_poc.stg.stg_emot_btncustcontract
-  WHERE 
+  WHERE
   CONTRACT_ENTRY_USR <> 'MIGRATION' AND RETURN_PLATE IS NOT NULL;
 --
 CREATE OR REPLACE TABLE impetus_poc.stg.stg_emot_btnmuser AS

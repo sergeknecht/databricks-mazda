@@ -31,38 +31,38 @@
 
 # COMMAND ----------
 
-SCOPE = "PRD" or "ACC"
+SCOPE = 'PRD' or 'ACC'
 
 # COMMAND ----------
 
-username = dbutils.secrets.get(scope=SCOPE, key="DWH_BI1__JDBC_USERNAME")
-password = dbutils.secrets.get(scope=SCOPE, key="DWH_BI1__JDBC_PASSWORD")
+username = dbutils.secrets.get(scope=SCOPE, key='DWH_BI1__JDBC_USERNAME')
+password = dbutils.secrets.get(scope=SCOPE, key='DWH_BI1__JDBC_PASSWORD')
 
-assert username, "secret username not retrieved"
-assert password, "secret password not retrieved"
+assert username, 'secret username not retrieved'
+assert password, 'secret password not retrieved'
 
 # for char in username:
 #     print(char, end=" ")
 
 # COMMAND ----------
 
-hostName = SCOPE.lower() + "dw-scan.mle.mazdaeur.com"
+hostName = SCOPE.lower() + 'dw-scan.mle.mazdaeur.com'
 # hostName="10.230.2.32"
-port = "1521"
-databaseName = SCOPE + "_DWH"
-driver = "oracle.jdbc.driver.OracleDriver"
+port = '1521'
+databaseName = SCOPE + '_DWH'
+driver = 'oracle.jdbc.driver.OracleDriver'
 
-jdbcUrl = f"jdbc:oracle:thin:@//{hostName}:{port}/{databaseName}"
+jdbcUrl = f'jdbc:oracle:thin:@//{hostName}:{port}/{databaseName}'
 print(jdbcUrl)
 
 # COMMAND ----------
 
 connectionProperties = {
-    "user": username,
-    "password": password,
-    "driver": driver,
-    "fetchSize": "100",
-    "url": jdbcUrl,
+    'user': username,
+    'password': password,
+    'driver': driver,
+    'fetchSize': '100',
+    'url': jdbcUrl,
 }
 
 # 'inferschema':'True',
@@ -105,7 +105,7 @@ df_mum = spark.read.jdbc(
     table=pushdown_query,
     properties=connectionProperties,
     numPartitions=4,
-    column="ROWNUM",
+    column='ROWNUM',
     lowerBound=bounds.MIN_ID,
     upperBound=bounds.MAX_ID + 1,
 )
@@ -115,20 +115,20 @@ display(df_mum)
 # COMMAND ----------
 
 df_mum_parts = (
-    spark.read.format("jdbc")
+    spark.read.format('jdbc')
     # .option("url", jdbcUrl)
-    .option("dbtable", pushdown_query)
+    .option('dbtable', pushdown_query)
     # .option("driver", driver)
     # .option("user", username)
     # .option("password", password)
     # a column that can be used that has a uniformly distributed range of values that can be used for parallelization
-    .option("partitionColumn", "ROWNUM")
+    .option('partitionColumn', 'ROWNUM')
     # lowest value to pull data for with the partitionColumn
-    .option("lowerBound", f"{bounds.MIN_ID:.0f}")
+    .option('lowerBound', f'{bounds.MIN_ID:.0f}')
     # max value to pull data for with the partitionColumn
-    .option("upperBound", f"{bounds.MAX_ID+1:.0f}")
+    .option('upperBound', f'{bounds.MAX_ID+1:.0f}')
     # number of partitions to distribute the data into. Do not set this very large (~hundreds)
-    .option("numPartitions", 4)
+    .option('numPartitions', 4)
     # # Oracle’s default fetchSize is 10
     # .option("fetchSize", "100")
     .options(**connectionProperties).load()
@@ -143,10 +143,10 @@ df_mum_parts.rdd.getNumPartitions()
 
 # single partition
 df_mum_1_part = (
-    spark.read.format("jdbc")
+    spark.read.format('jdbc')
     # .option("driver", driver)
     # .option("url", jdbcUrl)
-    .option("dbtable", "LZ_MUM.TUSER")
+    .option('dbtable', 'LZ_MUM.TUSER')
     # .option("user", username)
     # .option("password", password)
     # .option("fetchSize", "100")
