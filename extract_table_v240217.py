@@ -9,6 +9,7 @@ import json
 import sys
 import time
 import traceback
+from pprint import pformat
 
 from pyspark.sql.utils import AnalysisException
 
@@ -38,8 +39,6 @@ logger.info("This is an informational message")
 dbutils.widgets.text("p_work_json", "{}", label="Database Table Extract JSON Config")
 
 # COMMAND ----------
-
-start_time = time.time()
 
 p_work_json: dict = json.loads(dbutils.widgets.get("p_work_json"))
 assert p_work_json, "p_work_json not set"
@@ -100,6 +99,7 @@ if ("drop" in actions and p_mode != "append") or p_mode == "drop":
 
 class DelayedResultExtract:
     def __init__(self, work_item: dict):
+        self.start_time = time.time()
         self.exc_info = None
         self.result = None
         self.action = work_item["action"]
@@ -134,6 +134,8 @@ class DelayedResultExtract:
                     "query_type": "query",
                 },
             )
+
+            logger.info(pformat(self.work_item))
 
             df = get_jdbc_data_by_dict(
                 db_conn_props=db_conn_props,
@@ -195,7 +197,7 @@ class DelayedResultExtract:
 
     def get_result(self):
         end_time = time.time()
-        time_duration = int(end_time - start_time)
+        time_duration = int(end_time - self.start_time)
         if self.exc_info:
             e, traceback = self.exc_info
 
@@ -231,9 +233,6 @@ try:
                 status_message="ALREADY_REPORTED: table already exists - skipping",
             )
             result["fqn"] = p_fqn
-            end_time = time.time()
-            time_duration = int(end_time - start_time)
-            result["time_duration"] = time_duration
             dbutils.notebook.exit(json.dumps(result))
 
         # all is good. Let's create the catalog and schema the table will be in
@@ -244,11 +243,15 @@ try:
     # we are creating the target and the work item is in append mode
     elif "create" in actions and p_mode == "append":
 
+        # first action is a drop_create (using df overwrite). This might take some time to finish so we need to give it some time before we check if the NEW table is created
+        # TODO: this is a possible race condition that we need to fix in future
+        time.sleep(180)
+
         counter = 0
         while not table_exists(p_catalog_name, p_schema_name, p_table_name):
             time.sleep(60)
             counter += 1
-            if counter > 10:
+            if counter > 30: # TODO: Improve: longer is theoretically not possible because we also have a timeout from calling notebook
                 break
 
         # because we are in append mode we need to check if the table exists
@@ -259,9 +262,6 @@ try:
             )
             # 208: already reported
             result["fqn"] = p_fqn
-            end_time = time.time()
-            time_duration = int(end_time - start_time)
-            result["time_duration"] = time_duration
             dbutils.notebook.exit(json.dumps(result))
 
 except AnalysisException as e:

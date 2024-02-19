@@ -1,6 +1,6 @@
 # Databricks notebook source
 # dbutils.widgets.removeAll()
-dbutils.widgets.text('catalog', 'DWH_BI1')
+dbutils.widgets.text('catalog', 'impetus')
 dbutils.widgets.text('schema_filter', "like 'LZ_%'")
 dbutils.widgets.dropdown('scope', 'ACC', ['ACC', 'PRD', 'DEV'])
 
@@ -19,6 +19,7 @@ hostName = 'accdw-scan.mle.mazdaeur.com'
 # hostName="10.230.2.32"
 port = '1521'
 databaseName = f'{scope}_DWH'
+fetch_size = "1000000"
 
 jdbcUrl = f'jdbc:oracle:thin:@//{hostName}:{port}/{databaseName}'
 print(jdbcUrl)
@@ -30,7 +31,7 @@ print(catalog_name)
 
 # TODO: following statement is not accepted by spark SQL, therefore move it to an INIT SQL notebook
 sql_catalog_create = (
-    f"CREATE CATALOG IF NOT EXISTS {scope}__{catalog} COMMENT 'scope: {catalog}'"
+    f"CREATE CATALOG IF NOT EXISTS {scope}__{catalog} COMMENT 'scope: {scope}'"
 )
 # uses widget values !!!
 
@@ -46,8 +47,7 @@ def run_sql_cmd(sql: str):
 
 # COMMAND ----------
 
-# TODO: following statement is not accepted by spark SQL, therefore move it to an INIT SQL notebook
-# run_sql_cmd(sql_catalog_create)
+run_sql_cmd(sql_catalog_create)
 
 # COMMAND ----------
 
@@ -72,19 +72,9 @@ def get_df_sql(sql):
         .option('query', sql)
         .option('user', username)
         .option('password', password)
-        .option('numPartitions', 5)
+        .option("fetchSize", fetch_size)
         .load()
     )
-
-    # The following options configure parallelism for the query. This is required to get better performance, otherwise only a single thread will read all the data
-    # a column that can be used that has a uniformly distributed range of values that can be used for parallelization
-    # .option("partitionColumn", "partition_key")
-    # lowest value to pull data for with the partitionColumn
-    # .option("lowerBound", "minValue")
-    # max value to pull data for with the partitionColumn
-    # .option("upperBound", "maxValue")
-    # number of partitions to distribute the data into. Do not set this very large (~hundreds) to not overwhelm your database
-    # .option("numPartitions", <cluster_cores>)
 
     return df_sql
 
@@ -100,7 +90,7 @@ def get_df_table(table_name):
         .option('dbtable', table_name)
         .option('user', username)
         .option('password', password)
-        .option('numPartitions', 5)
+        .option("fetchSize", fetch_size)
         .load()
     )
 
@@ -124,9 +114,13 @@ display(df_list)
 
 # COMMAND ----------
 
-# not supported by spark sql command, but we don't need it since we use spark with full schema naming
-# # sql_catalog_use = f"USE CATALOG {scope}__{catalog}"
-# run_sql_cmd(sql_catalog_use)
+work_jsons = [{"catalog": "impetus_src", "name": f"{row['SCHEMA_NAME']}.{row['TABLE_NAME']}", "pii": False} for row in sorted(df_list.collect())]
+work_jsons
+
+# COMMAND ----------
+
+sql_catalog_use = f"USE CATALOG {scope}__{catalog}"
+run_sql_cmd(sql_catalog_use)
 
 # COMMAND ----------
 
@@ -179,7 +173,7 @@ def table_exists(catalog: str, schema: str, table_name: str):
 
 # COMMAND ----------
 
-table_exists('ACC__DWH_BI1', 'LZ_LEM', 'DDN_VEHICLE_DISTRIBUTORS')
+dbutils.notebook.exit("[]")
 
 # COMMAND ----------
 
