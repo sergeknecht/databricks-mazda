@@ -51,3 +51,7 @@ def create_table(catalog: str, schema: str, table_name: str, df, partition_cols:
     else:
         partition_cols = ""
     df.write.format("delta").partitionBy(partition_cols).saveAsTable(f"{catalog}.{schema}.{table_name}")
+    if overwrite:
+            return f"REPLACED: {catalog}.{schema}.{table_name}"
+        else:
+            return f"CREATED_IF_NEW: {catalog}.{schema}.{table_name}"

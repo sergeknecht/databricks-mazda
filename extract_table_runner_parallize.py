@@ -1135,6 +1135,12 @@ for wi in work_jsons:
 
 # COMMAND ----------
 
+work_jsons = [
+    {"catalog": "impetus", "name": "STG.STG_LEM_NO_WORKING_DAYS", "pii": False},
+]
+
+# COMMAND ----------
+
 def get_schema_name_source(x):
     schema = x["name"].split(".")[0]
     if schema == 'STAGING':
