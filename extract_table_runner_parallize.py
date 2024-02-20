@@ -1166,7 +1166,7 @@ work_items = [
         'catalog_name_source': '',
         'schema_name_source': get_schema_name_source(work_json),
         'table_name_source': get_table_name_source(work_json),
-        'catalog_name': f"{jp_scope.lower()}__{work_json["catalog"]}" if not work_json['pii'] else f"{jp_scope.lower()}__{work_json["catalog"]}_pii",
+        'catalog_name': f"{jp_scope.lower()}__{work_json['catalog']}" if not work_json['pii'] else f"{jp_scope.lower()}__{work_json['catalog']}_pii",
         'schema_name': get_schema_name_source(work_json)
         .lower()
         .replace('$', '_'),
