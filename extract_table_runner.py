@@ -8,7 +8,7 @@ import json
 import os
 import time
 
-from helpers.db_helper import table_exists
+from helpers.db_helper_delta import table_exists
 from helpers.status_helper import create_status
 
 # COMMAND ----------

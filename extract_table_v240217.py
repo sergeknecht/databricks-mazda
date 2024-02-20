@@ -16,11 +16,11 @@ from pyspark.sql.utils import AnalysisException
 from helpers.db_helper import (
     get_bounds__by_rownum,
     get_connection_properties__by_key,
-    get_data_partitioned__by_rownum,
     get_db_dict,
     get_jdbc_data_by_dict,
-    table_exists,
 )
+from helpers.db_helper_delta import table_exists
+from helpers.db_helper_oracle import get_data_partitioned__by_rownum
 from helpers.db_helper_oracle_sql import sql_pk_statement
 from helpers.logger_helper import log_to_delta_table
 from helpers.status_helper import create_status

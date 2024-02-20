@@ -8,11 +8,10 @@ from helpers.db_helper import (
     get_bounds__by_rownum,
     get_connection_properties__by_key,
     get_data,
-    get_data_partitioned__by_rownum,
     get_db_dict,
-    schema_exists,
-    table_exists,
 )
+from helpers.db_helper_delta import schema_exists, table_exists
+from helpers.db_helper_oracle import get_data_partitioned__by_rownum
 from helpers.db_helper_oracle_sql import sql_pk_statement
 from helpers.status_helper import create_status
 
