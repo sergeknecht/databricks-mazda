@@ -10,8 +10,6 @@
 
 # COMMAND ----------
 
-# COMMAND ----------
-
 import logging
 import json
 import time
@@ -33,8 +31,6 @@ logger.setLevel(logging.INFO)
 jp_action = 'drop__create' or 'create' or 'drop'
 jp_scope = 'ACC' or 'PRD' or 'TST' or 'DEV'
 p_db_key = 'DWH_BI1__500000' or 'DWH_BI1__250000' or 'DWH_BI1__100000' or 'DWH_BI1'
-
-sc = SparkContext.getOrCreate()
 
 # TODO: minus 1 ? because have not yet figured out how single nodes handle this number, and we want to avoid cpu starvation
 cpu_count = sc.defaultParallelism * 2 # // 0.95  # 6 if os.cpu_count() > 6 else os.cpu_count() - 1
@@ -72,6 +68,7 @@ work_jsons = [
     {"catalog": "impetus", "name": "STG_TMP.STG_TMP_COC_VINS", "pii": False},
     {"catalog": "impetus", "name": "STG.STG_EMOT_BTNCDHDR", "pii": True},
     {
+        "catalog": "impetus",
         "name": "STG.STG_EMOT_BTNPPLNH",
         "pii": False,
         "query_type": "query",
