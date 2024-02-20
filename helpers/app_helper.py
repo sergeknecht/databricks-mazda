@@ -2,8 +2,8 @@ from helpers.db_helper_delta import create_table, get_or_create_schema
 from helpers.dbx_init import spark
 from helpers.logger_helper import CATALOG, SCHEMA, TABLE_APPLICATION
 
-def init(scope):
 
+def init(scope):
     get_or_create_schema(CATALOG, SCHEMA)
     create_table(CATALOG, SCHEMA, TABLE_APPLICATION.format(scope=scope), spark.createDataFrame([]), overwrite=False)
 

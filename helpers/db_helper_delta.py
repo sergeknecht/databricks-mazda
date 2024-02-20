@@ -1,12 +1,5 @@
-# Databricks notebook source
-# MAGIC %md
-# MAGIC # General Delta Related Functions
-
-# COMMAND ----------
-
 from helpers.dbx_init import spark
 
-# COMMAND ----------
 
 def schema_exists(catalog: str, schema_name: str):
     query = spark.sql(
@@ -20,8 +13,6 @@ def schema_exists(catalog: str, schema_name: str):
     return query.count() > 0
 
 
-# COMMAND ----------
-
 def table_exists(catalog: str, schema: str, table_name: str):
     query = spark.sql(
         f"""
@@ -32,8 +23,6 @@ def table_exists(catalog: str, schema: str, table_name: str):
     )
     return query.count() > 0
 
-
-# COMMAND ----------
 
 def get_or_create_schema(catalog: str, schema_name: str):
     if not schema_exists(catalog, schema_name):
