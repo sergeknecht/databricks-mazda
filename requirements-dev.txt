@@ -1,4 +1,4 @@
-databricks-sdk[notebook]>=0.13.0
+databricks-sdk[notebook]>=0.19.0
 databricks_connect>=14.1.0
 pre-commit>=3.6.1
-pytest>=8.0.0
+pytest>=8.0.1
