@@ -22,6 +22,7 @@ from helpers.db_helper import (
     table_exists,
 )
 from helpers.db_helper_oracle_sql import sql_pk_statement
+from helpers.logger_helper import log_to_delta_table
 from helpers.status_helper import create_status
 
 # COMMAND ----------
@@ -80,6 +81,7 @@ if ("drop" in actions and p_mode != "append") or p_mode == "drop":
     spark.sql(f"DROP TABLE IF EXISTS {p_fqn}")
     if p_mode == "drop":
         result = create_status(
+            scope=p_scope,
             status_code=200,
             status_message="OK: table dropped",
         )
@@ -88,6 +90,7 @@ if ("drop" in actions and p_mode != "append") or p_mode == "drop":
         time_duration = int(end_time - start_time)
         result["time_duration"] = time_duration
         dbutils.notebook.exit(json.dumps(result))
+        log_to_delta_table(result)
 
 # dbutils.notebook.exit(json.dumps(work_item))
 
@@ -147,6 +150,7 @@ class DelayedResultExtract:
 
             if df.count() == 0:
                 result = create_status(
+                    scope=p_scope,
                     status_code=204,
                     status_message=f"NO_CONTENT: {self.fqn} resultset empty",
                 )
@@ -174,7 +178,9 @@ class DelayedResultExtract:
                     for curr_sql in sqls:
                         spark.sql(curr_sql)
 
-            result = create_status(status_code=201, status_message=f"CREATED: {self.fqn}")
+            result = create_status(
+                scope=p_scope, status_code=201, status_message=f"CREATED: {self.fqn}"
+            )
             result["fqn"] = self.fqn
             result["row_count"] = df.count()
             self.result = result
@@ -202,15 +208,19 @@ class DelayedResultExtract:
             e, traceback = self.exc_info
 
             result = create_status(
-                status_code=500, status_message="INTERNAL_SERVER_ERROR:" + e
+                scope=p_scope,
+                status_code=500,
+                status_message="INTERNAL_SERVER_ERROR:" + e,
             )
             result["fqn"] = self.fqn
             result["traceback"] = traceback
             result["time_duration"] = time_duration
+            log_to_delta_table(result)
             return json.dumps(result)
 
         self.result["time_duration"] = time_duration
         logger.info(f"result: {self.result}")
+        log_to_delta_table(result)
         return json.dumps(self.result)
 
 
@@ -229,10 +239,12 @@ try:
         # table should not yet exist, if it does we will skip this and return to caller
         if table_exists(p_catalog_name, p_schema_name, p_table_name):
             result = create_status(
+                scope=p_scope,
                 status_code=208,
                 status_message="ALREADY_REPORTED: table already exists - skipping",
             )
             result["fqn"] = p_fqn
+            log_to_delta_table(result)
             dbutils.notebook.exit(json.dumps(result))
 
         # all is good. Let's create the catalog and schema the table will be in
@@ -251,17 +263,21 @@ try:
         while not table_exists(p_catalog_name, p_schema_name, p_table_name):
             time.sleep(60)
             counter += 1
-            if counter > 30: # TODO: Improve: longer is theoretically not possible because we also have a timeout from calling notebook
+            if (
+                counter > 30
+            ):  # TODO: Improve: longer is theoretically not possible because we also have a timeout from calling notebook
                 break
 
         # because we are in append mode we need to check if the table exists
         if not table_exists(p_catalog_name, p_schema_name, p_table_name):
             result = create_status(
+                scope=p_scope,
                 status_code=500,
                 status_message="INTERNAL_SERVER_ERROR: Append table does not yet exists",
             )
             # 208: already reported
             result["fqn"] = p_fqn
+            log_to_delta_table(result)
             dbutils.notebook.exit(json.dumps(result))
 
 except AnalysisException as e:
@@ -277,11 +293,14 @@ except AnalysisException as e:
         status_message = status_message.split("JVM stacktrace:")[0]
 
     result = create_status(
+        scope=p_scope,
         status_code=500,
         status_message="INTERNAL_SERVER_ERROR: table_exists: {status_message}",
     )
     result["fqn"] = p_fqn
     result["stack_trace"] = stack_trace
+
+    log_to_delta_table(result)
 
     dbutils.notebook.exit(json.dumps(result))
 
