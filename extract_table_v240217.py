@@ -12,6 +12,7 @@ import traceback
 from pprint import pformat
 
 from pyspark.sql.utils import AnalysisException
+from pyspark.errors import PySparkException
 
 from helpers.db_helper import (
     get_bounds__by_rownum,
@@ -30,10 +31,10 @@ from helpers.status_helper import create_status
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-logger.warning("This is a warning message")
-logger.error("This is an error message")
-logger.debug("About to do something")
-logger.info("This is an informational message")
+# logger.warning("This is a warning message")
+# logger.error("This is an error message")
+# logger.debug("About to do something")
+# logger.info("This is an informational message")
 
 # COMMAND ----------
 
@@ -61,44 +62,48 @@ print(p_scope)
 print(p_action)
 print(p_mode)
 
+start_time = time.time()
+
 # COMMAND ----------
 
 db_conn_props: dict = get_connection_properties__by_key(p_scope, p_db_key)
+
+# merge p_work_json with db_conn_props (=overwrite)
 work_item = {
     **p_work_json,
     "db_conn_props": db_conn_props,
-}  # merge p_work_json with db_conn_props (=overwrite)
-
-# print(db_conn_props['url'])
+}
 
 # COMMAND ----------
 
 actions = p_action.split("__")
 
 # drop the table if it exists
-if ("drop" in actions and p_mode != "append") or p_mode == "drop":
+# if action is only drop than we don't want append to run. drop and quit
+if ("drop" in actions and p_mode != "append") or p_mode == "drop" or p_action == "drop": 
     # in case we are appending we might need to drop table first
-    spark.sql(f"DROP TABLE IF EXISTS {p_fqn}")
-    if p_mode == "drop":
+    if table_exists(p_catalog_name, p_schema_name, p_table_name):
+        sql_text = f"DROP TABLE IF EXISTS {p_fqn}"
+        spark.sql(sql_text)
         result = create_status(
             scope=p_scope,
             status_code=200,
             status_message="OK: table dropped",
+            status_ctx=work_item
         )
-        result["fqn"] = p_fqn
         end_time = time.time()
         time_duration = int(end_time - start_time)
         result["time_duration"] = time_duration
-        dbutils.notebook.exit(json.dumps(result))
         log_to_delta_table(result)
 
-# dbutils.notebook.exit(json.dumps(work_item))
-
+    if p_mode == "drop" or p_action == "drop":
+        # drop was the only thing to do
+        dbutils.notebook.exit("{}")
+        
 # bounds = get_bounds__by_rownum(db_dict=db_conn_props, table_name=f'{p_schema_name_source}.{p_table_name_source}')
 # display(bounds)
 
 # COMMAND ----------
-
 
 class DelayedResultExtract:
     def __init__(self, work_item: dict):
@@ -148,23 +153,45 @@ class DelayedResultExtract:
                 },
             )
 
-            if df.count() == 0:
-                result = create_status(
+            # if df.count() == 0:
+            #     result = create_status(
+            #         scope=p_scope,
+            #         status_code=204,
+            #         status_message=f"NO_CONTENT: {self.fqn} resultset empty",
+            #         status_ctx=work_item
+            #     )
+            #     result["row_count"] = 0
+            #     result["work_item"] = {
+            #         **self.work_item,
+            #         "table_sql": f"{self.schema_name_source}.{self.table_name_source}",
+            #     }
+            #     self.result = result
+            #     return
+
+            try:
+                df.write.format("delta").mode(self.mode).saveAsTable(self.fqn)
+            # catch empty datasets
+            except PySparkException as e:
+                print("we caught PySparkException")
+                logger.error(e.getErrorClass())
+                # logger.exception(e)
+                if e.getErrorClass() == "CANNOT_INFER_EMPTY_SCHEMA":
+                    logger.warning("CANNOT_INFER_EMPTY_SCHEMA: DataFrame empty")
+                    result = create_status(
                     scope=p_scope,
                     status_code=204,
                     status_message=f"NO_CONTENT: {self.fqn} resultset empty",
-                )
-                result["fqn"] = self.fqn
-                result["row_count"] = 0
-                result["work_item"] = {
-                    **self.work_item,
-                    "table_sql": f"{self.schema_name_source}.{self.table_name_source}",
-                }
-                self.result = result
-                return
-
-            df.write.format("delta").mode(self.mode).saveAsTable(self.fqn)
-
+                    status_ctx=work_item
+                    )
+                    result["row_count"] = 0
+                    result["work_item"] = {
+                        **self.work_item,
+                        "table_sql": f"{self.schema_name_source}.{self.table_name_source}",
+                    }
+                    self.result = result
+                    return
+                raise
+            
             # replicate the primary keys and indexes we found in the source table
             if self.mode == "overwrite":
                 for row_pk in df_pk.collect():
@@ -179,9 +206,9 @@ class DelayedResultExtract:
                         spark.sql(curr_sql)
 
             result = create_status(
-                scope=p_scope, status_code=201, status_message=f"CREATED: {self.fqn}"
+                scope=p_scope, status_code=201, status_message=f"CREATED: {self.fqn}",
+                status_ctx=work_item
             )
-            result["fqn"] = self.fqn
             result["row_count"] = df.count()
             self.result = result
         except Exception:
@@ -211,8 +238,8 @@ class DelayedResultExtract:
                 scope=p_scope,
                 status_code=500,
                 status_message="INTERNAL_SERVER_ERROR:" + e,
+                status_ctx=work_item
             )
-            result["fqn"] = self.fqn
             result["traceback"] = traceback
             result["time_duration"] = time_duration
             log_to_delta_table(result)
@@ -220,7 +247,7 @@ class DelayedResultExtract:
 
         self.result["time_duration"] = time_duration
         logger.info(f"result: {self.result}")
-        log_to_delta_table(result)
+        log_to_delta_table(self.result)
         return json.dumps(self.result)
 
 
@@ -242,8 +269,9 @@ try:
                 scope=p_scope,
                 status_code=208,
                 status_message="ALREADY_REPORTED: table already exists - skipping",
+                status_ctx=work_item
             )
-            result["fqn"] = p_fqn
+
             log_to_delta_table(result)
             dbutils.notebook.exit(json.dumps(result))
 
@@ -274,13 +302,13 @@ try:
                 scope=p_scope,
                 status_code=500,
                 status_message="INTERNAL_SERVER_ERROR: Append table does not yet exists",
+                status_ctx=work_item
             )
-            # 208: already reported
-            result["fqn"] = p_fqn
+
             log_to_delta_table(result)
             dbutils.notebook.exit(json.dumps(result))
 
-except AnalysisException as e:
+except (Exception, AnalysisException) as e:
     exc_type, exc_value, exc_tb = sys.exc_info()
     tb = traceback.TracebackException(exc_type, exc_value, exc_tb)
     stack_trace = traceback.format_exc(limit=2, chain=True)
@@ -296,8 +324,8 @@ except AnalysisException as e:
         scope=p_scope,
         status_code=500,
         status_message="INTERNAL_SERVER_ERROR: table_exists: {status_message}",
+        status_ctx=work_item
     )
-    result["fqn"] = p_fqn
     result["stack_trace"] = stack_trace
 
     log_to_delta_table(result)
@@ -306,10 +334,34 @@ except AnalysisException as e:
 
 # COMMAND ----------
 
-# try:
-dr = DelayedResultExtract(work_item=work_item)
-dr.do_work()
+try:
+    dr = DelayedResultExtract(work_item=work_item)
+    dr.do_work()
+    result = dr.get_result()
+except (Exception, AnalysisException) as e:
+    exc_type, exc_value, exc_tb = sys.exc_info()
+    tb = traceback.TracebackException(exc_type, exc_value, exc_tb)
+    stack_trace = traceback.format_exc(limit=2, chain=True)
+    status_message = "".join(tb.format_exception_only())
+
+    # remove the JVM stacktrace - to focus on python errors
+    if "JVM stacktrace" in stack_trace:
+        stack_trace = stack_trace.split("JVM stacktrace:")[0]
+    if "JVM stacktrace" in status_message:
+        status_message = status_message.split("JVM stacktrace:")[0]
+
+    result = create_status(
+        scope=p_scope,
+        status_code=500,
+        status_message="INTERNAL_SERVER_ERROR: table_exists: {status_message}",
+        status_ctx=work_item
+    )
+    result["stack_trace"] = stack_trace
+
+    log_to_delta_table(result)
+
+    dbutils.notebook.exit(json.dumps(result))
 
 # COMMAND ----------
 
-dbutils.notebook.exit(dr.get_result())
+dbutils.notebook.exit(json.dumps(result))

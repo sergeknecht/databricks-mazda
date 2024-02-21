@@ -5,14 +5,21 @@
 
 # COMMAND ----------
 
-# MAGIC %load_ext autoreload
-# MAGIC %autoreload 2
+# %load_ext autoreload
+# %autoreload 2
+
+# COMMAND ----------
+
+dir(dbutils.notebook.entry_point.getDbutils().notebook().getContext())
 
 # COMMAND ----------
 
 import logging
 import json
 import time
+import datetime
+import pprint as pp
+from helpers.app_helper import init
 
 # COMMAND ----------
 
@@ -28,12 +35,14 @@ logger.setLevel(logging.INFO)
 # COMMAND ----------
 
 # JOB PARAMETERS
-jp_action = 'drop__create' or 'create' or 'drop'
+jp_action = 'drop' or 'create' or 'drop__create' or 'create' or 'drop'
 jp_scope = 'ACC' or 'PRD' or 'TST' or 'DEV'
 p_db_key = 'DWH_BI1__500000' or 'DWH_BI1__250000' or 'DWH_BI1__100000' or 'DWH_BI1'
+run_ts = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
+run_name = dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get()
 
 # TODO: minus 1 ? because have not yet figured out how single nodes handle this number, and we want to avoid cpu starvation
-cpu_count = sc.defaultParallelism * 2 # // 0.95  # 6 if os.cpu_count() > 6 else os.cpu_count() - 1
+cpu_count = sc.defaultParallelism  # // 0.95  # 6 if os.cpu_count() > 6 else os.cpu_count() - 1
 print(cpu_count)
 
 timeout_sec = 3600
@@ -47,7 +56,39 @@ start_time = time.time()
 
 # COMMAND ----------
 
+result = init(jp_scope)
+display(result)
+
+# COMMAND ----------
+
+# from helpers.logger_helper import CATALOG, SCHEMA, TABLE_APPLICATION, FQN
+# # df=spark.createDataFrame([result])
+# # df.write.format("delta").partitionBy("log_dt").mode("append").option("mergeSchema", "true").saveAsTable(FQN.format(scope=jp_scope))
+
+# # test what will happen when target does not exist and we have no data (= no schema)
+
+# from pyspark.errors import PySparkException
+# try:
+#     df=spark.createDataFrame([])
+#     df.write.format("delta").partitionBy("log_dt").mode("append").option("mergeSchema", "true").saveAsTable(FQN.format(scope=jp_scope))
+# except PySparkException as e:
+#     print("we caught PySparkException")
+#     logger.error(e.getErrorClass())
+#     # logger.exception(e)
+#     if e.getErrorClass() == "CANNOT_INFER_EMPTY_SCHEMA":
+#         logger.warning("CANNOT_INFER_EMPTY_SCHEMA: DataFrame empty")
+# except Exception as e:
+#     print("we caught Exception")
+
+# COMMAND ----------
+
 work_jsons = [
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPLNH",
+        "pii": False,
+        "mode": "drop",
+    },
     {"catalog": "impetus", "name": "STG.STG_LEM_NO_WORKING_DAYS", "pii": False},
     {"catalog": "impetus", "name": "STG.STG_LEM_COUNTRIES", "pii": False},
     {"catalog": "impetus", "name": "STG.IOT_STG_DLR_DIST_INTERFACE", "pii": False},
@@ -1135,9 +1176,9 @@ for wi in work_jsons:
 
 # COMMAND ----------
 
-work_jsons = [
-    {"catalog": "impetus", "name": "STG.STG_LEM_NO_WORKING_DAYS", "pii": False},
-]
+# work_jsons = [
+#     {"catalog": "impetus", "name": "STG.STG_LEM_NO_WORKING_DAYS", "pii": False},
+# ]
 
 # COMMAND ----------
 
@@ -1183,6 +1224,8 @@ work_items = [
         'query_type': work_json.get('query_type', 'dbtable'),
         'query_sql': work_json.get('query_sql', None),
         'mode': work_json.get('mode', 'overwrite'),
+        "run_ts": run_ts,
+        "run_name": run_name,
     }
     for work_json in work_jsons
 ]
@@ -1203,7 +1246,7 @@ def load_table(work_item):
     p_schema_name_source = work_item['schema_name_source']
     p_table_name_source = work_item['table_name_source']
     # print(f'Extracting {p_schema_name_source}.{p_table_name_source}')
-    logger.info(f'Extracting {p_schema_name_source}.{p_table_name_source}')
+    logger.info(f'Processing {p_schema_name_source}.{p_table_name_source}')
     # Run the extract_table notebook
     result = dbutils.notebook.run(
         'extract_table_v240217',
@@ -1217,6 +1260,7 @@ def load_table(work_item):
     # parse string to json
     result = json.loads(result)
     if result['status_code'] >= 500:
+        logger.error("called from load_table")
         raise Exception(result['status_message'])
     end_time = time.time()
     time_duration = int(end_time - start_time)
@@ -1229,7 +1273,7 @@ from threading import Thread
 
 q = Queue()
 worker_count = cpu_count
-errors = []
+# errors = []
 
 def run_tasks(function, q):
     while not q.empty():
@@ -1239,8 +1283,14 @@ def run_tasks(function, q):
         except Exception as e:
             # fqn = value['fqn']
             # msg = f"ERROR: {fqn} failed with {str(e)}"
-            logger.exception(e)
-            errors[value] = e
+            logger.error(f"called from run task: {value['fqn']}")
+            logger.error(e.errmsg)
+            # logger.error(json.dumps(value))
+            # logger.error(json.dumps(dir(e)))
+            value["status_code"] = 500
+            results.append(json.dumps(value))
+            # logger.exception(e)
+            # errors[value] = e
             # print(msg) # log to logging
         finally:
             q.task_done()
@@ -1257,16 +1307,16 @@ for i in range(worker_count):
 
 q.join()
 
-end_time = time.time()
-execution_time = end_time - start_time
+# end_time = time.time()
+# execution_time = end_time - start_time
 
-logger.info(f"Execution time: {execution_time} seconds")
+# logger.info(f"Execution time: {execution_time} seconds")
 
-if len(errors)  == 0:
-    logger.info("All tasks completed successfully")
-else:
-    msg = f"Errors during tasks {list(errors.keys())} -> \n {str(errors)}"
-    raise Exception(msg)
+# if len(errors)  == 0:
+#     logger.info("All tasks completed successfully")
+# else:
+#     msg = f"Errors during tasks {list(errors.keys())} -> \n {str(errors)}"
+#     raise Exception(msg)
 
 # COMMAND ----------
 
@@ -1279,12 +1329,10 @@ print(f"duration notebook seconds: {time_duration}")
 error_results = []
 for entry in results:
     entry = json.loads(entry)
-    if entry['status_code'] >= 300:
+    if entry.get('status_code', -1) >= 300:
         error_results.append(entry)
-
-    import pprint as pp
-
-    pp.pprint(entry)
+    if entry:
+        pp.pprint(entry)
 
 # COMMAND ----------
 
@@ -1294,4 +1342,4 @@ if error_results:
 
 # COMMAND ----------
 
-dbutils.notebook.exit("[]")
+dbutils.notebook.exit("{}")
