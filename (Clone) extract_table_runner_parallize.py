@@ -23,7 +23,7 @@ from helpers.db_helper_delta import table_exists
 # spark.sparkContext.setLogLevel("WARN")
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.WARNING)
 
 # COMMAND ----------
 
@@ -33,17 +33,14 @@ jp_scope = 'ACC' or 'PRD' or 'TST' or 'DEV'
 p_db_key = 'DWH_BI1__500000' or 'DWH_BI1__250000' or 'DWH_BI1__100000' or 'DWH_BI1'
 run_ts = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
 run_name = dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get()
-
-# TODO: minus 1 ? because have not yet figured out how single nodes handle this number, and we want to avoid cpu starvation
-cpu_count = sc.defaultParallelism  # // 0.95  # 6 if os.cpu_count() > 6 else os.cpu_count() - 1
-print(cpu_count)
-
 timeout_sec = 3600
+cpu_count = int(sc.defaultParallelism  * 0.9)
+print(cpu_count)
 
 import logging
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.WARNING)
 
 start_time = time.time()
 
@@ -76,12 +73,12 @@ display(result)
 # COMMAND ----------
 
 work_jsons = [
-    {
-        "catalog": "impetus",
-        "name": "STG.STG_EMOT_BTNPPLNH",
-        "pii": False,
-        "mode": "drop",
-    },
+    # {
+    #     "catalog": "impetus",
+    #     "name": "STG.STG_EMOT_BTNPPLNH",
+    #     "pii": False,
+    #     "mode": "drop",
+    # },
     {"catalog": "impetus", "name": "STG.STG_LEM_NO_WORKING_DAYS", "pii": False},
     {"catalog": "impetus", "name": "STG.STG_LEM_COUNTRIES", "pii": False},
     {"catalog": "impetus", "name": "STG.IOT_STG_DLR_DIST_INTERFACE", "pii": False},
@@ -101,14 +98,14 @@ work_jsons = [
     {"catalog": "impetus", "name": "STG.STG_LEM_VEHICLE_STATE_TYPES", "pii": False},
     {"catalog": "impetus", "name": "STG_TMP.STG_TMP_COC_VINS", "pii": False},
     {"catalog": "impetus", "name": "STG.STG_EMOT_BTNCDHDR", "pii": True},
-    {
-        "catalog": "impetus",
-        "name": "STG.STG_EMOT_BTNPPLNH",
-        "pii": False,
-        "query_type": "query",
-        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2024-01-01' AND CREATE_TS <= '2024-12-31'",
-        # "mode": "append",
-    },
+    # {
+    #     "catalog": "impetus",
+    #     "name": "STG.STG_EMOT_BTNPPLNH",
+    #     "pii": False,
+    #     "query_type": "query",
+    #     "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2024-01-01' AND CREATE_TS <= '2024-12-31'",
+    #     # "mode": "append",
+    # },
     {"catalog": "impetus", "name": "STG.STG_EPD_CUSTCLASSIFICATION", "pii": False},
     {"catalog": "impetus", "name": "STG.STG_EPD_CSTCLSSIFICATIONASSIGN", "pii": False},
     {"catalog": "impetus", "name": "STG.STG_EPD_CUSTASSIGN", "pii": False},
@@ -196,70 +193,70 @@ work_jsons = [
     {"catalog": "impetus", "name": "STG.STG_LEM_LEAD_TIME_TARGETS", "pii": False},
     {"catalog": "impetus", "name": "STG.STG_VIN_DSR", "pii": False},
     {"catalog": "impetus", "name": "STG.STG_EMOT_BTNPROP_XREF_REL", "pii": False},
-    {"catalog": "impetus", "name": "STG.STG_EMOT_BTNPROP_XREF", "pii": False},
-       {"catalog": "impetus",
-        "name": "STG.STG_EMOT_BTNPPLNH",
-        "pii": False,
-        "query_type": "query",
-        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2023-01-01' AND CREATE_TS <= '2023-12-31'",
-        "mode": "append",
-    },
-    {"catalog": "impetus",
-        "name": "STG.STG_EMOT_BTNPPLNH",
-        "pii": False,
-        "query_type": "query",
-        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2022-01-01' AND CREATE_TS <= '2022-12-31'",
-        "mode": "append",
-    },
-    {"catalog": "impetus",
-        "name": "STG.STG_EMOT_BTNPPLNH",
-        "pii": False,
-        "query_type": "query",
-        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2021-01-01' AND CREATE_TS <= '2021-12-31'",
-        "mode": "append",
-    },
-    {"catalog": "impetus",
-        "name": "STG.STG_EMOT_BTNPPLNH",
-        "pii": False,
-        "query_type": "query",
-        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2020-01-01' AND CREATE_TS <= '2020-12-31'",
-        "mode": "append",
-    },
-    {"catalog": "impetus",
-        "name": "STG.STG_EMOT_BTNPPLNH",
-        "pii": False,
-        "query_type": "query",
-        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2019-01-01' AND CREATE_TS <= '2019-12-31'",
-        "mode": "append",
-    },
-    {"catalog": "impetus",
-        "name": "STG.STG_EMOT_BTNPPLNH",
-        "pii": False,
-        "query_type": "query",
-        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2018-01-01' AND CREATE_TS <= '2018-12-31'",
-        "mode": "append",
-    },
-    {"catalog": "impetus",
-        "name": "STG.STG_EMOT_BTNPPLNH",
-        "pii": False,
-        "query_type": "query",
-        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2017-01-01' AND CREATE_TS <= '2017-12-31'",
-        "mode": "append",
-    },
-    {"catalog": "impetus",
-        "name": "STG.STG_EMOT_BTNPPLNH",
-        "pii": False,
-        "query_type": "query",
-        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2016-01-01' AND CREATE_TS <= '2016-12-31'",
-        "mode": "append",
-    },
-    {"catalog": "impetus",
-        "name": "STG.STG_EMOT_BTNPPLNH",
-        "pii": False,
-        "query_type": "query",
-        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2015-01-01' AND CREATE_TS <= '2015-12-31'",
-        "mode": "append",
-    },
+    # {"catalog": "impetus", "name": "STG.STG_EMOT_BTNPROP_XREF", "pii": False},
+    #    {"catalog": "impetus",
+    #     "name": "STG.STG_EMOT_BTNPPLNH",
+    #     "pii": False,
+    #     "query_type": "query",
+    #     "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2023-01-01' AND CREATE_TS <= '2023-12-31'",
+    #     "mode": "append",
+    # },
+    # {"catalog": "impetus",
+    #     "name": "STG.STG_EMOT_BTNPPLNH",
+    #     "pii": False,
+    #     "query_type": "query",
+    #     "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2022-01-01' AND CREATE_TS <= '2022-12-31'",
+    #     "mode": "append",
+    # },
+    # {"catalog": "impetus",
+    #     "name": "STG.STG_EMOT_BTNPPLNH",
+    #     "pii": False,
+    #     "query_type": "query",
+    #     "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2021-01-01' AND CREATE_TS <= '2021-12-31'",
+    #     "mode": "append",
+    # },
+    # {"catalog": "impetus",
+    #     "name": "STG.STG_EMOT_BTNPPLNH",
+    #     "pii": False,
+    #     "query_type": "query",
+    #     "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2020-01-01' AND CREATE_TS <= '2020-12-31'",
+    #     "mode": "append",
+    # },
+    # {"catalog": "impetus",
+    #     "name": "STG.STG_EMOT_BTNPPLNH",
+    #     "pii": False,
+    #     "query_type": "query",
+    #     "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2019-01-01' AND CREATE_TS <= '2019-12-31'",
+    #     "mode": "append",
+    # },
+    # {"catalog": "impetus",
+    #     "name": "STG.STG_EMOT_BTNPPLNH",
+    #     "pii": False,
+    #     "query_type": "query",
+    #     "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2018-01-01' AND CREATE_TS <= '2018-12-31'",
+    #     "mode": "append",
+    # },
+    # {"catalog": "impetus",
+    #     "name": "STG.STG_EMOT_BTNPPLNH",
+    #     "pii": False,
+    #     "query_type": "query",
+    #     "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2017-01-01' AND CREATE_TS <= '2017-12-31'",
+    #     "mode": "append",
+    # },
+    # {"catalog": "impetus",
+    #     "name": "STG.STG_EMOT_BTNPPLNH",
+    #     "pii": False,
+    #     "query_type": "query",
+    #     "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2016-01-01' AND CREATE_TS <= '2016-12-31'",
+    #     "mode": "append",
+    # },
+    # {"catalog": "impetus",
+    #     "name": "STG.STG_EMOT_BTNPPLNH",
+    #     "pii": False,
+    #     "query_type": "query",
+    #     "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2015-01-01' AND CREATE_TS <= '2015-12-31'",
+    #     "mode": "append",
+    # },
     {"catalog": "impetus_target", "name": "STG.IOT_STG_LEM_NO_WORKING_DAYS", "pii": False},
     {"catalog": "impetus_target", "name": "STG.IOT_STG_LEM_NO_WORKING_DAYS_TP", "pii": False},
     {"catalog": "impetus_target", "name": "STG.IOT_STG_DSR_DLR_DIST_LKP", "pii": False},
@@ -1169,10 +1166,6 @@ for wi in work_jsons:
 
 # COMMAND ----------
 
-# work_jsons = [work_jsons[0]]
-
-# COMMAND ----------
-
 def get_schema_name_source(x):
     schema = x["name"].split(".")[0]
     if schema == 'STAGING':
@@ -1187,13 +1180,8 @@ def get_schema_name_source(x):
         return schema
     else:
         return schema.lower()
-       # raise Exception(f'Unknown schema: {x}')
 
 get_table_name_source = lambda x: x['name'].split('.')[1]
-
-# def get_catalog_name_source(work_json):
-#     catalog_name = work_json.get('catalog', 'impetus')
-#     return x.get('catalog', 'impetus')
 
 work_items = [
     {
@@ -1225,21 +1213,24 @@ work_items = [
     wi | {"fqn": f"{wi['catalog_name']}.{wi['schema_name']}.{wi['table_name']}"}
     for wi in work_items
 ]
-
-work_items
+print(len(work_items))
 
 # COMMAND ----------
 
-print(len(work_items))
 def is_unfinished_task(wi):
     if wi["action"] == "create" and wi["mode"] == "overwrite" and wi["query_type"] == "dbtable":
         return not table_exists(wi["catalog_name"], wi["schema_name"], wi["table_name"])
     else:
-        return true
+        return True
+
 work_items = [
-    wi for wi in work_items
+    wi for wi in work_items if is_unfinished_task(wi)
 ]
 print(len(work_items))
+
+# COMMAND ----------
+
+display(work_items)
 
 # COMMAND ----------
 
@@ -1277,7 +1268,6 @@ from threading import Thread
 
 q = Queue()
 worker_count = cpu_count
-# errors = []
 
 def run_tasks(function, q):
     while not q.empty():
@@ -1285,17 +1275,10 @@ def run_tasks(function, q):
             value = q.get()
             results.append(function(value))
         except Exception as e:
-            # fqn = value['fqn']
-            # msg = f"ERROR: {fqn} failed with {str(e)}"
             logger.error(f"called from run task: {value['fqn']}")
             logger.error(e.errmsg)
-            # logger.error(json.dumps(value))
-            # logger.error(json.dumps(dir(e)))
             value["status_code"] = 500
             results.append(json.dumps(value))
-            # logger.exception(e)
-            # errors[value] = e
-            # print(msg) # log to logging
         finally:
             q.task_done()
 
@@ -1310,17 +1293,6 @@ for i in range(worker_count):
     t.start()
 
 q.join()
-
-# end_time = time.time()
-# execution_time = end_time - start_time
-
-# logger.info(f"Execution time: {execution_time} seconds")
-
-# if len(errors)  == 0:
-#     logger.info("All tasks completed successfully")
-# else:
-#     msg = f"Errors during tasks {list(errors.keys())} -> \n {str(errors)}"
-#     raise Exception(msg)
 
 # COMMAND ----------
 

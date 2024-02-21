@@ -3,8 +3,9 @@ from databricks.sdk.runtime import *
 
 
 def create_status(scope:str, status_message: str = '', status_code: int = 200, status_ctx : dict = None) -> dict:
-    status_ts = datetime.datetime.now(tz=datetime.timezone.utc) # .isoformat()
-    status_dt = status_ts.date()
+    status_ts = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0) # .isoformat()
+    status_dt = status_ts.date().isoformat()
+    status_ts = status_ts.isoformat()
     ctx = dbutils.notebook.entry_point.getDbutils().notebook().getContext()
     result = {
         'status_code': status_code,
@@ -16,7 +17,6 @@ def create_status(scope:str, status_message: str = '', status_code: int = 200, s
         "user_name":  ctx.userName().get() if ctx.userName() else None,
         "nb_id":  ctx.notebookId().get() if ctx.notebookId() else None,
         "nb_path":  ctx.notebookPath().get() if ctx.notebookPath() else None,
-        "cmd_run_id":  ctx.commandRunId().get() if ctx.commandRunId() else None,
         "cluster_id":  ctx.clusterId().get() if ctx.clusterId() else None,
     }
 

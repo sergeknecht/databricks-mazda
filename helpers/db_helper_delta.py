@@ -32,6 +32,7 @@ def get_or_create_schema(catalog: str, schema_name: str):
 
 
 def create_or_append_table(catalog: str, schema: str, table_name: str, df, partition_cols: list = None, overwrite: bool = False):
+    mode = "overwrite"
     if table_exists(catalog, schema, table_name):
         if overwrite:
             spark.sql(f"DROP TABLE IF EXISTS {catalog}.{schema}.{table_name}")

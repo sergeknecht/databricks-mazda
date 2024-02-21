@@ -31,10 +31,6 @@ from helpers.status_helper import create_status
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-# logger.warning("This is a warning message")
-# logger.error("This is an error message")
-# logger.debug("About to do something")
-# logger.info("This is an informational message")
 
 # COMMAND ----------
 
@@ -253,12 +249,6 @@ class DelayedResultExtract:
 
 # COMMAND ----------
 
-# if "create" in actions:
-#     # table_exists requires the catalog to exist, so let's create it first
-#     spark.sql(
-#         f"CREATE CATALOG IF NOT EXISTS {p_catalog_name} WITH DBPROPERTIES (scope='{p_scope}')"
-#     )
-
 try:
     # we will create the target and the work item is not append mode
 
@@ -323,7 +313,7 @@ except (Exception, AnalysisException) as e:
     result = create_status(
         scope=p_scope,
         status_code=500,
-        status_message="INTERNAL_SERVER_ERROR: table_exists: {status_message}",
+        status_message=f"INTERNAL_SERVER_ERROR: table_exists in prepare: {status_message}",
         status_ctx=work_item
     )
     result["stack_trace"] = stack_trace
@@ -353,7 +343,7 @@ except (Exception, AnalysisException) as e:
     result = create_status(
         scope=p_scope,
         status_code=500,
-        status_message="INTERNAL_SERVER_ERROR: table_exists: {status_message}",
+        status_message=f"INTERNAL_SERVER_ERROR: table_exists in DelayedResultExtract: {status_message}",
         status_ctx=work_item
     )
     result["stack_trace"] = stack_trace
