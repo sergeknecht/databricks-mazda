@@ -68,17 +68,7 @@ work_item = p_work_json | {
 }
 # merge p_work_json with db_conn_props (=overwrite)
 
-# print(db_conn_props["url"])
-
 # COMMAND ----------
-
-# dbutils.notebook.exit(json.dumps(work_item))
-
-# bounds = get_bounds__by_rownum(db_dict=db_conn_props, table_name=f"{p_schema_name_source}.{p_table_name_source}")
-# display(bounds)
-
-# COMMAND ----------
-
 
 class DelayedResult:
     def __init__(self, work_item: dict):
@@ -205,13 +195,6 @@ class DelayedResult:
         self.result['time_duration'] = time_duration
         return json.dumps(self.result)
 
-
-# COMMAND ----------
-
-
-# dr = DelayedResult()
-# dr.test_exception()
-# dbutils.notebook.exit(dr.get_result())
 
 # COMMAND ----------
 

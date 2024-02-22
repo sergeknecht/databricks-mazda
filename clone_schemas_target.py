@@ -14,7 +14,6 @@ from helpers.db_helper_delta import schema_exists, table_exists
 from helpers.db_helper_oracle import get_data_partitioned__by_rownum
 from helpers.db_helper_oracle_sql import sql_pk_statement
 from helpers.status_helper import create_status
-from helpers.db_helper_delta import table_exists, schema_exists
 
 # COMMAND ----------
 
@@ -105,4 +104,4 @@ for row in tables:
 
 # COMMAND ----------
 
-dbutils.notebook.exit(create_status('OK: Notebook Completed'))
+dbutils.notebook.exit(json.dumps(create_status('OK: Notebook Completed')))

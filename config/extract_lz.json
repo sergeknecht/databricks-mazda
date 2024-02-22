@@ -1,0 +1,2587 @@
+[
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_BILL.TBCBI_CODE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_BILL.TBCBI_ITEM",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_BILL.TBCBI_NONSTDVATCD",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_BILL.TBMJY_PAROKEY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_BIUT.BIFILEUPLOAD_VERSIONDESC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_BIUT.CAUSE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_BIUT.CLIENT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_BIUT.MARKET",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_BIUT.MARKETDISTRIBUTORCOUNTRY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_BIUT.MARKETMAPPING",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_BIUT.MARKETSTRUCTURE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_BIUT.MARKETTYPE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_BIUT.PICK_PACK_CHECK_RESULT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_BIUT.PICK_PACK_LOCATION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_BIUT.PICK_PACK_STATUS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_BIUT.WORKINGDAY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_COC.TBCOC_PRODUCT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_COC.TBCOC_REGEXCHG",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_COC.TBCOC_REGEXCODE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_COC.TBCOC_REGEXFIELD",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_COC.TBCOC_STATUS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_COC.TBCOC_VALUE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_CTS2.APPLICATION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_CTS2.KEY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_CTS2.LABEL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_CTS2.LANGUAGE_LOCALE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.ACCESS_LOG",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.CHECKLIST",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.CHECK_ATTACHMENT_REF",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.CHECK_LOCATION_RESULT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.CHECK_REMINDER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.CHECK_RESULT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.CHECK_RESULT_DETAIL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.DEFECT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.DSB_COUNTRY_PARAMS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.DSB_DIST_NSC_CONVERSION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.EXTERNAL_CONTRACTS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.EXT_SVC_PLANS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.EXT_SVC_PLAN_ITEMS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.MAP_UPDATES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.MV_RPTBONUS_DETAIL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.MV_RPTBONUS_DETAIL_ROLL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.MV_RPTBONUS_SUMMARY_DLR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.MV_RPTBONUS_SUMMARY_DLR_ROLL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.MV_RPTBONUS_SUMMARY_NSC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.MV_RPTBONUS_SUMMARY_NSC_ROLL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.MV_VEHICLE_WARRANTY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.NSC_DLR_CONVERSIONS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.OERSA_CONTRACTS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.OEW_CONTRACTS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.OFFERLI_ATTREF_RELATION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.OFFER_ATTREF_RELATION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.RSA_SARA_PROVIDERS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.SVC_RECORDS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.SVC_REC_ITEMS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.SVC_REC_ITEMS_ID",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.VEHICLE_MASTER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.VIN_LOCATION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.WO_TRANSMISSIONS_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.W_INVOICES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.W_INVOICES_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.W_INVOICE_ITEMS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.W_INVOICE_ITEMS_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.W_ORDERS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.W_ORDERS_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.W_ORDER_ITEMS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.W_ORDER_ITEMS_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_DSR.W_ORDER_SVC_ITEMS_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EBONUS.MV_DWH_CALCULATION_CURRENT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_ECLAIMS.CLAIM",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_ECLAIMS.CLAIM_DECISION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_ECLAIMS.EXTERNAL_ADVICE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNBOEVT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNBPM",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNCOCV",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNCRCAR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNCRINFH",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNCUSTCONTRACT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNCUSTOMER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNDEAL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNDEAL_AUDIT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNDOC_EVENTS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNDOC_EVENTS_DETAIL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNIHDR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNMUSER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNORDFORM",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNORDRQ",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNOREC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNORECH",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNORPND",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNPCST",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNPDISC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNPDSC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNPGPC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNPLNMV",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNPPLN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNPPLNH",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNPROCRESULT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNPROP_XREF",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNPROP_XREF_REL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNREG",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNREGEXDEMO",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNREGEXT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNREGFR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNREGH",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNREGSIV",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNRPRTT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EMOT.BTNVINH",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBBAS_DISASSIGN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBBAS_DISTRIBUT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBBAS_LANASSIGN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBBAS_LANGUAGE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBEPD_BASECODE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBEPD_COLASSIGN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBEPD_COLOUR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBEPD_CUSTASSIGN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBEPD_CUSTCLASSIFICATION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBEPD_CUSTCLASSIFICATIONASSIGN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBEPD_ELEASSIGN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBEPD_ELEMENT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBEPD_GVSCARLINEMODELASSIGN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBEPD_MODEL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBEPD_MSCASSIGN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBEPD_PLUFLAG",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBEPD_PLUFLAGHISTORY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPD.TBEPD_SERIES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPSS.ATTACHMENT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPSS.CHECKSHEET_TYPE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPSS.CODETYPE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPSS.IGNITIONKEY_LOG",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPSS.IMMOBILIZER_LOG",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPSS.PQI",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPSS.PQI_CVC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPSS.PQI_DTC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPSS.PQI_HISTORY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPSS.REQMASTER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPSS.REQMASTER_HISTORY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPSS.REQMASTER_PART",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPSS.REQMASTER_REQUESTOR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPSS.TC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPSS.TC_HISTORY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EPSS.TC_MODEL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EQT.BI_OFFER_EVENT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EQT.BI_OFFER_EVENT_ACCESSORY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EQT.BI_OFFER_EVENT_USED_CAR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EQT.BI_OFFER_EVENT_VEH_DISC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EQT.BI_SALES_CONTRACT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_ETAS.BTGADDRESSES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_ETAS.BTGCOMPANIES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_ETAS.BTGEMPLOYMENT_STATUS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_ETAS.BTGFUNCTIONS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_ETAS.BTGJOBROLES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_ETAS.BTGUSERFUNCTIONS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_ETAS.BTGUSERS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_ETAS.BTGUSER_DETAILS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONLEAD_DEL_EXP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACTS_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACTS_DEL_EXP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACTS_EXPORT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACTS_LIST",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACTS_RTBD_DEL_EXP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_EMAILS_EXP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_EMAIL_VEH_EXP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_FILTER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_LEADS_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_LEADS_EXP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_ORDERS_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_ORDERS_EXP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_ORDERS_LIST",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_ORD_DEL_EXP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_TCMR_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_TCMR_DEL_EXP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_TCMR_EXP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_TSC_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_TSC_DEL_EXP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_TSC_EXP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_TSC_UPD_EXP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_VEHICLES_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_VEHICLES_EXP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_VEHICLES_LIST",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONTACT_VEH_DEL_EXP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_CONVEH_DEL_EXP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.ELOQUA_MARKETS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_EXTRACT.MMUK_MMPSREG",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FILE.CEMI",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FILE.CIP_CUSTOMER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FILE.CIP_MASTER_CUSTOMER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FILE.RDC_CANCELLATIONS_DAILY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FILE.RDC_ORDER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FILE.RDC_ORDER_DAILY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FILE.RDC_PICKUP_DAILY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.ACCESSORIES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.ACCOUNTINGCATEGORY_MAPPINGS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.CARS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.CARSTATES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.CAR_CALCULATIONS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.CAR_LICENSEPLATE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.CAR_TYPES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.CURRENCIES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.DISTANCES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.DISTANCEUNITS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.INVOICES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.LICENSEPLATES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.MODELS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.NETAMOUNTS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.ONLINE_STATES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.ORDERS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.PRECARORDERS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.PRICES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.USAGES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_FMS.USAGE_TYPES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_GA.DWR_PAGE_VIEWS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_GA.MONTHLY_WEB_REPORT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_GA.MWR_CAMPAIGN_GOALS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_GA.MWR_SESSIONS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_GA.MWR_SOURCE_MEDIUM",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_GA.MWR_URL_CATEGORY_PAGE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_GA.MWR_URL_LANDING_PAGE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_GA.WEBSITE_TRACKING",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.CATEGORY_COMPOSING",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.CATEGORY_DESCRIPTION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.E_COMPONENT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.E_COMPONENTTYPE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.E_COMPONENT_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.E_DESCRIPTION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.E_DESCRIPTION_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.LEARNINGFORM_D",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.PARTICIPANT_PREBOOKING_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.PERSON",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.PERSON_COMPONENT_ASSIGNMENT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.PERSON_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.PERSON_CUSTOM",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.PORTFOLIO",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.PORTFOLIO_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.R_LOCATION_STRUCTURE_D",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.TOPIC_COMPOSING",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.TOPIC_COMPOSING_IDS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.TOPIC_DESCRIPTION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_IMC.TOPIC_ROOT_D",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.DMM_DEALER_SETTINGS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.DMM_MATCH_EXPLANATIONS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.DMM_MODEL_GROUP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.DMM_MODEL_GROUP_CARLINE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.DMM_MODEL_GROUP_TARGET_RANGE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.DMM_POS_DLR_STTNGS_MGR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.DMM_RESULT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.DMM_SANCTIONING",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.DMM_SANCTIONING_RESULT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.DMM_TDEFI",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.DMM_VIN_DATA",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.DMM_VIN_RESULT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.TBDFP_VINPAYMENT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.TBINC_CAMPAIGN_CAR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.TBINC_COND",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.TBINC_CPNTYPE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.TBINC_EMOTIVMIRROR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.TBINC_EMOTIVMIRROR_INVOICE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.TBINC_FINZINF",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.TBINC_MATCH",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.TBINC_RESULT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.TBINC_TDEFI",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_INC.TBINC_VINPAYMENT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_KRONOS.CA_ABSENCE_REQUEST",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_KRONOS.CO_EMPLOYEE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_KRONOS.CO_EMPLOYEE_SYNC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_KRONOS.CUST_MAZDA_ABSENCES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_KRONOS.CUST_MAZDA_EMPLOYEES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_KRONOS.CUST_MAZDA_PUNCHES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_KRONOS.EMPLOYEE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_KRONOS.EMPLOYEE_SYNC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_KRONOS.TM_EXCDEF",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_KRONOS.TM_EXCEPTION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_KRONOS.TM_LINK",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_KRONOS.TM_PUNCH",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_KRONOS.TM_SCHEDULE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_KRONOS.TM_TEMPLATE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_LEM.COST_DETAILS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_LEM.COST_DETAILS_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_LEM.DDN_RTDAM_AUDIT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_LEM.DDN_VEHICLE_DISTRIBUTORS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_LEM.DDN_VEHICLE_STATE_FLOW",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_LEM.MPI_INVOICES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_LEM.RTDAM_AUDIT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_LEM.VEHICLES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_LEM.VEHICLE_ACCESSORIES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_LEM.VEHICLE_DESTINATIONS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_LEM.VEHICLE_DISTRIBUTORS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_LEM.VEHICLE_ORIGINS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_LEM.VEHICLE_PROCESS_STATUSES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_LEM.VEHICLE_ROUTE_SEGMENTS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_LEM.VEHICLE_STATE_FLOW",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_LEM.VPR_SENT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_LEM.VPR_SUMMARY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_MUD.BI_DEALER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_MUD.BI_DEALER_CODE_HISTORY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_MUD.BI_DEALER_GROUP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_MUD.BI_DEALER_SERVICE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_MUD.BI_DISTRIBUTOR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_MUD.BI_INTERFACE_CODE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_MUD.BI_PARTS_DISTRIBUTOR_SERVICE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_MUD.BI_RELATION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_MUD.BI_SALESTARGET",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_MUD.BI_SALESTARGETPROPOSAL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_MUM.TUSER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_NGEPS.ALL_PART_FLAGS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_NGEPS.CLASSIFICATION_HIST",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_NGEPS.MV_CLASSIFICATION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_NGEPS.V_CAMPAIGN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_NGEPS.V_CIF_ANTWERP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_NGEPS.V_DEALER_NET",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_NGEPS.V_FOB_BRUSSELS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_NGEPS.V_FOB_JAPAN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_NGEPS.V_MASTER_RETAIL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_NGEPS.V_PART_FLAGS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_NGEPS.V_SIMULATION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_NGEPS.V_TRANSFER_CIF",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_OSB.CHANGE_LOG_FILES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_OSB.EVENT_DETAILS_FILES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_OSB.LOGIN_FILES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_OTM.IE_SHIPMENTSTATUS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_OTM.SHIPMENT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_OTM.XXSPE_SHIPMENTSTATUS_V",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSBDYTP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSCARLN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSCLAIM_HIST00",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSCLDLR_HIST00",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSCLLOG_HIST00",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSCTCRL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSDLDCH",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSDLRDT_HIST00",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSDLRGN_MUD",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSDLRGN_MUD_HIST00",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSDLRHD_HIST00",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSDLRRH",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSDLRRT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSDSILG",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSENG",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSHSTCF",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSHSTFB",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSHSTFJ",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSMKPLT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSMKR00",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSMKRLT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSMODEL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSMRKT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSPAM00",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSPAM00_HIST",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSPAM10",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSPAMLT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSPDT00_HIST00",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSPHD00_HIST00",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSPLI00",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSPMPLT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSPSCSP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSPSCSP_SYNC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSREBLT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSRETAU_HIST00",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSSECST",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSSERIE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTSTRM",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTS_MAG_HISRETAIL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTS_MAG_RETAIL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTS_PDT_CANCEL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.BTS_PRDC_MOQ",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.PA_CAMPG_ID",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.PA_RTLDV_ID",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PA.RB_ORDER_AUDIT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PIM.XXRECON_REP_ITEM_CLASSIF_TL_V",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PIM.XXRECON_REP_ITEM_LANG_TRANS_V",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PROTIME.ABSENCES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PROTIME.ANOMALIES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PROTIME.ANOMALY_TYPES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PROTIME.CLOCKINGS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PROTIME.EMPLOYEES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_PROTIME.SHIFTS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.CX_CON_SEGMENTS_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.CX_MERGE_RECORD",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.CX_MERGE_RECORD_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.CX_TERM_COND",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.CX_TERM_COND_BU",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.CX_TERM_CONTACT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.CX_TERM_LOV",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ADDR_PER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ADDR_PER_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ASSET",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ASSET_ACCNT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ASSET_ATX",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ASSET_BU",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ASSET_CON",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ASSET_CON_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ASSET_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ASSET_X",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_CAMP_CALL_LST_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_CAMP_CON",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_CAMP_CON_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_COMMUNICATION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_COMMUNICATION_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_COMM_DTL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_COMM_SVY_LOG",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_CONTACT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_CONTACT_ATX_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_CONTACT_BU",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_CONTACT_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_CONTACT_FNX",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_CONTACT_FNX_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_CONTACT_T_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_CONTACT_X",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_CONTACT_X_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_CON_ADDR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_CON_ADDR_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_CON_SM_ATTR_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_CON_SM_PROF",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_CON_SM_PROF_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_DOC_AGREE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_EVT_ACT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_EVT_ACT_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_LANG",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_MKTSVY_QUES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_NOTE_SR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_NOTE_SR_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_OPTY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_OPTY_ASSET",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_OPTY_ASSET_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_OPTY_CON",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_OPTY_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_OPTY_ORG",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_OPTY_ORG_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_OPTY_SRC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_OPTY_SRC_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_OPTY_UTX",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_OPTY_UTX_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_OPTY_X",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_OPTY_X_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ORDER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ORDER_BU",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ORDER_ITEM",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ORG_BU",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ORG_BU_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ORG_EXT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ORG_EXT2_FNX_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ORG_EXT_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ORG_EXT_FNX",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ORG_EXT_FNX_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ORG_EXT_LSX",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ORG_EXT_X",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ORG_EXT_X_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ORG_MAKE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ORG_PRTNR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_ORG_PRTNR_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_OU_PRTNR_TIER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_PARTY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_PARTY_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_PARTY_PER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_PARTY_PER_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_POSTN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_PROD_INT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_PROD_INT_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_REVN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_REVN_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_SALES_METHOD",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_SRV_REQ",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_SRV_REQ_BU",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_SRV_REQ_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_SRV_REQ_X",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_SRV_REQ_XM",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_SRV_REQ_XM_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_SRV_REQ_X_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_SR_ATT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_USER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_USER_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_VHCL_FIN_DTL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_VHCL_SALES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_VHCL_SALES_BU",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_VHCL_SALES_BU_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_VHCL_SALES_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_VHCL_SRV",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_VHCL_SRV_CURR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SIEBEL_OLTP.S_VHCL_SRV_XM",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SUNBIL.TBSDB_DICT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SUNBIL.TBSDB_SUNBILHEA",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_SUNBIL.TBSDB_SUNBILPOS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_TSC.TSC_ASSIGNMENT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_TSC.TSC_ASSIGNMENT_ID",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_TSC.TSC_DESC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_TSC.TSC_ID",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_TSC.TSC_VARIANT_ID",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_TSC.TSC_VARIANT_NSC_SETTING_ID",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_UCM.UCMACTIONS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_UCM.UCMCARSMAPPED",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_UCM.UCMDATES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_UCM.UCMFUELTYPES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_UCM.UCMIMAGES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_UCM.UCMINTERFACES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_UCM.UCMMAPPING",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_UCM.UCMMAPPINGTYPES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_UCM.UCMPRICES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_UCM.UCMPROVIDERS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_UD.ORGANISATIONS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_UD.USERS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_VEH_MASTER.BTV14010",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_VPO.TBVPO_CHG_ORDER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_VPO.TBVPO_ORDADDINF",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_VPO.TBVPO_ORDER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_VPO.TBVPO_ORDERROLE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_VPO.TBVPO_ORDER_TYP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_VPO.TBVPO_PROD_STAT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_VPO.TBVPO_STAGE_VPOSTATUS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_VPO.TBVPO_STATUS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_WML.BOOKING",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_WML.CLAIM",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_WML.OPERATION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_WML.PART",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_WML.PROCSTEP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_WML.SUBLET",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_WML.SUBLOCATION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_WML.WML_CLAIM_ADJUSTMENT_ID",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_src",
+        "name": "LZ_WML.WML_CLAIM_ID",
+        "pii": false
+    }
+]

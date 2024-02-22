@@ -97,7 +97,7 @@ def get_jdbc_data_by_dict(
         spark.read.format('jdbc')
         .option(query_type, query_sql)
         .options(**db_conn_props)
-        .load()
+        # .load()
     )
 
     return df

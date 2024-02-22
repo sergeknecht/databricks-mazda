@@ -237,7 +237,7 @@ work_items = [
         'table_name_target': get_table_name_source(work_json).lower().replace('$', '_'),
         'db_key': p_db_key,
         'query_type': work_json.get('query_type', 'dbtable'),
-        'query_sql': work_json.get('query_sql', None),
+        'query_sql': work_json.get('query_sql', ""),
         'mode': work_json.get('mode', 'overwrite'),
     }
     for work_json in work_jsons
@@ -279,33 +279,12 @@ def do_task(work_item):
         },
     )
     return result
-    print(result)
-    # parse string to json
-    result = json.loads(result)
-    if result['status_code'] >= 300:
-        raise Exception(result['status_message'])
-    end_time = time.time()
-    time_duration = int(end_time - start_time)
-    return f'OK: {p_schema_name_source}.{p_table_name_source} completed in {time_duration} seconds'
-
 
 # COMMAND ----------
 
 for work_item in work_items:
     result = do_task(work_item)
     results.append(result)
-
-# except Py4JJavaError as jex:
-#     print(str(jex.java_exception))
-#     print("TIMEDOUT" in str(jex.java_exception))
-#     end_time = time.time()
-#     time_duration = int(end_time - start_time)
-#     raise Exception(f"ERROR: TIMEDOUT: {time_duration} seconds") from jex
-
-# except AnalysisException as ex:
-# dbutils.notebook.exit(str(ex))
-# except Exception as e:
-# dbutils.notebook.exit(str(e))
 
 # COMMAND ----------
 

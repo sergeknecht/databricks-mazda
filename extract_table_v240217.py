@@ -9,15 +9,13 @@ import json
 import sys
 import time
 import traceback
-from pprint import pformat
 
-from pyspark.sql.utils import AnalysisException
 from pyspark.errors import PySparkException
+from pyspark.sql.utils import AnalysisException
 
 from helpers.db_helper import (
     get_bounds__by_rownum,
     get_connection_properties__by_key,
-    get_db_dict,
     get_jdbc_data_by_dict,
 )
 from helpers.db_helper_delta import table_exists
@@ -28,7 +26,9 @@ from helpers.status_helper import create_status
 
 # COMMAND ----------
 
-logging.basicConfig()
+logging.basicConfig(
+    level=logging.WARNING, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -38,8 +38,17 @@ dbutils.widgets.text("p_work_json", "{}", label="Database Table Extract JSON Con
 
 # COMMAND ----------
 
+try:
+    notebook_info = json.loads(dbutils.notebook.entry_point.getDbutils().notebook().getContext().toJson())
+    #The tag jobId does not exists when the notebook is not triggered by dbutils.notebook.run(...)
+    job_id = notebook_info["tags"]["jobId"]
+except:
+    job_id = -1
+
 p_work_json: dict = json.loads(dbutils.widgets.get("p_work_json"))
 assert p_work_json, "p_work_json not set"
+
+p_work_json["job_id"] = job_id
 
 p_scope = p_work_json["scope"]
 p_action = p_work_json["action"]
@@ -53,7 +62,8 @@ p_table_name = p_work_json["table_name"]
 p_mode = p_work_json.get("mode", "overwrite")
 p_fqn = p_work_json.get("fqn", f"{p_catalog_name}.{p_schema_name}.{p_table_name}")
 
-print(p_fqn)
+logger.info(p_fqn)
+logger.info(job_id)
 print(p_scope)
 print(p_action)
 print(p_mode)
@@ -74,28 +84,15 @@ work_item = {
 
 actions = p_action.split("__")
 
-# drop the table if it exists
+# drop the table if action or mode matches
 # if action is only drop than we don't want append to run. drop and quit
-if ("drop" in actions and p_mode != "append") or p_mode == "drop" or p_action == "drop": 
-    # in case we are appending we might need to drop table first
-    if table_exists(p_catalog_name, p_schema_name, p_table_name):
-        sql_text = f"DROP TABLE IF EXISTS {p_fqn}"
-        spark.sql(sql_text)
-        result = create_status(
-            scope=p_scope,
-            status_code=200,
-            status_message="OK: table dropped",
-            status_ctx=work_item
-        )
-        end_time = time.time()
-        time_duration = int(end_time - start_time)
-        result["time_duration"] = time_duration
-        log_to_delta_table(result)
+if ("drop" in actions and p_mode != "append") or p_mode == "drop" or p_action == "drop":
+    spark.sql(f"DROP TABLE IF EXISTS {p_fqn}")
 
     if p_mode == "drop" or p_action == "drop":
-        # drop was the only thing to do
-        dbutils.notebook.exit("{}")
-        
+        # drop was the only thing to do, let's quit
+        dbutils.notebook.exit(json.dumps({'job_id' : job_id, "fqn" : p_fqn, "status_code" : 200, "status_message" : "OK"}))
+
 # bounds = get_bounds__by_rownum(db_dict=db_conn_props, table_name=f'{p_schema_name_source}.{p_table_name_source}')
 # display(bounds)
 
@@ -123,31 +120,7 @@ class DelayedResultExtract:
 
     def do_work(self):
         try:
-
-            # get all primary keys and indexes so that we can also apply it in the target table
-            pk_sql = sql_pk_statement.format(
-                **{
-                    "schema": self.schema_name_source,
-                    "table_name": self.table_name_source,
-                }
-            )
-            df_pk = get_jdbc_data_by_dict(
-                db_conn_props=db_conn_props,
-                work_item={
-                    "query_sql": pk_sql,
-                    "query_type": "query",
-                },
-            )
-
-            logger.info(pformat(self.work_item))
-
-            df = get_jdbc_data_by_dict(
-                db_conn_props=db_conn_props,
-                work_item={
-                    **self.work_item,
-                    "table_sql": f"{self.schema_name_source}.{self.table_name_source}",
-                },
-            )
+            # logger.info(pformat(self.work_item))
 
             # if df.count() == 0:
             #     result = create_status(
@@ -165,19 +138,24 @@ class DelayedResultExtract:
             #     return
 
             try:
+                df = get_jdbc_data_by_dict(
+                    db_conn_props=db_conn_props,
+                    work_item={
+                        **self.work_item,
+                        "table_sql": f"{self.schema_name_source}.{self.table_name_source}",
+                    },
+                ).load()
                 df.write.format("delta").mode(self.mode).saveAsTable(self.fqn)
             # catch empty datasets
             except PySparkException as e:
-                # print("we caught PySparkException")
                 logger.error(e.getErrorClass())
-                # logger.exception(e)
                 if e.getErrorClass() == "CANNOT_INFER_EMPTY_SCHEMA":
                     logger.warning("CANNOT_INFER_EMPTY_SCHEMA: DataFrame empty")
                     result = create_status(
-                    scope=p_scope,
-                    status_code=204,
-                    status_message=f"NO_CONTENT: {self.fqn} resultset empty",
-                    status_ctx=work_item
+                        scope=p_scope,
+                        status_code=204,
+                        status_message=f"NO_CONTENT: {self.fqn} resultset empty",
+                        status_ctx=self.work_item,
                     )
                     result["row_count"] = 0
                     result["work_item"] = {
@@ -186,12 +164,26 @@ class DelayedResultExtract:
                     }
                     self.result = result
                     return
-                else: 
-                    logger.warning("Unhandled PySparkException: " + e.getErrorClass())
-                raise
-            
+                else:
+                    logger.error("Unhandled PySparkException: " + e.getErrorClass())
+                    raise
+
             # replicate the primary keys and indexes we found in the source table
             if self.mode == "overwrite":
+                # get all primary keys and indexes so that we can also apply it in the target table
+                pk_sql = sql_pk_statement.format(
+                    **{
+                        "schema": self.schema_name_source,
+                        "table_name": self.table_name_source,
+                    }
+                )
+                df_pk = get_jdbc_data_by_dict(
+                    db_conn_props=db_conn_props,
+                    work_item={
+                        "query_sql": pk_sql,
+                        "query_type": "query",
+                    },
+                ).load()
                 for row_pk in df_pk.collect():
                     column_name = row_pk["COLUMN_NAME"]
                     sqls = [
@@ -204,11 +196,14 @@ class DelayedResultExtract:
                         spark.sql(curr_sql)
 
             result = create_status(
-                scope=p_scope, status_code=201, status_message=f"CREATED: {self.fqn}",
-                status_ctx=work_item
+                scope=p_scope,
+                status_code=201,
+                status_message=f"CREATED: {self.fqn}",
+                status_ctx=self.work_item,
             )
             result["row_count"] = df.count()
             self.result = result
+            self.exc_info = None
         except Exception:
             exc_type, exc_value, exc_tb = sys.exc_info()
             tb = traceback.TracebackException(exc_type, exc_value, exc_tb)
@@ -226,7 +221,7 @@ class DelayedResultExtract:
                 stack_trace,
             )
 
-    def get_result(self):
+    def get_result(self) -> str:
         end_time = time.time()
         time_duration = int(end_time - self.start_time)
         if self.exc_info:
@@ -235,11 +230,12 @@ class DelayedResultExtract:
             result = create_status(
                 scope=p_scope,
                 status_code=500,
-                status_message="INTERNAL_SERVER_ERROR:" + e,
-                status_ctx=work_item
+                status_message="INTERNAL_SERVER_ERROR:" + str(e),
+                status_ctx=self.work_item,
             )
             result["traceback"] = traceback
             result["time_duration"] = time_duration
+            result["job_id"] = job_id
             log_to_delta_table(result)
             return json.dumps(result)
 
@@ -261,7 +257,7 @@ try:
                 scope=p_scope,
                 status_code=208,
                 status_message="ALREADY_REPORTED: table already exists - skipping",
-                status_ctx=work_item
+                status_ctx=work_item,
             )
 
             log_to_delta_table(result)
@@ -275,18 +271,17 @@ try:
     # we are creating the target and the work item is in append mode
     elif "create" in actions and p_mode == "append":
 
-        # first action is a drop_create (using df overwrite). This might take some time to finish so we need to give it some time before we check if the NEW table is created
-        # TODO: this is a possible race condition that we need to fix in future
-        time.sleep(180)
+        # # first action is a drop_create (using df overwrite). This might take some time to finish so we need to give it some time before we check if the NEW table is created
+        # # TODO: this is a possible race condition that we need to fix in future
+        # time.sleep(180)
 
-        counter = 0
-        while not table_exists(p_catalog_name, p_schema_name, p_table_name):
-            time.sleep(60)
-            counter += 1
-            if (
-                counter > 30
-            ):  # TODO: Improve: longer is theoretically not possible because we also have a timeout from calling notebook
-                break
+        # counter = 0
+        # while not table_exists(p_catalog_name, p_schema_name, p_table_name):
+        #     time.sleep(60)
+        #     counter += 1
+        #     if counter > 30:
+        #         # TODO: Improve: longer is theoretically not possible because we also have a timeout from calling notebook
+        #         break
 
         # because we are in append mode we need to check if the table exists
         if not table_exists(p_catalog_name, p_schema_name, p_table_name):
@@ -294,7 +289,7 @@ try:
                 scope=p_scope,
                 status_code=500,
                 status_message="INTERNAL_SERVER_ERROR: Append table does not yet exists",
-                status_ctx=work_item
+                status_ctx=work_item,
             )
 
             log_to_delta_table(result)
@@ -316,7 +311,7 @@ except (Exception, AnalysisException) as e:
         scope=p_scope,
         status_code=500,
         status_message=f"INTERNAL_SERVER_ERROR: table_exists in prepare: {status_message}",
-        status_ctx=work_item
+        status_ctx=work_item,
     )
     result["stack_trace"] = stack_trace
 
@@ -326,10 +321,20 @@ except (Exception, AnalysisException) as e:
 
 # COMMAND ----------
 
+result = None
 try:
     dr = DelayedResultExtract(work_item=work_item)
     dr.do_work()
-    result = dr.get_result()
+
+    result :str = dr.get_result()
+
+    logger.info(result)
+
+    assert type(result) == str, "result is not a string"
+
+
+    log_to_delta_table(json.loads(result))
+
 except (Exception, AnalysisException) as e:
     exc_type, exc_value, exc_tb = sys.exc_info()
     tb = traceback.TracebackException(exc_type, exc_value, exc_tb)
@@ -345,15 +350,15 @@ except (Exception, AnalysisException) as e:
     result = create_status(
         scope=p_scope,
         status_code=500,
-        status_message=f"INTERNAL_SERVER_ERROR: table_exists in DelayedResultExtract: {status_message}",
-        status_ctx=work_item
+        status_message=f"INTERNAL_SERVER_ERROR: table_exists in DelayedResultExtract: {status_message} {e}",
+        status_ctx=work_item,
     )
     result["stack_trace"] = stack_trace
 
     log_to_delta_table(result)
-
     dbutils.notebook.exit(json.dumps(result))
 
 # COMMAND ----------
 
-dbutils.notebook.exit(json.dumps(result))
+if result:
+    dbutils.notebook.exit(result)

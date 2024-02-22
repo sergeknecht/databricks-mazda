@@ -1,8 +1,11 @@
 import datetime
+
 from databricks.sdk.runtime import *
 
 
 def create_status(scope:str, status_message: str = '', status_code: int = 200, status_ctx : dict = None) -> dict:
+    assert scope, "scope is required"
+
     status_ts = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0) # .isoformat()
     status_dt = status_ts.date().isoformat()
     status_ts = status_ts.isoformat()
@@ -21,11 +24,11 @@ def create_status(scope:str, status_message: str = '', status_code: int = 200, s
     }
 
     if status_ctx:
-        context_keys = ["mode", "fqn", "db_key", "run_ts", "run_name"]
+        context_keys = ["mode", "fqn", "db_key", "run_ts", "run_name", "job_id"]
         for ck in context_keys:
             if ck in status_ctx:
                 result[ck] = status_ctx[ck]
-    
+
     return result
 
 

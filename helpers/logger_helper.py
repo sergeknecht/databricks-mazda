@@ -1,3 +1,5 @@
+import pprint as pp
+
 from databricks.sdk.runtime import *
 
 CATALOG = "mle_bi_app_data"
@@ -8,11 +10,17 @@ FQN = "mle_bi_app_data.log.{scope}__application"
 
 # method that accepts a dic and writes it to a databricks delta table
 def log_to_delta_table(log_dict: dict):
+
+    if type(log_dict) is not dict:
+        raise TypeError("log_dict must be a dictionary")
+
+    if not log_dict:
+        return
+
     # create pandas dataframe from dictionary
-    assert log_dict["scope"], "scope not found in log_dict"
+    assert "scope" in log_dict, "scope not found in log_dict: " + pp.pformat(log_dict)
 
     scope = log_dict["scope"].lower()
-    
 
     df = spark.createDataFrame(data=[log_dict])
     # write to delta table

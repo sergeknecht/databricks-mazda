@@ -1,0 +1,752 @@
+[
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPLNH",
+        "pii": false,
+        "mode": "drop"
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_NO_WORKING_DAYS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_COUNTRIES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.IOT_STG_DLR_DIST_INTERFACE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.IOT_DIM_DIST",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_DSR_DIST_CONVERSION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_DSR_VEHICLE_MASTER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_DSR_SVC_RECORDS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNREGH",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_VEHICLE_DISTRIBUTORS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_DEALERS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_DISTRIBUTORS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_MUD_INTERFACE_CODE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.IOT_DIM_DLR_CAR_DELV_ADDRESS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.IOT_DIM_DLR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_VEHICLE_STATE_FLOW",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_VEHICLE_STATE_VALUES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_VEHICLE_STATE_TYPES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG_TMP.STG_TMP_COC_VINS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNCDHDR",
+        "pii": true
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPLNH",
+        "pii": false,
+        "query_type": "query",
+        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2024-01-01' AND CREATE_TS <= '2024-12-31'"
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EPD_CUSTCLASSIFICATION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EPD_CSTCLSSIFICATIONASSIGN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EPD_CUSTASSIGN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EPD_MODEL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.IOT_DIM_VEH_PRODUCT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNIHDR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_VIN_LEM",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_DAMAGE_CASES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_VEH_CMPD_INFORMATION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_COMPOUNDS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_PARTNER_CODES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_VEHICLE_ROUTE_SEGMENTS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_ROUTE_SEGMENTS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_TRANSPORT_LINES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_TRANSPORT_LINE_DEFS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_OUTGOING_MESSAGES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_VEHICLES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_VEHICLE_ROUTES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_ROUTES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_ROUTE_DEFS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_PROCESSING_TYPES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "LZ_LEM.VPR_SUMMARY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_VPR_SUMMARY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_VPR_TYPES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_OUTGOING_MESSAGES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_TRANSPORT_MODES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_VEHICLE_ORIGINS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_PORTS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_ORIGINS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_VOYAGES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_VESSELS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.IOT_DIM_COUNTRY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_PLANNING_PRIORITIES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_INCO_TERMS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_CURRENCIES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.IOT_DIM_CUR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_LANGUAGES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.IOT_DIM_SUPPLY_CHAIN_REGION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.IOT_DIM_CMPD",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.IOT_DIM_VIN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_VEHICLE_DESTINATIONS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_DESTINATIONS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_VEHICLE_DIST_PRICES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_RTDAM_AUDIT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_PLANTS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.IOT_DIM_PRTN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_VEH_MASTER_BTV14010",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.IOT_DIM_INTR_COLOR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.IOT_DIM_EXTR_COLOR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPLDEL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPLN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNORECH",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNOREC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_SIEBEL_AGREEMENT_DATA",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNCRCAR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNREGFR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.IOT_DIM_COC_TYPE_APPROVAL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNREGSIV",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNREGEXT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNCUSTCONTRACT",
+        "pii": true
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNMUSER",
+        "pii": true
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNCUSTOMER",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNREG",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNBPM",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNREGEXDEMO",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNCOCV",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPEXT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNVBLFL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.IOT_DIM_VEH_PRODUCT_LOCAL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.IOT_STG_EMOT_BTNMPROP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNDOC_EVENTS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_TECH_DOCUMENT_STATUS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNADDR",
+        "pii": true
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNDOC_EVENTS_DETAIL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNBOEVT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNRPRTT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNRPRT",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_DSR_SVC_REC_ITEMS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_DSR_SVC_ITEMS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_DSR_RSA_SARA_PROVIDERS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_DSR_VEHICLE_WARRANTY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_VIN_EMOT",
+        "pii": true
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_VIN_WRTY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_VIN_LEM_NO_WORKING_DAYS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_LEM_LEAD_TIME_TARGETS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_VIN_DSR",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPROP_XREF_REL",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPROP_XREF",
+        "pii": false
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPLNH",
+        "pii": false,
+        "query_type": "query",
+        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2023-01-01' AND CREATE_TS <= '2023-12-31'",
+        "mode": "append"
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPLNH",
+        "pii": false,
+        "query_type": "query",
+        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2022-01-01' AND CREATE_TS <= '2022-12-31'",
+        "mode": "append"
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPLNH",
+        "pii": false,
+        "query_type": "query",
+        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2021-01-01' AND CREATE_TS <= '2021-12-31'",
+        "mode": "append"
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPLNH",
+        "pii": false,
+        "query_type": "query",
+        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2020-01-01' AND CREATE_TS <= '2020-12-31'",
+        "mode": "append"
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPLNH",
+        "pii": false,
+        "query_type": "query",
+        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2019-01-01' AND CREATE_TS <= '2019-12-31'",
+        "mode": "append"
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPLNH",
+        "pii": false,
+        "query_type": "query",
+        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2018-01-01' AND CREATE_TS <= '2018-12-31'",
+        "mode": "append"
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPLNH",
+        "pii": false,
+        "query_type": "query",
+        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2017-01-01' AND CREATE_TS <= '2017-12-31'",
+        "mode": "append"
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPLNH",
+        "pii": false,
+        "query_type": "query",
+        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2016-01-01' AND CREATE_TS <= '2016-12-31'",
+        "mode": "append"
+    },
+    {
+        "catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPLNH",
+        "pii": false,
+        "query_type": "query",
+        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2015-01-01' AND CREATE_TS <= '2015-12-31'",
+        "mode": "append"
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.IOT_STG_LEM_NO_WORKING_DAYS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.IOT_STG_LEM_NO_WORKING_DAYS_TP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.IOT_STG_DSR_DLR_DIST_LKP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.IOT_STG_EMOT_LAST_DEREG",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.IOT_STG_LEM_DLR_DIST_LKP",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.IOT_STG_LEM_CUSTOMS_STATES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.IOT_STG_EMOT_LOAD_RECEIVE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.IOT_STG_EPD_LPG_CUSTOMIZATION",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.IOT_STG_EMOT_MLE_INVOICE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.STG_VIN_LEM_NO_WORKING_DAYS",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.IOT_STG_EMOT_NSC_INVOICE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.IOT_STG_LEM_PROCESS_STATES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.IOT_STG_LEM_REPAIR_STATES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.IOT_STG_LEM_TRANSPORT_MEXICO",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.IOT_STG_LEM_TRANSPORT_STATES",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.IOT_STG_LEM_VPR_SUMMARY",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG_TMP.STG_TMP_LEM_PDI_RDY_DATE",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG_TMP.STG_TMP_LEM_FIRST_TR_UNLOAD",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.STG_VIN_LEM",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG_TMP.T$_TTL_PPLN",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG_TMP.T$_IOT_DIM_CMPD",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG_TMP.T$_FIRST_DEMO_OREC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.STG_VIN_EMOT",
+        "pii": true
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG_TMP.V$_TEMP_200_ALL_SVC",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG_TMP.V$_TEMP_210_VHM_INFO",
+        "pii": false
+    },
+    {
+        "catalog": "impetus_target",
+        "name": "STG.STG_DIM_VIN",
+        "pii": true
+    }
+]
