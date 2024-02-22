@@ -30,7 +30,7 @@ logger.setLevel(logging.WARNING)
 # JOB PARAMETERS
 jp_action = 'create' or 'drop__create' or 'create' or 'drop'
 jp_scope = 'ACC' or 'PRD' or 'TST' or 'DEV'
-p_db_key = 'DWH_BI1__500000' or 'DWH_BI1__250000' or 'DWH_BI1__100000' or 'DWH_BI1'
+p_db_key = 'DWH_BI1__250000' or 'DWH_BI1__500000' or 'DWH_BI1__100000' or 'DWH_BI1'
 run_ts = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
 run_name = dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get()
 timeout_sec = 3600
@@ -193,14 +193,14 @@ work_jsons = [
     {"catalog": "impetus", "name": "STG.STG_LEM_LEAD_TIME_TARGETS", "pii": False},
     {"catalog": "impetus", "name": "STG.STG_VIN_DSR", "pii": False},
     {"catalog": "impetus", "name": "STG.STG_EMOT_BTNPROP_XREF_REL", "pii": False},
-    # {"catalog": "impetus", "name": "STG.STG_EMOT_BTNPROP_XREF", "pii": False},
-    #    {"catalog": "impetus",
-    #     "name": "STG.STG_EMOT_BTNPPLNH",
-    #     "pii": False,
-    #     "query_type": "query",
-    #     "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2023-01-01' AND CREATE_TS <= '2023-12-31'",
-    #     "mode": "append",
-    # },
+    {"catalog": "impetus", "name": "STG.STG_EMOT_BTNPROP_XREF", "pii": False},
+       {"catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPLNH",
+        "pii": False,
+        "query_type": "query",
+        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2023-01-01' AND CREATE_TS <= '2023-12-31'",
+        "mode": "append",
+    },
     # {"catalog": "impetus",
     #     "name": "STG.STG_EMOT_BTNPPLNH",
     #     "pii": False,
@@ -222,20 +222,20 @@ work_jsons = [
     #     "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2020-01-01' AND CREATE_TS <= '2020-12-31'",
     #     "mode": "append",
     # },
-    # {"catalog": "impetus",
-    #     "name": "STG.STG_EMOT_BTNPPLNH",
-    #     "pii": False,
-    #     "query_type": "query",
-    #     "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2019-01-01' AND CREATE_TS <= '2019-12-31'",
-    #     "mode": "append",
-    # },
-    # {"catalog": "impetus",
-    #     "name": "STG.STG_EMOT_BTNPPLNH",
-    #     "pii": False,
-    #     "query_type": "query",
-    #     "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2018-01-01' AND CREATE_TS <= '2018-12-31'",
-    #     "mode": "append",
-    # },
+    {"catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPLNH",
+        "pii": False,
+        "query_type": "query",
+        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2019-01-01' AND CREATE_TS <= '2019-12-31'",
+        "mode": "append",
+    },
+    {"catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPLNH",
+        "pii": False,
+        "query_type": "query",
+        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2018-01-01' AND CREATE_TS <= '2018-12-31'",
+        "mode": "append",
+    },
     # {"catalog": "impetus",
     #     "name": "STG.STG_EMOT_BTNPPLNH",
     #     "pii": False,
@@ -250,13 +250,13 @@ work_jsons = [
     #     "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2016-01-01' AND CREATE_TS <= '2016-12-31'",
     #     "mode": "append",
     # },
-    # {"catalog": "impetus",
-    #     "name": "STG.STG_EMOT_BTNPPLNH",
-    #     "pii": False,
-    #     "query_type": "query",
-    #     "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2015-01-01' AND CREATE_TS <= '2015-12-31'",
-    #     "mode": "append",
-    # },
+    {"catalog": "impetus",
+        "name": "STG.STG_EMOT_BTNPPLNH",
+        "pii": False,
+        "query_type": "query",
+        "query_sql": "select * from STG.STG_EMOT_BTNPPLNH WHERE CREATE_TS >= '2015-01-01' AND CREATE_TS <= '2015-12-31'",
+        "mode": "append",
+    },
     {"catalog": "impetus_target", "name": "STG.IOT_STG_LEM_NO_WORKING_DAYS", "pii": False},
     {"catalog": "impetus_target", "name": "STG.IOT_STG_LEM_NO_WORKING_DAYS_TP", "pii": False},
     {"catalog": "impetus_target", "name": "STG.IOT_STG_DSR_DLR_DIST_LKP", "pii": False},
@@ -1299,6 +1299,11 @@ q.join()
 end_time = time.time()
 time_duration = int(end_time - start_time)
 print(f"duration notebook seconds: {time_duration}")
+
+# COMMAND ----------
+
+import pprint as pp
+pp.pprint(results)
 
 # COMMAND ----------
 

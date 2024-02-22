@@ -168,7 +168,7 @@ class DelayedResultExtract:
                 df.write.format("delta").mode(self.mode).saveAsTable(self.fqn)
             # catch empty datasets
             except PySparkException as e:
-                print("we caught PySparkException")
+                # print("we caught PySparkException")
                 logger.error(e.getErrorClass())
                 # logger.exception(e)
                 if e.getErrorClass() == "CANNOT_INFER_EMPTY_SCHEMA":
@@ -186,6 +186,8 @@ class DelayedResultExtract:
                     }
                     self.result = result
                     return
+                else: 
+                    logger.warning("Unhandled PySparkException: " + e.getErrorClass())
                 raise
             
             # replicate the primary keys and indexes we found in the source table

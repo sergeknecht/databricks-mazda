@@ -23,8 +23,8 @@ from helpers.db_helper_delta import table_exists, schema_exists
 # COMMAND ----------
 
 start_time = time.time()
-catalog_source = 'acc__impetus'
-catalog_target = 'impetus_poc'
+catalog_source = 'acc__impetus_target'
+catalog_target = 'impetus_target'
 schemas = ['stg', 'stg_tmp', 'lz_lem']
 jp_action = "drop__create"
 jp_actions = jp_action.split('__')
