@@ -15,11 +15,11 @@ from pyspark.sql.utils import AnalysisException
 
 from helpers.db_helper_delta import table_exists
 from helpers.db_helper_jdbc import (
-    get_bounds__by_rownum,
     get_connection_properties__by_key,
+    get_jdbc_bounds__by_partition_key,
     get_jdbc_data_by_dict,
+    get_jdbc_data_by_dict__by_partition_key,
 )
-from helpers.db_helper_jdbc_oracle import get_data_partitioned__by_rownum
 from helpers.db_helper_sql_oracle import sql_pk_statement
 from helpers.logger_helper import log_to_delta_table
 from helpers.status_helper import create_status
@@ -39,8 +39,10 @@ dbutils.widgets.text("p_work_json", "{}", label="Database Table Extract JSON Con
 # COMMAND ----------
 
 try:
-    notebook_info = json.loads(dbutils.notebook.entry_point.getDbutils().notebook().getContext().toJson())
-    #The tag jobId does not exists when the notebook is not triggered by dbutils.notebook.run(...)
+    notebook_info = json.loads(
+        dbutils.notebook.entry_point.getDbutils().notebook().getContext().toJson()
+    )
+    # The tag jobId does not exists when the notebook is not triggered by dbutils.notebook.run(...)
     job_id = notebook_info["tags"]["jobId"]
 except:
     job_id = -1
@@ -52,6 +54,7 @@ p_work_json["job_id"] = job_id
 
 p_scope = p_work_json["scope"]
 p_action = p_work_json["action"]
+p_db_scope = p_work_json["db_scope"]
 p_db_key = p_work_json["db_key"]
 p_catalog_name_source = p_work_json["catalog_name_source"]
 p_schema_name_source = p_work_json["schema_name_source"]
@@ -64,7 +67,7 @@ p_fqn = p_work_json.get("fqn", f"{p_catalog_name}.{p_schema_name}.{p_table_name}
 
 logger.info(p_fqn)
 logger.info(job_id)
-print(p_scope)
+print(p_scope, p_db_scope)
 print(p_action)
 print(p_mode)
 
@@ -72,7 +75,7 @@ start_time = time.time()
 
 # COMMAND ----------
 
-db_conn_props: dict = get_connection_properties__by_key(p_scope, p_db_key)
+db_conn_props: dict = get_connection_properties__by_key(p_db_scope, p_db_key)
 
 # merge p_work_json with db_conn_props (=overwrite)
 work_item = {
@@ -91,15 +94,25 @@ if ("drop" in actions and p_mode != "append") or p_mode == "drop" or p_action ==
 
     if p_mode == "drop" or p_action == "drop":
         # drop was the only thing to do, let's quit
-        dbutils.notebook.exit(json.dumps({'job_id' : job_id, "fqn" : p_fqn, "status_code" : 200, "status_message" : "OK"}))
+        dbutils.notebook.exit(
+            json.dumps(
+                {
+                    "job_id": job_id,
+                    "fqn": p_fqn,
+                    "status_code": 200,
+                    "status_message": "OK",
+                }
+            )
+        )
 
 # bounds = get_bounds__by_rownum(db_dict=db_conn_props, table_name=f'{p_schema_name_source}.{p_table_name_source}')
 # display(bounds)
 
 # COMMAND ----------
 
+
 class DelayedResultExtract:
-    def __init__(self, work_item: dict):
+    def __init__(self, work_item: dict, logger: logging.Logger = logger):
         self.start_time = time.time()
         self.exc_info = None
         self.result = None
@@ -117,10 +130,39 @@ class DelayedResultExtract:
         self.work_item = work_item
         self.mode = work_item["mode"]
         self.fqn = work_item["fqn"]
+        self.partition_count = work_item.get("partition_count", 4)
+        self.logger = logger
 
     def do_work(self):
         try:
             # logger.info(pformat(self.work_item))
+
+            # get all primary keys and indexes so that we can also apply it in the target table
+            # we can also use this to determine a partition_key (if pk is a number and unique we can use it as partition key)
+            sql_pk = sql_pk_statement.format(
+                **{
+                    "schema": self.schema_name_source,
+                    "table_name": self.table_name_source,
+                }
+            )
+            df_pk = get_jdbc_data_by_dict(
+                db_conn_props=db_conn_props,
+                work_item={
+                    "query_sql": sql_pk,
+                    "query_type": "query",
+                },
+            ).load()
+            column_name_pks = []
+            column_name_partition = None
+            table_name_source = f"{self.schema_name_source}.{self.table_name_source}"
+
+            for row_pk in df_pk.collect():
+                # we will use the first primary key as the primary key in the target table
+                column_name_pks.append(row_pk["COLUMN_NAME"])
+
+                # can we also use it as partition key? This is only available when we ingest tables, not queries
+                if self.query_type  == "dbtable" and row_pk["DATA_TYPE"] == "NUMBER":
+                    column_name_partition = row_pk["COLUMN_NAME"]
 
             # if df.count() == 0:
             #     result = create_status(
@@ -138,17 +180,50 @@ class DelayedResultExtract:
             #     return
 
             try:
-                df = get_jdbc_data_by_dict(
-                    db_conn_props=db_conn_props,
-                    work_item={
-                        **self.work_item,
-                        "table_sql": f"{self.schema_name_source}.{self.table_name_source}",
-                    },
-                ).load()
+
+                if column_name_partition:
+                    bounds = get_jdbc_bounds__by_partition_key(
+                        db_conn_props=db_conn_props,
+                        table_name=table_name_source,
+                        column_name_partition=column_name_partition,
+                    )
+                    range_size = bounds.MAX_ID - bounds.MIN_ID
+
+                    bin_size = 500_000
+                    if range_size < bin_size:
+                        self.partition_count = 1
+                    else:
+                        # we want to have at least 100_000 rows per partition with a maxum of self.partition_count
+                        self.partition_count = min(self.partition_count, int(range_size / bin_size))
+
+                    logger.info(f"Partitioning table {table_name_source} by {column_name_partition} into {self.partition_count} partitions")
+
+                    df = get_jdbc_data_by_dict__by_partition_key(
+                        db_conn_props=db_conn_props,
+                        work_item={
+                            **self.work_item,
+                            "table_sql": table_name_source,
+                            "query_type" : 'dbtable' # with partitioning query is not allowed
+                        },
+                        bounds=bounds,
+                        column_name_partition=column_name_partition,
+                        partition_count=self.partition_count
+                    ).load()
+
+                else:
+                    df = get_jdbc_data_by_dict(
+                        db_conn_props=db_conn_props,
+                        work_item={
+                            **self.work_item,
+                            "table_sql": table_name_source,
+                        },
+                    ).load()
+
                 df.write.format("delta").mode(self.mode).saveAsTable(self.fqn)
+
             # catch empty datasets
             except PySparkException as e:
-                logger.error(e.getErrorClass())
+                self.logger.error(e.getErrorClass())
                 if e.getErrorClass() == "CANNOT_INFER_EMPTY_SCHEMA":
                     logger.warning("CANNOT_INFER_EMPTY_SCHEMA: DataFrame empty")
                     result = create_status(
@@ -160,45 +235,45 @@ class DelayedResultExtract:
                     result["row_count"] = 0
                     result["work_item"] = {
                         **self.work_item,
-                        "table_sql": f"{self.schema_name_source}.{self.table_name_source}",
+                        "table_sql": table_name_source,
                     }
                     self.result = result
                     return
                 else:
-                    logger.error("Unhandled PySparkException: " + e.getErrorClass())
+                    self.logger.error("Unhandled PySparkException: " + e.getErrorClass())
                     raise
 
-            # replicate the primary keys and indexes we found in the source table
+
+            status_message = f"{self.mode}: {self.fqn}"
+
             if self.mode == "overwrite":
-                # get all primary keys and indexes so that we can also apply it in the target table
-                pk_sql = sql_pk_statement.format(
-                    **{
-                        "schema": self.schema_name_source,
-                        "table_name": self.table_name_source,
-                    }
-                )
-                df_pk = get_jdbc_data_by_dict(
-                    db_conn_props=db_conn_props,
-                    work_item={
-                        "query_sql": pk_sql,
-                        "query_type": "query",
-                    },
-                ).load()
-                for row_pk in df_pk.collect():
-                    column_name = row_pk["COLUMN_NAME"]
-                    sqls = [
-                        f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET NOT NULL",
-                        f"ALTER TABLE {self.fqn} DROP PRIMARY KEY IF EXISTS CASCADE",
-                        f"ALTER TABLE {self.fqn} ADD CONSTRAINT pk_{self.table_name}_{column_name} PRIMARY KEY({column_name})",
-                        f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET TAGS ('db_schema' = 'pk')",
-                    ]
-                    for curr_sql in sqls:
-                        spark.sql(curr_sql)
+
+                sqls = []
+
+                # add tags to the table for PII/confidential data
+                if self.work_item.get("pii", False):
+                    status_message += " with PII"
+                    sqls.append(f"ALTER TABLE {self.fqn} SET TAGS ('pii_table' = 'TRUE')")
+
+                # replicate the primary keys and indexes we found in the source table
+                if column_name_pks:
+                    sqls.append(f"ALTER TABLE {self.fqn} DROP PRIMARY KEY IF EXISTS CASCADE")
+                    column_pk_names = ", ".join(column_name_pks) # can be a composite key
+
+                    for column_name in column_name_pks:
+                        sqls.append(f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET NOT NULL")
+                        sqls.append(f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET TAGS ('db_schema' = 'pk')")
+
+                    sqls.append(f"ALTER TABLE {self.fqn} ADD CONSTRAINT pk_{self.table_name}_{column_name_pks[0]} PRIMARY KEY({column_pk_names})")
+                    status_message += f" with primary key ({column_pk_names})"
+
+                for curr_sql in sqls:
+                    spark.sql(curr_sql)
 
             result = create_status(
                 scope=p_scope,
                 status_code=201,
-                status_message=f"CREATED: {self.fqn}",
+                status_message=status_message,
                 status_ctx=self.work_item,
             )
             result["row_count"] = df.count()
@@ -326,12 +401,11 @@ try:
     dr = DelayedResultExtract(work_item=work_item)
     dr.do_work()
 
-    result :str = dr.get_result()
+    result: str = dr.get_result()
 
     logger.info(result)
 
     assert type(result) == str, "result is not a string"
-
 
     log_to_delta_table(json.loads(result))
 

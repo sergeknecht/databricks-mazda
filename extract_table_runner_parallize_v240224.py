@@ -18,8 +18,6 @@ import time
 
 from helpers.app_helper import init
 
-# from helpers.db_helper_delta import table_exists
-
 # COMMAND ----------
 
 logging.basicConfig(
@@ -33,7 +31,9 @@ logger.setLevel(logging.INFO)
 # JOB PARAMETERS
 jp_action = "drop__create" or "create" or "drop"
 jp_actions = jp_action.split("__")
-jp_scope = "ACC" or "PRD" or "TST" or "DEV"
+jp_scope = "DEV" or "ACC" or "PRD" or "TST" or "DEV"  # where to write the data
+jp_db_scope = "ACC"  # where to read the data
+jp_run_version = "v240224"  # version of the job
 p_db_key = "DWH_BI1__500000" or "DWH_BI1__250000" or "DWH_BI1__100000" or "DWH_BI1"
 run_ts = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
 run_name = (
@@ -41,8 +41,9 @@ run_name = (
 )
 
 # TODO: minus 1 ? because have not yet figured out how single nodes handle this number, and we want to avoid cpu starvation
-cpu_count = int(sc.defaultParallelism * 0.8)
-print(cpu_count)
+cpu_count = max(40, int(sc.defaultParallelism * 0.95))  # 40 workers accross all nodes, but partitioning will create more tasks
+worker_count = 5  # 5 workers accross all nodes, but partitioning will create more tasks
+print(cpu_count, worker_count)
 
 timeout_sec = 5400  # 1:30 hours
 
@@ -77,7 +78,7 @@ display(result)
 # COMMAND ----------
 
 work_jsons = [
-    # {"catalog": "impetus_poc", "name": "STG.STG_LEM_NO_WORKING_DAYS", "pii": False},
+    {"catalog": "impetus_poc", "name": "STG.STG_LEM_NO_WORKING_DAYS", "pii": False},
     {"catalog": "impetus_poc", "name": "STG.STG_LEM_COUNTRIES", "pii": False},
     {"catalog": "impetus_poc", "name": "STG.IOT_STG_DLR_DIST_INTERFACE", "pii": False},
     {"catalog": "impetus_poc", "name": "STG.IOT_DIM_DIST", "pii": False},
@@ -96,6 +97,11 @@ work_jsons = [
     {"catalog": "impetus_poc", "name": "STG.STG_LEM_VEHICLE_STATE_TYPES", "pii": False},
     {"catalog": "impetus_poc", "name": "STG_TMP.STG_TMP_COC_VINS", "pii": False},
     {"catalog": "impetus_poc", "name": "STG.STG_EMOT_BTNCDHDR", "pii": True},
+    {
+        "catalog": "impetus_poc",
+        "name": "STG.STG_EMOT_BTNPPLNH",
+        "pii": False,
+    },
     # {
     #     "catalog": "impetus_poc",
     #     "name": "STG.STG_EMOT_BTNPPLNH",
@@ -1028,6 +1034,7 @@ def create_work_item(wi):
         ),
         "schema_name": get_schema_name_source(wi).lower().replace("$", "_"),
         "table_name": get_table_name_source(wi).lower().replace("$", "_"),
+        "db_scope": jp_db_scope,
         "db_key": wi.get("db_key", p_db_key),
         "query_type": wi.get("query_type", "dbtable"),
         "query_sql": wi.get("query_sql", ""),
@@ -1035,6 +1042,7 @@ def create_work_item(wi):
         "children": wi.get("children", []),
         "run_ts": run_ts,
         "run_name": run_name,
+        "partition_count": wi.get("partition_count", cpu_count),
     }
     wi["fqn"] = f"{wi['catalog_name']}.{wi['schema_name']}.{wi['table_name']}"
     return wi
@@ -1076,7 +1084,7 @@ def load_table(work_item) -> str:
     )
     # Run the extract_table notebook
     result: str = dbutils.notebook.run(
-        "extract_table_v240217",
+        f"extract_table_{jp_run_version}",
         timeout_sec,
         {
             "p_work_json": json.dumps(work_item),
@@ -1125,7 +1133,11 @@ def run_tasks(function, q):
                 # check if we have a thread for each child added
                 child_count = len(work_item["children"])
                 if child_count > thread_count:
-                    max_threads = cpu_count if cpu_count < len(work_item["children"]) else len(work_item["children"])
+                    max_threads = (
+                        worker_count
+                        if worker_count < len(work_item["children"])
+                        else len(work_item["children"])
+                    )
                     create_threads(max_threads - thread_count)
 
         except Exception as e:
@@ -1146,7 +1158,7 @@ def run_tasks(function, q):
 for work_item in work_items:
     q.put(work_item)
 
-create_threads(cpu_count)
+create_threads(worker_count)
 
 q.join()
 

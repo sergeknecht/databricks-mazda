@@ -41,3 +41,13 @@ def get_data_partitioned__by_rownum(
     )
 
     return df
+
+
+def get_jdbc_url(db_dict: dict):
+    if db_dict['db_type'] == 'oracle':
+        return (
+            f"jdbc:oracle:thin:@//{db_dict['hostName']}:"
+            f"{db_dict['port']}/{db_dict['databaseName']}"
+        )
+    else:
+        raise ValueError(f"db_type {db_dict['db_type']} not supported")

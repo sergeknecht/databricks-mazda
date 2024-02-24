@@ -4,15 +4,15 @@ import sys
 import time
 import traceback
 
-from helpers.db_helper import (
+from helpers.db_helper_delta import schema_exists, table_exists
+from helpers.db_helper_jdbc import (
     get_bounds__by_rownum,
     get_connection_properties__by_key,
     get_data,
     get_db_dict,
 )
-from helpers.db_helper_delta import schema_exists, table_exists
-from helpers.db_helper_oracle import get_data_partitioned__by_rownum
-from helpers.db_helper_oracle_sql import sql_pk_statement
+from helpers.db_helper_jdbc_oracle import get_data_partitioned__by_rownum
+from helpers.db_helper_sql_oracle import sql_pk_statement
 from helpers.status_helper import create_status
 
 # COMMAND ----------

@@ -2,7 +2,7 @@ import pytest
 from databricks.connect import DatabricksSession
 from pyspark.dbutils import DBUtils
 
-from helpers.db_helper import get_connection_properties__by_key
+from helpers.db_helper_jdbc import get_connection_properties__by_key
 
 spark = DatabricksSession.builder.getOrCreate()
 dbutils = DBUtils(spark)
