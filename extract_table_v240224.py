@@ -189,7 +189,7 @@ class DelayedResultExtract:
                     )
                     range_size = bounds.MAX_ID - bounds.MIN_ID
 
-                    bin_size = 500_000
+                    bin_size = 250_000
                     if range_size < bin_size:
                         self.partition_count = 1
                     else:
