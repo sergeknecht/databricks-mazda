@@ -42,6 +42,10 @@ run_name = (
 # TODO: minus 1 ? because have not yet figured out how single nodes handle this number, and we want to avoid cpu starvation
 cpu_count = max(8, int(sc.defaultParallelism * 0.85))  # 40 workers accross all nodes, but partitioning will create more tasks
 worker_count = 5  # 5 workers accross all nodes, but partitioning will create more tasks
+
+if jp_action == "drop":
+    worker_count = cpu_count * 2
+
 print(cpu_count, worker_count)
 
 timeout_sec = 5400  # 1:30 hours
@@ -490,115 +494,115 @@ work_jsons_source = [
     {"catalog": "impetus_src", "name": "LZ_ETAS.BTGUSERFUNCTIONS", "pii": False},
     {"catalog": "impetus_src", "name": "LZ_ETAS.BTGUSERS", "pii": False},
     {"catalog": "impetus_src", "name": "LZ_ETAS.BTGUSER_DETAILS", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_EXTRACT.ELOQUA_CONLEAD_DEL_EXP", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_EXTRACT.ELOQUA_CONTACTS_CURR", "pii": False},
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACTS_DEL_EXP",
-        "pii": False,
-    },
-    {"catalog": "impetus_src", "name": "LZ_EXTRACT.ELOQUA_CONTACTS_EXPORT", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_EXTRACT.ELOQUA_CONTACTS_LIST", "pii": False},
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACTS_RTBD_DEL_EXP",
-        "pii": False,
-    },
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_EMAILS_EXP",
-        "pii": False,
-    },
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_EMAIL_VEH_EXP",
-        "pii": False,
-    },
-    {"catalog": "impetus_src", "name": "LZ_EXTRACT.ELOQUA_CONTACT_FILTER", "pii": False},
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_LEADS_CURR",
-        "pii": False,
-    },
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_LEADS_EXP",
-        "pii": False,
-    },
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_ORDERS_CURR",
-        "pii": False,
-    },
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_ORDERS_EXP",
-        "pii": False,
-    },
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_ORDERS_LIST",
-        "pii": False,
-    },
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_ORD_DEL_EXP",
-        "pii": False,
-    },
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_TCMR_CURR",
-        "pii": False,
-    },
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_TCMR_DEL_EXP",
-        "pii": False,
-    },
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_TCMR_EXP",
-        "pii": False,
-    },
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_TSC_CURR",
-        "pii": False,
-    },
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_TSC_DEL_EXP",
-        "pii": False,
-    },
-    {"catalog": "impetus_src", "name": "LZ_EXTRACT.ELOQUA_CONTACT_TSC_EXP", "pii": False},
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_TSC_UPD_EXP",
-        "pii": False,
-    },
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_VEHICLES_CURR",
-        "pii": False,
-    },
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_VEHICLES_EXP",
-        "pii": False,
-    },
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_VEHICLES_LIST",
-        "pii": False,
-    },
-    {
-        "catalog": "impetus_src",
-        "name": "LZ_EXTRACT.ELOQUA_CONTACT_VEH_DEL_EXP",
-        "pii": False,
-    },
-    {"catalog": "impetus_src", "name": "LZ_EXTRACT.ELOQUA_CONVEH_DEL_EXP", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_EXTRACT.ELOQUA_MARKETS", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_EXTRACT.MMUK_MMPSREG", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_EXTRACT.ELOQUA_CONLEAD_DEL_EXP", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_EXTRACT.ELOQUA_CONTACTS_CURR", "pii": False},
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACTS_DEL_EXP",
+    #     "pii": False,
+    # },
+    # {"catalog": "impetus_src", "name": "LZ_EXTRACT.ELOQUA_CONTACTS_EXPORT", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_EXTRACT.ELOQUA_CONTACTS_LIST", "pii": False},
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACTS_RTBD_DEL_EXP",
+    #     "pii": False,
+    # },
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_EMAILS_EXP",
+    #     "pii": False,
+    # },
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_EMAIL_VEH_EXP",
+    #     "pii": False,
+    # },
+    # {"catalog": "impetus_src", "name": "LZ_EXTRACT.ELOQUA_CONTACT_FILTER", "pii": False},
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_LEADS_CURR",
+    #     "pii": False,
+    # },
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_LEADS_EXP",
+    #     "pii": False,
+    # },
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_ORDERS_CURR",
+    #     "pii": False,
+    # },
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_ORDERS_EXP",
+    #     "pii": False,
+    # },
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_ORDERS_LIST",
+    #     "pii": False,
+    # },
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_ORD_DEL_EXP",
+    #     "pii": False,
+    # },
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_TCMR_CURR",
+    #     "pii": False,
+    # },
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_TCMR_DEL_EXP",
+    #     "pii": False,
+    # },
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_TCMR_EXP",
+    #     "pii": False,
+    # },
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_TSC_CURR",
+    #     "pii": False,
+    # },
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_TSC_DEL_EXP",
+    #     "pii": False,
+    # },
+    # {"catalog": "impetus_src", "name": "LZ_EXTRACT.ELOQUA_CONTACT_TSC_EXP", "pii": False},
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_TSC_UPD_EXP",
+    #     "pii": False,
+    # },
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_VEHICLES_CURR",
+    #     "pii": False,
+    # },
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_VEHICLES_EXP",
+    #     "pii": False,
+    # },
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_VEHICLES_LIST",
+    #     "pii": False,
+    # },
+    # {
+    #     "catalog": "impetus_src",
+    #     "name": "LZ_EXTRACT.ELOQUA_CONTACT_VEH_DEL_EXP",
+    #     "pii": False,
+    # },
+    # {"catalog": "impetus_src", "name": "LZ_EXTRACT.ELOQUA_CONVEH_DEL_EXP", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_EXTRACT.ELOQUA_MARKETS", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_EXTRACT.MMUK_MMPSREG", "pii": False},
     {"catalog": "impetus_src", "name": "LZ_FILE.CEMI", "pii": False},
     {"catalog": "impetus_src", "name": "LZ_FILE.CIP_CUSTOMER", "pii": False},
     {"catalog": "impetus_src", "name": "LZ_FILE.CIP_MASTER_CUSTOMER", "pii": False},
@@ -693,20 +697,20 @@ work_jsons_source = [
     {"catalog": "impetus_src", "name": "LZ_INC.TBINC_RESULT", "pii": False},
     {"catalog": "impetus_src", "name": "LZ_INC.TBINC_TDEFI", "pii": False},
     {"catalog": "impetus_src", "name": "LZ_INC.TBINC_VINPAYMENT", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_KRONOS.CA_ABSENCE_REQUEST", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_KRONOS.CO_EMPLOYEE", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_KRONOS.CO_EMPLOYEE_SYNC", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_KRONOS.CUST_MAZDA_ABSENCES", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_KRONOS.CUST_MAZDA_EMPLOYEES", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_KRONOS.CUST_MAZDA_PUNCHES", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_KRONOS.EMPLOYEE", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_KRONOS.EMPLOYEE_SYNC", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_KRONOS.TM_EXCDEF", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_KRONOS.TM_EXCEPTION", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_KRONOS.TM_LINK", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_KRONOS.TM_PUNCH", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_KRONOS.TM_SCHEDULE", "pii": False},
-    {"catalog": "impetus_src", "name": "LZ_KRONOS.TM_TEMPLATE", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_KRONOS.CA_ABSENCE_REQUEST", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_KRONOS.CO_EMPLOYEE", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_KRONOS.CO_EMPLOYEE_SYNC", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_KRONOS.CUST_MAZDA_ABSENCES", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_KRONOS.CUST_MAZDA_EMPLOYEES", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_KRONOS.CUST_MAZDA_PUNCHES", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_KRONOS.EMPLOYEE", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_KRONOS.EMPLOYEE_SYNC", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_KRONOS.TM_EXCDEF", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_KRONOS.TM_EXCEPTION", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_KRONOS.TM_LINK", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_KRONOS.TM_PUNCH", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_KRONOS.TM_SCHEDULE", "pii": False},
+    # {"catalog": "impetus_src", "name": "LZ_KRONOS.TM_TEMPLATE", "pii": False},
     {"catalog": "impetus_src", "name": "LZ_LEM.COST_DETAILS", "pii": False},
     {"catalog": "impetus_src", "name": "LZ_LEM.COST_DETAILS_CURR", "pii": False},
     {"catalog": "impetus_src", "name": "LZ_LEM.DDN_RTDAM_AUDIT", "pii": False},
@@ -1123,7 +1127,7 @@ def run_tasks(function, q):
             work_item["job_id"] = result_dict.get("job_id", 0)
 
             logger.info(
-                f"completed {result_dict.get('job_id', 0)}: {work_item.get('fqn', '')}, status_code: {work_item.get('status_code', -1)}, time_duration: {work_item.get('time_duration', -1)} sec ({work_item.get('time_duration', -1)//6} min)."
+                f"completed {result_dict.get('job_id', 0)}: {work_item.get('fqn', '')}, status_code: {result_dict.get('status_code', -1)}, time_duration: {result_dict.get('time_duration', -1)} sec ({result_dict.get('time_duration', -1)//60} min)."
             )
 
             results.append(result)

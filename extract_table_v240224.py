@@ -6,6 +6,7 @@
 
 import logging
 import json
+import pprint as pp
 import sys
 import time
 import traceback
@@ -95,13 +96,17 @@ if ("drop" in actions and p_mode != "append") or p_mode == "drop" or p_actions =
 
     if p_mode == "drop" or p_actions == "drop":
         # drop was the only thing to do, let's quit
+        end_time = time.time()
+        time_duration = int(end_time - start_time)
+
         dbutils.notebook.exit(
             json.dumps(
                 {
                     "job_id": job_id,
                     "fqn": p_fqn,
                     "status_code": 200,
-                    "status_message": "OK",
+                    "status_message": "OK - dropped",
+                    "time_duration": time_duration
                 }
             )
         )
@@ -342,17 +347,12 @@ try:
     if "create" in actions and p_mode != "append":
         # table should not yet exist, if it does we will skip this and return to caller
         if table_exists(p_catalog_name, p_schema_name, p_table_name):
-            result = create_status(
+            result :dict = create_status(
                 scope=p_scope,
                 status_code=208,
                 status_message="ALREADY_REPORTED: table already exists - skipping",
                 status_ctx=work_item,
             )
-
-            # log_to_delta_table(result)
-
-            # dbutils.notebook.exit(json.dumps(result))
-            # we don't want to exit here because this actually is an exception and is considered an error
 
         # all is good. Let's create the catalog and schema the table will be in
         spark.sql(
@@ -362,31 +362,17 @@ try:
     # we are creating the target and the work item is in append mode
     elif "create" in actions and p_mode == "append":
 
-        # # first action is a drop_create (using df overwrite). This might take some time to finish so we need to give it some time before we check if the NEW table is created
-        # # TODO: this is a possible race condition that we need to fix in future
-        # time.sleep(180)
-
-        # counter = 0
-        # while not table_exists(p_catalog_name, p_schema_name, p_table_name):
-        #     time.sleep(60)
-        #     counter += 1
-        #     if counter > 30:
-        #         # TODO: Improve: longer is theoretically not possible because we also have a timeout from calling notebook
-        #         break
-
         # because we are in append mode we need to check if the table exists
         if not table_exists(p_catalog_name, p_schema_name, p_table_name):
-            result = create_status(
+            result :dict = create_status(
                 scope=p_scope,
                 status_code=500,
                 status_message="INTERNAL_SERVER_ERROR: Append table does not yet exists",
                 status_ctx=work_item,
             )
-
-            # log_to_delta_table(result)
-
-            # dbutils.notebook.exit(json.dumps(result))
-            # we don't want to exit here because this actually is an exception and is considered an error
+            end_time = time.time()
+            time_duration = int(end_time - start_time)
+            result["time_duration"] = time_duration
 
 except (Exception, AnalysisException) as e:
     exc_type, exc_value, exc_tb = sys.exc_info()
@@ -422,6 +408,7 @@ if result:
     time_duration = int(end_time - start_time)
     result["time_duration"] = time_duration
     log_to_delta_table(result)
+    logger.info(pp.ppformat(result))
     dbutils.notebook.exit(json.dumps(result))
 
 # COMMAND ----------
@@ -458,6 +445,9 @@ except (Exception, AnalysisException) as e:
         status_ctx=work_item,
     )
     result["stack_trace"] = stack_trace
+    end_time = time.time()
+    time_duration = int(end_time - start_time)
+    result["time_duration"] = time_duration
 
     log_to_delta_table(result)
     dbutils.notebook.exit(json.dumps(result))
