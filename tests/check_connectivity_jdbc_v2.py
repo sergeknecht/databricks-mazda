@@ -32,8 +32,8 @@
 # COMMAND ----------
 
 from helpers.db_helper_jdbc import (
-    get_bounds__by_rownum,
     get_connection_properties__by_key,
+    get_jdbc_bounds__by_rownum,
     get_jdbc_data_by_dict,
 )
 from helpers.db_helper_jdbc_oracle import get_data_partitioned__by_rownum
@@ -64,7 +64,7 @@ print(db_conn_props['url'])
 #     url=jdbcUrl, table=pushdown_query, properties=connectionProperties
 # ).collect()[0]
 
-bounds = get_bounds__by_rownum(db_conn_props, 'LZ_MUM.TUSER')
+bounds = get_jdbc_bounds__by_rownum(db_conn_props, 'LZ_MUM.TUSER')
 bounds
 
 

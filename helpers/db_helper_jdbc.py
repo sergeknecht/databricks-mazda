@@ -88,9 +88,13 @@ def get_jdbc_data_by_dict(
     # if 'partitionColumn' in db_conn_props:
     #     query_type = 'dbtable'
 
-    logger.info(query_sql)
+
 
     db_conn_props = {k: v for k, v in db_conn_props.items() if k in JDBC_KEYS_ALLOWED}
+    db_conn_props = {k: v for k, v in db_conn_props.items() if v}
+
+    logger.info(query_sql)
+    logger.info(pp.pformat(db_conn_props))
 
     df = (
         spark.read.format('jdbc')
@@ -159,8 +163,8 @@ def get_jdbc_bounds__by_partition_key(
 
     return bounds
 
-def get_bounds__by_rownum(
-    db_dict: dict,
+def get_jdbc_bounds__by_rownum(
+    db_conn_props: dict,
     table_name: str,  # example: "LZ_MUM.TUSER"
 ):
     """
@@ -186,9 +190,9 @@ def get_bounds__by_rownum(
     """
 
     bounds = spark.read.jdbc(
-        url=db_dict['url'],
+        url=db_conn_props['url'],
         table=pushdown_query,
-        properties=db_dict,
+        properties=db_conn_props,
     ).collect()[0]
 
     return bounds

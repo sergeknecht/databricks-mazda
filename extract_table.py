@@ -11,9 +11,9 @@ import traceback
 
 from helpers.db_helper_delta import table_exists
 from helpers.db_helper_jdbc import (
-    get_bounds__by_rownum,
     get_connection_properties__by_key,
     get_db_dict,
+    get_jdbc_bounds__by_rownum,
     get_jdbc_data_by_dict,
 )
 from helpers.db_helper_jdbc_oracle import get_data_partitioned__by_rownum

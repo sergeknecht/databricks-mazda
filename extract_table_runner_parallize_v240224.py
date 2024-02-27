@@ -13,7 +13,6 @@
 import logging
 import datetime
 import json
-import pprint as pp
 import time
 
 from helpers.app_helper import init
@@ -29,20 +28,20 @@ logger.setLevel(logging.INFO)
 # COMMAND ----------
 
 # JOB PARAMETERS
-jp_action = "create" or "drop__create" or  "drop"
+jp_action = "drop" or "drop__create" or "create" or "drop__create" or "drop"
 jp_actions = jp_action.split("__")
 jp_scope = "DEV" or "ACC" or "PRD" or "TST" or "DEV"  # where to write the data
 jp_db_scope = "ACC"  # where to read the data
 jp_run_version = "v240224"  # version of the job
-p_db_key = "DWH_BI1__250000" or "DWH_BI1__100000" or "DWH_BI1" or "DWH_BI1__500000" 
+p_db_key = "DWH_BI1__250000" or "DWH_BI1__100000" or "DWH_BI1" or "DWH_BI1__500000"
 run_ts = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
 run_name = (
     dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get()
 )
 
 # TODO: minus 1 ? because have not yet figured out how single nodes handle this number, and we want to avoid cpu starvation
-cpu_count = max(40, int(sc.defaultParallelism * 0.85))  # 40 workers accross all nodes, but partitioning will create more tasks
-worker_count = 8  # 5 workers accross all nodes, but partitioning will create more tasks
+cpu_count = max(8, int(sc.defaultParallelism * 0.85))  # 40 workers accross all nodes, but partitioning will create more tasks
+worker_count = 5  # 5 workers accross all nodes, but partitioning will create more tasks
 print(cpu_count, worker_count)
 
 timeout_sec = 5400  # 1:30 hours
@@ -1020,7 +1019,7 @@ get_table_name_source = lambda x: x["name"].split(".")[1]
 
 def create_work_item(wi):
     wi = {
-        "action": "create",
+        "action": jp_action,
         "pii": wi["pii"],
         "timeout_sec": timeout_sec,
         "scope": jp_scope,
@@ -1077,10 +1076,11 @@ results = []
 def load_table(work_item) -> str:
     p_schema_name_source = work_item["schema_name_source"]
     p_table_name_source = work_item["table_name_source"]
+    p_action = work_item["action"]
     p_mode = work_item.get("mode", "overwrite")
     p_sql = work_item.get("query_sql", "")
     logger.info(
-        f"Processing {p_schema_name_source}.{p_table_name_source} with mode {p_mode} with sql {p_sql}"
+        f"{p_action} {p_schema_name_source}.{p_table_name_source} with mode {p_mode} with sql {p_sql}"
     )
     # Run the extract_table notebook
     result: str = dbutils.notebook.run(
@@ -1123,8 +1123,9 @@ def run_tasks(function, q):
             work_item["job_id"] = result_dict.get("job_id", 0)
 
             logger.info(
-                f"completed {result_dict.get('job_id', 0)}: {work_item.get('fqn', '')}"
+                f"completed {result_dict.get('job_id', 0)}: {work_item.get('fqn', '')}, status_code: {work_item.get('status_code', -1)}"
             )
+
             results.append(result)
             if work_item["children"]:
                 for child in work_item["children"]:

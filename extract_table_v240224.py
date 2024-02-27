@@ -17,6 +17,7 @@ from helpers.db_helper_delta import table_exists
 from helpers.db_helper_jdbc import (
     get_connection_properties__by_key,
     get_jdbc_bounds__by_partition_key,
+    get_jdbc_bounds__by_rownum,
     get_jdbc_data_by_dict,
     get_jdbc_data_by_dict__by_partition_key,
 )
@@ -53,7 +54,7 @@ assert p_work_json, "p_work_json not set"
 p_work_json["job_id"] = job_id
 
 p_scope = p_work_json["scope"]
-p_action = p_work_json["action"]
+p_actions = p_work_json["action"]
 p_db_scope = p_work_json["db_scope"]
 p_db_key = p_work_json["db_key"]
 p_catalog_name_source = p_work_json["catalog_name_source"]
@@ -68,7 +69,7 @@ p_fqn = p_work_json.get("fqn", f"{p_catalog_name}.{p_schema_name}.{p_table_name}
 logger.info(p_fqn)
 logger.info(job_id)
 print(p_scope, p_db_scope)
-print(p_action)
+print(p_actions)
 print(p_mode)
 
 start_time = time.time()
@@ -85,14 +86,14 @@ work_item = {
 
 # COMMAND ----------
 
-actions = p_action.split("__")
+actions = p_actions.split("__")
 
 # drop the table if action or mode matches
 # if action is only drop than we don't want append to run. drop and quit
-if ("drop" in actions and p_mode != "append") or p_mode == "drop" or p_action == "drop":
+if ("drop" in actions and p_mode != "append") or p_mode == "drop" or p_actions == "drop":
     spark.sql(f"DROP TABLE IF EXISTS {p_fqn}")
 
-    if p_mode == "drop" or p_action == "drop":
+    if p_mode == "drop" or p_actions == "drop":
         # drop was the only thing to do, let's quit
         dbutils.notebook.exit(
             json.dumps(
@@ -181,12 +182,29 @@ class DelayedResultExtract:
 
             try:
 
-                if column_name_partition:
+                if not column_name_partition:
+                    column_name_partition = "ROWNUM"
+                    bounds = get_jdbc_bounds__by_rownum(
+                        db_conn_props=db_conn_props,
+                        table_name=table_name_source,
+                    )
+                    pushdown_query = f"""(
+                    select ROWNUM, d.* from {table_name_source} d order by d.ROWID
+                    ) dataset
+                    """
+                    work_item["table_sql"]= pushdown_query
+                    work_item["query_type"]= 'dbtable' # with partitioning query is not allowed
+                else:
                     bounds = get_jdbc_bounds__by_partition_key(
                         db_conn_props=db_conn_props,
                         table_name=table_name_source,
                         column_name_partition=column_name_partition,
                     )
+                    work_item["table_sql"]= table_name_source
+                    work_item["query_type"]= 'dbtable' # with partitioning query is not allowed
+
+
+                if column_name_partition:
                     range_size = bounds.MAX_ID - bounds.MIN_ID
 
                     bin_size = 250_000
@@ -200,11 +218,7 @@ class DelayedResultExtract:
 
                     df = get_jdbc_data_by_dict__by_partition_key(
                         db_conn_props=db_conn_props,
-                        work_item={
-                            **self.work_item,
-                            "table_sql": table_name_source,
-                            "query_type" : 'dbtable' # with partitioning query is not allowed
-                        },
+                        work_item=self.work_item,
                         bounds=bounds,
                         column_name_partition=column_name_partition,
                         partition_count=self.partition_count
@@ -321,7 +335,7 @@ class DelayedResultExtract:
 
 
 # COMMAND ----------
-
+result = None
 try:
     # we will create the target and the work item is not append mode
 
@@ -335,8 +349,10 @@ try:
                 status_ctx=work_item,
             )
 
-            log_to_delta_table(result)
-            dbutils.notebook.exit(json.dumps(result))
+            # log_to_delta_table(result)
+
+            # dbutils.notebook.exit(json.dumps(result))
+            # we don't want to exit here because this actually is an exception and is considered an error
 
         # all is good. Let's create the catalog and schema the table will be in
         spark.sql(
@@ -367,8 +383,10 @@ try:
                 status_ctx=work_item,
             )
 
-            log_to_delta_table(result)
-            dbutils.notebook.exit(json.dumps(result))
+            # log_to_delta_table(result)
+
+            # dbutils.notebook.exit(json.dumps(result))
+            # we don't want to exit here because this actually is an exception and is considered an error
 
 except (Exception, AnalysisException) as e:
     exc_type, exc_value, exc_tb = sys.exc_info()
@@ -392,6 +410,12 @@ except (Exception, AnalysisException) as e:
 
     log_to_delta_table(result)
 
+    dbutils.notebook.exit(json.dumps(result))
+
+if result:
+    # there was no exception but we encountered a condition which allows us to quit early
+    # during create we found that table already exists, etc.
+    log_to_delta_table(result)
     dbutils.notebook.exit(json.dumps(result))
 
 # COMMAND ----------
