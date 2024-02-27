@@ -989,6 +989,7 @@ work_jsons_source = [
 # COMMAND ----------
 
 # work_jsons.extend(work_jsons_source)
+work_jsons = work_jsons_source
 
 # COMMAND ----------
 

@@ -1,4 +1,9 @@
 # Databricks notebook source
+# MAGIC %load_ext autoreload
+# MAGIC %autoreload 2
+
+# COMMAND ----------
+
 import json
 import sys
 import time
@@ -22,7 +27,7 @@ from helpers.status_helper import create_status
 # COMMAND ----------
 
 start_time = time.time()
-catalog_source = 'acc__impetus_target'
+catalog_source = 'dev__impetus_target'
 catalog_target = 'impetus_target'
 schemas = ['stg', 'stg_tmp', 'lz_lem']
 jp_action = "drop__create"

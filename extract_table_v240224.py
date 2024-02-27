@@ -406,6 +406,9 @@ except (Exception, AnalysisException) as e:
         status_message=f"INTERNAL_SERVER_ERROR: table_exists in prepare: {status_message}",
         status_ctx=work_item,
     )
+    end_time = time.time()
+    time_duration = int(end_time - start_time)
+    result["time_duration"] = time_duration
     result["stack_trace"] = stack_trace
 
     log_to_delta_table(result)
@@ -415,6 +418,9 @@ except (Exception, AnalysisException) as e:
 if result:
     # there was no exception but we encountered a condition which allows us to quit early
     # during create we found that table already exists, etc.
+    end_time = time.time()
+    time_duration = int(end_time - start_time)
+    result["time_duration"] = time_duration
     log_to_delta_table(result)
     dbutils.notebook.exit(json.dumps(result))
 
