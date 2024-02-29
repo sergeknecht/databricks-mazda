@@ -27,8 +27,8 @@ from helpers.status_helper import create_status
 # COMMAND ----------
 
 start_time = time.time()
-catalog_source = 'dev__impetus_poc'
-catalog_target = 'impetus_poc'
+catalog_source = 'acc__impetus_poc'
+catalog_target = 'impetus_poc_day2'
 schemas = ['stg', 'stg_tmp', 'lz_lem']
 jp_action = "drop__create"
 jp_actions = jp_action.split('__')
