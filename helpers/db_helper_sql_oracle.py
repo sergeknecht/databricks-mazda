@@ -48,10 +48,7 @@ SELECT
           THEN c.column_name || ' ' ||  'DATE'
     ELSE ''
     END DBX_DATA_TYPE,
-    CASE
-        WHEN c.data_type = 'CHAR' AND c.char_length > 1 THEN '''['' || ' || c.column_name || ' || '']'' AS ' || c.column_name
-        ELSE c.column_name
-    END DBX_COLUMN_NAME
+    c.column_name DBX_COLUMN_NAME
 FROM
     sys.all_tables t
     INNER JOIN sys.all_tab_columns c ON t.table_name = c.table_name
@@ -64,6 +61,12 @@ ORDER BY
     c.COLUMN_ID,
     c.column_name
 """
+
+    # CASE
+    #     WHEN c.data_type = 'CHAR' AND c.char_length > 1 THEN '''['' || ' || c.column_name || ' || '']'' AS ' || c.column_name
+    #     ELSE c.column_name
+    # END DBX_COLUMN_NAME
+
 
 # AND ( ( c.data_type = 'NUMBER'
 #         AND c.data_length = 22

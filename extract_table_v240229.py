@@ -225,11 +225,25 @@ class DelayedResultExtract:
 
             try:
 
+                # now that we have bounds, we can customSchema
+                customSchema = ", ".join(customSchemas)
+                column_names = ", ".join(column_names)  # d.*
+
+                pushdown_query = f"""(
+                select {column_names} from {table_name_source} d
+                ) dataset
+                """
+
                 if not column_name_partition:
 
-                    # raise ValueError("No partition key found")
-
                     logging.warning("No partition key found: {table_name_source}")
+
+                    if customSchema:
+                        db_conn_props["customSchema"] = customSchema
+                        logging.debug(f"customSchema: '{customSchema}'")
+
+                    if column_names:
+                        logging.debug(f"column_names: '{column_names}'")
 
                     df = get_jdbc_data_by_dict(
                         db_conn_props=db_conn_props,
@@ -239,29 +253,6 @@ class DelayedResultExtract:
                         },
                     ).load()
 
-                    # ROWNUM is unusable as partition key, probably because of incosistency due to Oracle DB cluster
-                    # bounds = get_jdbc_bounds__by_rownum(
-                    #     db_conn_props=db_conn_props,
-                    #     table_name=table_name_source,
-                    # )
-
-                    # column_name_partition = "ROWNUM"
-                    # customSchemas.append("ROWNUM INT")
-
-                    # # column_names = [f"d.{column}" for column in column_names]
-                    # column_names.insert(0, "ROWNUM")
-                    # column_names = ", ".join(column_names)  # ROWNUM, d.*
-
-                    # pushdown_query = f"""(
-                    # select {column_names} from {table_name_source} d order by d.ROWID
-                    # ) dataset
-                    # """
-
-                    # work_item["table_sql"] = pushdown_query
-                    # work_item["query_type"] = (
-                    #     "dbtable"  # with partitioning query is not allowed
-                    # )
-
                 else:
                     bounds = get_jdbc_bounds__by_partition_key(
                         db_conn_props=db_conn_props,
@@ -269,50 +260,40 @@ class DelayedResultExtract:
                         column_name_partition=column_name_partition,
                     )
 
-                    # column_names = [f"d.{column}" for column in column_names]
-                    column_names = ", ".join(column_names)  # d.*
-
-                    pushdown_query = f"""(
-                    select {column_names} from {table_name_source} d
-                    ) dataset
-                    """
-
                     work_item["table_sql"] = pushdown_query
                     work_item["query_type"] = (
                         "dbtable"  # with partitioning query is not allowed
                     )
 
-                # now that we have bounds, we can customSchema
-                customSchema = ", ".join(customSchemas)
+                    if customSchema:
+                        db_conn_props["customSchema"] = customSchema
+                        logging.debug(f"customSchema: '{customSchema}'")
 
-                if customSchema:
-                    db_conn_props["customSchema"] = customSchema
-                    logging.debug(f"customSchema: '{customSchema}'")
+                    if column_names:
+                        logging.debug(f"column_names: '{column_names}'")
 
-                if column_names:
-                    logging.debug(f"column_names: '{column_names}'")
+                    # if column_name_partition:
+                    range_size = bounds.MAX_ID - bounds.MIN_ID
 
-                # if column_name_partition:
-                range_size = bounds.MAX_ID - bounds.MIN_ID
+                    partition_bin_size = 200_000
+                    if range_size < partition_bin_size:
+                        self.partition_count = 1
+                    else:
+                        # we want to have at least bin_size rows per partition with a maxum of self.partition_count
+                        self.partition_count = min(20, int(range_size / partition_bin_size))
 
-                bin_size = 200_000
-                if range_size < bin_size:
-                    self.partition_count = 1
-                else:
-                    # we want to have at least bin_size rows per partition with a maxum of self.partition_count
-                    self.partition_count = min(20, int(range_size / bin_size))
+                    logger.info(
+                        f"Partitioning table {table_name_source} by {column_name_partition} into {self.partition_count} partitions"
+                    )
 
-                logger.info(
-                    f"Partitioning table {table_name_source} by {column_name_partition} into {self.partition_count} partitions"
-                )
+                    df = get_jdbc_data_by_dict__by_partition_key(
+                        db_conn_props=db_conn_props,
+                        work_item=self.work_item,
+                        bounds=bounds,
+                        column_name_partition=column_name_partition,
+                        partition_count=self.partition_count,
+                    ).load()
 
-                df = get_jdbc_data_by_dict__by_partition_key(
-                    db_conn_props=db_conn_props,
-                    work_item=self.work_item,
-                    bounds=bounds,
-                    column_name_partition=column_name_partition,
-                    partition_count=self.partition_count,
-                ).load()
 
                 df.write.format("delta").mode(self.mode).option(
                     "overwriteSchema", "true"
@@ -509,7 +490,7 @@ try:
 
     assert type(result) == str, "result is not a string"
 
-    log_to_delta_table(json.loads(result))
+    # log_to_delta_table(json.loads(result))
 
 except (Exception, AnalysisException) as e:
     exc_type, exc_value, exc_tb = sys.exc_info()
