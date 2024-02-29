@@ -28,9 +28,9 @@ logger.setLevel(logging.INFO)
 # COMMAND ----------
 
 # JOB PARAMETERS
-jp_action = "drop" or "drop__create" or "create" or "drop__create" or "drop"
+jp_action = "create" or "drop__create" or "create" or "drop__create" or "drop"
 jp_actions = jp_action.split("__")
-jp_scope = "DEV" or "ACC" or "PRD" or "TST" or "DEV"  # where to write the data
+jp_scope = "ACC" or "PRD" or "TST" or "DEV"  # where to write the data
 jp_db_scope = "ACC"  # where to read the data
 jp_run_version = "v240224"  # version of the job
 p_db_key = "DWH_BI1__250000" or "DWH_BI1__100000" or "DWH_BI1" or "DWH_BI1__500000"
