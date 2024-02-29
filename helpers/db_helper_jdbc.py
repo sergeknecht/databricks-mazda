@@ -25,6 +25,7 @@ JDBC_KEYS_ALLOWED = [
     'fetchSize',
     'pooling',
     'port',
+    "customSchema",
 ]
 
 
@@ -94,7 +95,7 @@ def get_jdbc_data_by_dict(
     db_conn_props = {k: v for k, v in db_conn_props.items() if v}
 
     logger.info(query_sql)
-    logger.info(pp.pformat(db_conn_props))
+    logger.debug(pp.pformat(db_conn_props))
 
     df = (
         spark.read.format('jdbc')
@@ -151,7 +152,7 @@ def get_jdbc_bounds__by_partition_key(
     ) dataset
     """
 
-    logger.info(pp.pformat(db_conn_props))
+    logger.debug(pp.pformat(db_conn_props))
 
     bounds = spark.read.jdbc(
         url=db_conn_props['url'],
@@ -159,7 +160,7 @@ def get_jdbc_bounds__by_partition_key(
         properties=db_conn_props,
     ).collect()[0]
 
-    logger.info(pp.pformat(bounds))
+    logger.debug(pp.pformat(bounds))
 
     return bounds
 

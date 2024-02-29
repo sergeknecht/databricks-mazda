@@ -18,3 +18,89 @@ order by 1 ,2, 3
 """
 
 # partitionColumn must be a numeric, date, or timestamp column from the table in the query
+
+
+# code to get data type of table
+# and convert it to spark data type that is compatible with it
+# https://docs.databricks.com/en/sql/language-manual/sql-ref-datatypes.html
+
+sql_table_schema_statement = """
+SELECT
+    t.owner AS schema_name,
+    t.table_name,
+    c.column_id,
+    c.column_name,
+    c.data_type,
+    c.data_length,
+    c.data_scale,
+    c.char_length,
+    c.data_default,
+    CASE
+    WHEN ( c.data_type = 'NUMBER'
+            AND c.data_length = 22
+            AND c.data_scale = 0
+          )
+            THEN c.column_name || ' ' || 'INT'
+    WHEN  ( c.data_type = 'DATE'
+            AND c.data_length = 7
+            AND c.char_length = 0
+          )
+          THEN c.column_name || ' ' ||  'DATE'
+    ELSE ''
+    END DBX_DATA_TYPE,
+    CASE
+        WHEN c.data_type = 'CHAR' THEN '''['' || ' || c.column_name || ' || '']'' AS ' || c.column_name
+        ELSE c.column_name
+    END DBX_COLUMN_NAME
+FROM
+    sys.all_tables t
+    INNER JOIN sys.all_tab_columns c ON t.table_name = c.table_name
+WHERE
+        lower(t.owner) = lower('{schema}')
+    AND lower(t.table_name) = lower('{table_name}')
+ORDER BY
+    t.owner,
+    t.table_name,
+    c.COLUMN_ID,
+    c.column_name
+"""
+
+# AND ( ( c.data_type = 'NUMBER'
+#         AND c.data_length = 22
+#         AND c.data_scale = 0 )
+#       OR ( c.data_type = 'DATE'
+#            AND c.data_length = 7
+#            AND c.char_length = 0 )
+#             )
+# OR ( c.data_type = 'CHAR' )
+
+sql_top_distinct_columns_statement = """
+SELECT
+    t.owner AS schema_name,
+    t.table_name,
+    c.column_id,
+    c.COLUMN_NAME,
+    c.num_distinct,
+    c.data_type,
+    c.data_length,
+    c.data_scale,
+    c.char_length,
+    c.data_default
+FROM
+         sys.all_tables t
+    INNER JOIN sys.all_tab_columns c ON t.table_name = c.table_name
+WHERE
+        lower(t.owner) = lower('{schema}')
+    AND lower(t.table_name) = lower('{table_name}')
+    AND ( c.data_type = 'NUMBER'
+            AND c.data_length = 22
+            AND c.data_scale = 0
+        )
+      AND     rownum <= 5
+ORDER BY
+    t.owner,
+    t.table_name,
+    c.num_distinct DESC,
+    c.COLUMN_ID,
+    c.column_name
+    """
