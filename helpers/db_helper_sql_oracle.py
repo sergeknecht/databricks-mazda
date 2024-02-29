@@ -49,7 +49,7 @@ SELECT
     ELSE ''
     END DBX_DATA_TYPE,
     CASE
-        WHEN c.data_type = 'CHAR' THEN '''['' || ' || c.column_name || ' || '']'' AS ' || c.column_name
+        WHEN c.data_type = 'CHAR' AND c.char_length > 1 THEN '''['' || ' || c.column_name || ' || '']'' AS ' || c.column_name
         ELSE c.column_name
     END DBX_COLUMN_NAME
 FROM
