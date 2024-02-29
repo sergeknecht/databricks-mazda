@@ -43,10 +43,10 @@ run_name = (
 cpu_count = max(
     8, int(sc.defaultParallelism * 0.85)
 )  # 40 workers accross all nodes, but partitioning will create more tasks
-worker_count = 7  # workers accross all nodes, but partitioning will create more tasks
+worker_count = 5  # workers accross all nodes, but partitioning will create more tasks
 
 if jp_action == "drop":
-    worker_count = cpu_count * 4
+    worker_count = cpu_count * 5
 
 print(cpu_count, worker_count)
 
@@ -59,26 +59,6 @@ start_time = time.time()
 result = init(jp_scope)
 display(result)
 
-# COMMAND ----------
-
-# from helpers.logger_helper import CATALOG, SCHEMA, TABLE_APPLICATION, FQN
-# # df=spark.createDataFrame([result])
-# # df.write.format("delta").partitionBy("log_dt").mode("append").option("mergeSchema", "true").saveAsTable(FQN.format(scope=jp_scope))
-
-# # test what will happen when target does not exist and we have no data (= no schema)
-
-# from pyspark.errors import PySparkException
-# try:
-#     df=spark.createDataFrame([])
-#     df.write.format("delta").partitionBy("log_dt").mode("append").option("mergeSchema", "true").saveAsTable(FQN.format(scope=jp_scope))
-# except PySparkException as e:
-#     print("we caught PySparkException")
-#     logger.error(e.getErrorClass())
-#     # logger.exception(e)
-#     if e.getErrorClass() == "CANNOT_INFER_EMPTY_SCHEMA":
-#         logger.warning("CANNOT_INFER_EMPTY_SCHEMA: DataFrame empty")
-# except Exception as e:
-#     print("we caught Exception")
 
 # COMMAND ----------
 
@@ -1193,7 +1173,7 @@ def run_tasks(function, q):
             work_item["job_id"] = result_dict.get("job_id", 0)
 
             logger.info(
-                f"completed {result_dict.get('job_id', 0)}: {work_item.get('fqn', '')}, status_code: {result_dict.get('status_code', -1)}, time_duration: {result_dict.get('time_duration', -1)} sec ({result_dict.get('time_duration', -1)//60} min)."
+                f"completed {result_dict.get('job_id', 0)}: {work_item.get('fqn', '')}, status_code: {result_dict.get('status_code', -1)}, time_duration: {result_dict.get('time_duration', -1)} sec ({result_dict.get('time_duration', -1)//60} min), status_message: {result_dict.get('status_message', '')}."
             )
 
             results.append(result)

@@ -18,7 +18,6 @@ from helpers.db_helper_delta import table_exists
 from helpers.db_helper_jdbc import (
     get_connection_properties__by_key,
     get_jdbc_bounds__by_partition_key,
-    get_jdbc_bounds__by_rownum,
     get_jdbc_data_by_dict,
     get_jdbc_data_by_dict__by_partition_key,
 )
@@ -228,31 +227,40 @@ class DelayedResultExtract:
 
                 if not column_name_partition:
 
-                    raise ValueError("No partition key found")
+                    # raise ValueError("No partition key found")
 
-                    logging.warning("No partition key found, using ROWNUM")
+                    logging.warning("No partition key found: {table_name_source}")
 
-                    bounds = get_jdbc_bounds__by_rownum(
+                    df = get_jdbc_data_by_dict(
                         db_conn_props=db_conn_props,
-                        table_name=table_name_source,
-                    )
+                        work_item={
+                            **self.work_item,
+                            "table_sql": table_name_source,
+                        },
+                    ).load()
 
-                    column_name_partition = "ROWNUM"
-                    customSchemas.append("ROWNUM INT")
+                    # ROWNUM is unusable as partition key, probably because of incosistency due to Oracle DB cluster
+                    # bounds = get_jdbc_bounds__by_rownum(
+                    #     db_conn_props=db_conn_props,
+                    #     table_name=table_name_source,
+                    # )
 
-                    # column_names = [f"d.{column}" for column in column_names]
-                    column_names.insert(0, "ROWNUM")
-                    column_names = ", ".join(column_names)  # ROWNUM, d.*
+                    # column_name_partition = "ROWNUM"
+                    # customSchemas.append("ROWNUM INT")
 
-                    pushdown_query = f"""(
-                    select {column_names} from {table_name_source} d order by d.ROWID
-                    ) dataset
-                    """
+                    # # column_names = [f"d.{column}" for column in column_names]
+                    # column_names.insert(0, "ROWNUM")
+                    # column_names = ", ".join(column_names)  # ROWNUM, d.*
 
-                    work_item["table_sql"] = pushdown_query
-                    work_item["query_type"] = (
-                        "dbtable"  # with partitioning query is not allowed
-                    )
+                    # pushdown_query = f"""(
+                    # select {column_names} from {table_name_source} d order by d.ROWID
+                    # ) dataset
+                    # """
+
+                    # work_item["table_sql"] = pushdown_query
+                    # work_item["query_type"] = (
+                    #     "dbtable"  # with partitioning query is not allowed
+                    # )
 
                 else:
                     bounds = get_jdbc_bounds__by_partition_key(
@@ -485,7 +493,7 @@ if result:
     time_duration = int(end_time - start_time)
     result["time_duration"] = time_duration
     log_to_delta_table(result)
-    logger.info(pp.ppformat(result))
+    logger.info(pp.pformat(result))
     dbutils.notebook.exit(json.dumps(result))
 
 # COMMAND ----------
