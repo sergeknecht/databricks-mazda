@@ -27,8 +27,16 @@ logger.setLevel(logging.INFO)
 
 # COMMAND ----------
 
+dbutils.widgets.text("jp_action", "drop", label="Job action: drop or create or drop__create", position=0)
+
+# COMMAND ----------
+
+jp_action: str = dbutils.widgets.get("jp_action")
+
+# COMMAND ----------
+
 # JOB PARAMETERS
-jp_action = "create" or "drop__create" or "create" or "drop__create" or "drop"
+# jp_action = "create" or "drop__create" or "create" or "drop__create" or "drop"
 jp_actions = jp_action.split("__")
 jp_scope = "ACC" or "PRD" or "TST" or "DEV"  # where to write the data
 jp_db_scope = "ACC"  # where to read the data
@@ -1030,6 +1038,13 @@ work_jsons_source = [
 
 
 # COMMAND ----------
+
+
+# COMMAND ----------
+
+work_jsons = [
+    {"catalog": "impetus_poc", "name": "STG.STG_EMOT_BTNCDHDR", "pii": True},
+    ]
 
 # work_jsons = [
 #     {"catalog": "dwh1", "name": "STG.STG_DSR_VEHICLE_MASTER", "pii": False},

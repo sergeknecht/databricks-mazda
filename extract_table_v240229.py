@@ -71,7 +71,7 @@ p_mode = p_work_json.get("mode", "overwrite")
 p_fqn = p_work_json.get("fqn", f"{p_catalog_name}.{p_schema_name}.{p_table_name}")
 
 logger.info(p_fqn)
-logger.info(job_id)
+# logger.info(job_id)
 print(p_scope, p_db_scope)
 print(p_actions)
 print(p_mode)
