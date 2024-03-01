@@ -1040,21 +1040,6 @@ work_jsons_source = [
 
 # COMMAND ----------
 
-
-
-# COMMAND ----------
-
-work_jsons = [
-    {"catalog": "impetus_poc", "name": "STG.STG_EMOT_BTNCDHDR", "pii": True},
-    ]
-
-# work_jsons = [
-#     {"catalog": "dwh1", "name": "STG.STG_DSR_VEHICLE_MASTER", "pii": False},
-#     {"catalog": "dwh1", "name": "STG.STG_DSR_SVC_RECORDS", "pii": False},
-# ]
-
-# COMMAND ----------
-
 # work_jsons.extend(work_jsons_source)
 
 # COMMAND ----------
