@@ -27,11 +27,12 @@ logger.setLevel(logging.INFO)
 
 # COMMAND ----------
 
-dbutils.widgets.text("jp_action", "drop", label="Job action: drop or create or drop__create", position=0)
+dbutils.widgets.text("jp_action", "drop", label="Job action: drop or create or drop__create")
 
 # COMMAND ----------
 
 jp_action: str = dbutils.widgets.get("jp_action")
+jp_action
 
 # COMMAND ----------
 
@@ -1038,6 +1039,7 @@ work_jsons_source = [
 
 
 # COMMAND ----------
+
 
 
 # COMMAND ----------
