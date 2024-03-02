@@ -27,14 +27,14 @@ logger.setLevel(logging.INFO)
 
 # COMMAND ----------
 
-dbutils.widgets.text(
-    "jp_action", "create", label="Job action: drop or create or drop__create"
-)
+dbutils.widgets.text("jp_action", "drop", label="Job action: drop or create or drop__create")
+dbutils.widgets.dropdown("jp_stop_on_exception", "FALSE", ["TRUE", "FALSE"], label="raise exception on data error")
 
 # COMMAND ----------
 
 jp_action: str = dbutils.widgets.get("jp_action")
-jp_action
+jp_stop_on_exception: bool = dbutils.widgets.get("jp_stop_on_exception").upper() == "TRUE"
+jp_action + ","  + str(jp_stop_on_exception)
 
 # COMMAND ----------
 
@@ -43,7 +43,7 @@ jp_action
 jp_actions = jp_action.split("__")
 jp_scope = "ACC" or "PRD" or "TST" or "DEV"  # where to write the data
 jp_db_scope = "ACC"  # where to read the data
-jp_run_version = "v240301"  # version of the job
+jp_run_version = "v240229"  # version of the job
 p_db_key = "DWH_BI1__100000" or "DWH_BI1" or "DWH_BI1__500000" or "DWH_BI1__250000"
 run_ts = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
 run_name = (
@@ -1110,19 +1110,6 @@ print(len(work_items))
 
 # COMMAND ----------
 
-# def is_unfinished_task(wi):
-#     if wi["action"] == "create" and wi["mode"] == "overwrite" and wi["query_type"] == "dbtable":
-#         return not table_exists(wi["catalog_name"], wi["schema_name"], wi["table_name"])
-#     else:
-#         return True
-
-# work_items = [
-#     wi for wi in work_items if is_unfinished_task(wi)
-# ]
-# print(len(work_items))
-
-# COMMAND ----------
-
 work_items
 
 # COMMAND ----------
@@ -1177,10 +1164,10 @@ def run_tasks(function, q):
         try:
             result: str = function(work_item)
             result_dict = json.loads(result)
-            work_item["job_id"] = result_dict.get("job_id", "0")
+            work_item["job_id"] = result_dict.get("job_id", 0)
 
             logger.info(
-                f"completed {result_dict.get('job_id', "0")}: {work_item.get('fqn', '')}, status_code: {result_dict.get('status_code', -1)}, time_duration: {result_dict.get('time_duration', -1)} sec ({result_dict.get('time_duration', -1)//60} min), status_message: {result_dict.get('status_message', '')}."
+                f"completed {result_dict.get('job_id', 0)}: {work_item.get('fqn', '')}, status_code: {result_dict.get('status_code', -1)}, time_duration: {result_dict.get('time_duration', -1)} sec ({result_dict.get('time_duration', -1)//60} min), status_message: {result_dict.get('status_message', '')}."
             )
 
             results.append(result)
@@ -1200,7 +1187,7 @@ def run_tasks(function, q):
 
         except Exception as e:
             logger.error(
-                f"called from run task {work_item.get('job_id', "0")}: {work_item.get('fqn', '')}: {e}"
+                f"called from run task {work_item.get('job_id', 0)}: {work_item.get('fqn', '')}: {e}"
             )
             if hasattr(e, "errmsg"):
                 logger.error(e.errmsg)
@@ -1242,7 +1229,10 @@ for entry in results:
 # COMMAND ----------
 
 if error_results:
-    dbutils.notebook.exit(json.dumps(error_results))
+    if jp_stop_on_exception:
+        raise Exception("errors occured in notebook")
+    else:
+        dbutils.notebook.exit(json.dumps(error_results))
 
 # COMMAND ----------
 
