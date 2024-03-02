@@ -1,6 +1,16 @@
 # from helpers.dbx_init import spark
 from databricks.sdk.runtime import *
 
+# import the required libraries when running from vcode
+try:
+    print(type(spark))
+except Exception as e:
+    print(e)
+    from databricks.connect import DatabricksSession
+    from databricks.sdk.runtime import *
+
+    spark = DatabricksSession.builder.getOrCreate()
+
 
 def schema_exists(catalog: str, schema_name: str):
     query = spark.sql(
@@ -24,8 +34,10 @@ def table_exists(catalog: str, schema: str, table_name: str):
     )
     return query.count() > 0
 
+
 def drop_table(fqn: str):
     spark.sql(f"DROP TABLE IF EXISTS {fqn}")
+
 
 def get_or_create_schema(catalog: str, schema_name: str):
     if not schema_exists(catalog, schema_name):
@@ -33,7 +45,14 @@ def get_or_create_schema(catalog: str, schema_name: str):
     return f"{catalog}.{schema_name}"
 
 
-def create_or_append_table(catalog: str, schema: str, table_name: str, df, partition_cols: list = None, overwrite: bool = False):
+def create_or_append_table(
+    catalog: str,
+    schema: str,
+    table_name: str,
+    df,
+    partition_cols: list = None,
+    overwrite: bool = False,
+):
     mode = "overwrite"
     if table_exists(catalog, schema, table_name):
         if overwrite:
@@ -45,10 +64,14 @@ def create_or_append_table(catalog: str, schema: str, table_name: str, df, parti
 
     if partition_cols:
         partition_cols = ",".join(partition_cols)
-        df.write.format("delta").mode(mode).partitionBy(partition_cols).saveAsTable(f"{catalog}.{schema}.{table_name}")
+        df.write.format("delta").mode(mode).partitionBy(partition_cols).saveAsTable(
+            f"{catalog}.{schema}.{table_name}"
+        )
     else:
         partition_cols = ""
-        df.write.format("delta").mode(mode).saveAsTable(f"{catalog}.{schema}.{table_name}")
+        df.write.format("delta").mode(mode).saveAsTable(
+            f"{catalog}.{schema}.{table_name}"
+        )
 
     # df.write.format("delta").partitionBy(partition_cols).saveAsTable(f"{catalog}.{schema}.{table_name}")
 

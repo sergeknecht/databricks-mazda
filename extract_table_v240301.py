@@ -29,17 +29,42 @@ from helpers.db_helper_sql_oracle import (
 from helpers.logger_helper import log_to_delta_table
 from helpers.status_helper import create_status
 
+# # import the required libraries when running from vcode
+# try:
+#     print(type(spark))
+# except Exception as e:
+#     print(e)
+#     from databricks.connect import DatabricksSession
+#     from databricks.sdk.runtime import *
+
+#     spark = DatabricksSession.builder.getOrCreate()
+
 # COMMAND ----------
 
 logging.basicConfig(
-    level=logging.WARNING,
-    format="%(asctime)s - [%(funcName)s %(lineno)d] - %(levelname)s - %(message)s",
+    format="%(asctime)s,%(msecs)03d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
+    datefmt="%Y-%m-%d:%H:%M:%S",
+    level=logging.DEBUG,
 )
-# "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-# '[%(levelname)s] %(message)s [%(pathname)s %(funcName)s %(lineno)d]'
 logger = logging.getLogger(__name__)
+stdout = logging.StreamHandler(stream=sys.stdout)
+fmt = logging.Formatter(
+    "%(name)s: %(asctime)s | %(levelname)s | %(filename)s:%(lineno)s >>> %(message)s"
+)
+stdout.setFormatter(fmt)
+logger.addHandler(stdout)
 logger.setLevel(logging.INFO)
 
+# COMMAND ----------
+
+# logging.basicConfig(
+#     level=logging.WARNING,
+#     format="%(asctime)s - [%(pathname)s %(funcName)s %(lineno)d] - %(levelname)s - %(message)s",
+# )
+# "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+# '[%(levelname)s] %(message)s [%(pathname)s %(funcName)s %(lineno)d]'
+# logger = logging.getLogger(__name__)
+# logger.setLevel(logging.INFO)
 
 # COMMAND ----------
 
@@ -52,16 +77,19 @@ try:
         dbutils.notebook.entry_point.getDbutils().notebook().getContext().toJson()
     )
     # The tag jobId does not exists when the notebook is not triggered by dbutils.notebook.run(...)
-    job_id = notebook_info["tags"]["jobId"]
+    job_id = str(notebook_info["tags"]["jobId"])
+except Exception as e:
+    print(__name__, e)
+    job_id = "-1"
 except:
-    job_id = -1
+    job_id = "-1"
 
 # COMMAND ----------
 
-DEBUG = True
+DEBUG = False
 if DEBUG:
     p_work_json = {
-        "action": "create",
+        "action": "drop__create",
         "pii": True,
         "timeout_sec": 5400,
         "scope": "ACC",
@@ -90,7 +118,7 @@ else:
 
 # COMMAND ----------
 
-p_work_json["job_id"] = job_id
+p_work_json["job_id"] = str(job_id)
 
 p_scope = p_work_json["scope"]
 p_actions = p_work_json["action"]
@@ -126,6 +154,7 @@ work_item = {
     **p_work_json,
     "db_conn_props": db_conn_props,
 }
+work_item
 
 # COMMAND ----------
 
@@ -144,7 +173,7 @@ if ("drop" in actions and p_mode != "append") or p_mode == "drop" or p_actions =
         dbutils.notebook.exit(
             json.dumps(
                 {
-                    "job_id": job_id,
+                    "job_id": str(job_id),
                     "fqn": p_fqn,
                     "status_code": 200,
                     "status_message": "OK - dropped",
@@ -225,7 +254,7 @@ class DelayedResultExtract:
                         "query_sql": sql_distinct,
                         "query_type": "query",
                     },
-                ).load()
+                )
                 for row in df_distinct.collect():
                     column_name_partition = row["COLUMN_NAME"]
                     break
@@ -246,7 +275,9 @@ class DelayedResultExtract:
                     "query_sql": sql_schema,
                     "query_type": "query",
                 },
-            ).load()
+            )
+
+            df_schema.show(100, False)
 
             # the default data type conversion to DB data types is not always correct
             # we will use the data type translations to correct this
@@ -290,7 +321,7 @@ class DelayedResultExtract:
                             **self.work_item,
                             "table_sql": table_name_source,
                         },
-                    ).load()
+                    )
 
                 else:
                     bounds = get_jdbc_bounds__by_partition_key(
@@ -299,7 +330,9 @@ class DelayedResultExtract:
                         column_name_partition=column_name_partition,
                     )
 
-                    work_item["table_sql"] = pushdown_query
+                    work_item["table_sql"] = (
+                        pushdown_query  # table_name_source  # pushdown_query
+                    )
                     work_item["query_type"] = (
                         "dbtable"  # with partitioning query is not allowed
                     )
@@ -308,8 +341,8 @@ class DelayedResultExtract:
                         db_conn_props["customSchema"] = customSchema
                         logging.debug(f"customSchema: '{customSchema}'")
 
-                    if column_names:
-                        logging.debug(f"column_names: '{column_names}'")
+                    # if column_names:
+                    #     logging.debug(f"column_names: '{column_names}'")
 
                     # if column_name_partition:
                     range_size = bounds.MAX_ID - bounds.MIN_ID
@@ -323,9 +356,9 @@ class DelayedResultExtract:
                             20, int(range_size / partition_bin_size)
                         )
 
-                    logger.info(
-                        f"Partitioning table {table_name_source} by {column_name_partition} into {self.partition_count} partitions"
-                    )
+                    # logger.info(
+                    #     f"Partitioning table {table_name_source} by {column_name_partition} into {self.partition_count} partitions"
+                    # )
 
                     df = get_jdbc_data_by_dict__by_partition_key(
                         db_conn_props=db_conn_props,
@@ -333,17 +366,12 @@ class DelayedResultExtract:
                         bounds=bounds,
                         column_name_partition=column_name_partition,
                         partition_count=self.partition_count,
-                    ).load()
+                    )
 
-                df.write.format("delta").mode(self.mode).option(
-                    "overwriteSchema", "true"
-                ).saveAsTable(self.fqn)
+                    # print(df.schema)
+                    # print(df.describe())
 
-            # catch empty datasets
-            except PySparkException as e:
-                self.logger.error(e.getErrorClass())
-                if e.getErrorClass() == "CANNOT_INFER_EMPTY_SCHEMA":
-                    logger.warning("CANNOT_INFER_EMPTY_SCHEMA: DataFrame empty")
+                if df.count() == 0:
                     result = create_status(
                         scope=p_scope,
                         status_code=204,
@@ -357,8 +385,44 @@ class DelayedResultExtract:
                     }
                     self.result = result
                     return
+
+                # logger.info(
+                #     f"df.count(): {df.count()} {self.fqn} {self.mode} part_count: {self.partition_count}"
+                # )
+                # logger.info(table_exists(p_catalog_name, p_schema_name, p_table_name))
+
+                df.write.format("delta").mode(self.mode).saveAsTable(self.fqn)
+
+                # .option( "overwriteSchema", "true" )
+                # logger.info(table_exists(p_catalog_name, p_schema_name, p_table_name))
+
+            # catch empty datasets
+            except (PySparkException, Exception) as e:
+                if hasattr(e, "getErrorClass"):
+                    if e.getErrorClass():
+                        self.logger.error(e.getErrorClass())
+                        if e.getErrorClass() == "CANNOT_INFER_EMPTY_SCHEMA":
+                            logger.warning("CANNOT_INFER_EMPTY_SCHEMA: DataFrame empty")
+                            result = create_status(
+                                scope=p_scope,
+                                status_code=204,
+                                status_message=f"NO_CONTENT: {self.fqn} resultset empty",
+                                status_ctx=self.work_item,
+                            )
+                            result["row_count"] = 0
+                            result["work_item"] = {
+                                **self.work_item,
+                                "table_sql": table_name_source,
+                            }
+                            self.result = result
+                            return
+                    else:
+                        self.logger.error(
+                            "Unhandled Exception 1: " + str(type(e)) + str(e)
+                        )
+                        raise
                 else:
-                    self.logger.error("Unhandled PySparkException: " + e.getErrorClass())
+                    self.logger.error("Unhandled Exception 2: " + str(type(e)) + str(e))
                     raise
 
             status_message = f"{self.mode}: {self.fqn}"
@@ -393,6 +457,7 @@ class DelayedResultExtract:
                     status_message += f" with primary key ({column_pk_names})"
 
                 for curr_sql in sqls:
+                    logging.info(curr_sql)
                     spark.sql(curr_sql)
 
             result = create_status(
@@ -404,11 +469,14 @@ class DelayedResultExtract:
             result["row_count"] = df.count()
             self.result = result
             self.exc_info = None
+
         except Exception:
             exc_type, exc_value, exc_tb = sys.exc_info()
             tb = traceback.TracebackException(exc_type, exc_value, exc_tb)
             stack_trace = traceback.format_exc(limit=2, chain=True)
             status_message = "".join(tb.format_exception_only())
+            if not status_message:
+                status_message = str(e)
 
             # remove the JVM stacktrace - to focus on python errors
             if "JVM stacktrace" in stack_trace:
@@ -430,12 +498,13 @@ class DelayedResultExtract:
             result = create_status(
                 scope=p_scope,
                 status_code=500,
-                status_message="INTERNAL_SERVER_ERROR:" + str(e),
+                status_message="INTERNAL_SERVER_ERROR: get_result: " + str(e),
                 status_ctx=self.work_item,
             )
             result["traceback"] = traceback
+            print(traceback)
             result["time_duration"] = time_duration
-            result["job_id"] = job_id
+            result["job_id"] = str(job_id)
             log_to_delta_table(result)
             return json.dumps(result)
 
@@ -461,9 +530,11 @@ try:
             )
 
         # all is good. Let's create the catalog and schema the table will be in
+        spark.sql(f"USE CATALOG {p_catalog_name}")
         spark.sql(
             f"CREATE SCHEMA IF NOT EXISTS {p_catalog_name}.{p_schema_name} WITH DBPROPERTIES (scope='{p_scope}')"
         )
+        spark.sql(f"USE DATABASE {p_schema_name}")
 
     # we are creating the target and the work item is in append mode
     elif "create" in actions and p_mode == "append":
@@ -485,6 +556,8 @@ except (Exception, AnalysisException) as e:
     tb = traceback.TracebackException(exc_type, exc_value, exc_tb)
     stack_trace = traceback.format_exc(limit=2, chain=True)
     status_message = "".join(tb.format_exception_only())
+    if not status_message:
+        status_message = str(e)
 
     # remove the JVM stacktrace - to focus on python errors
     if "JVM stacktrace" in stack_trace:
@@ -521,7 +594,7 @@ if result:
 
 result = None
 try:
-    dr = DelayedResultExtract(work_item=work_item, logger=logger)
+    dr = DelayedResultExtract(work_item=work_item)
     dr.do_work()
 
     result: str = dr.get_result()
@@ -536,7 +609,10 @@ except (Exception, AnalysisException) as e:
     exc_type, exc_value, exc_tb = sys.exc_info()
     tb = traceback.TracebackException(exc_type, exc_value, exc_tb)
     stack_trace = traceback.format_exc(limit=2, chain=True)
+    print(stack_trace)
     status_message = "".join(tb.format_exception_only())
+    if not status_message:
+        status_message = str(e)
 
     # remove the JVM stacktrace - to focus on python errors
     if "JVM stacktrace" in stack_trace:
@@ -547,7 +623,7 @@ except (Exception, AnalysisException) as e:
     result = create_status(
         scope=p_scope,
         status_code=500,
-        status_message=f"INTERNAL_SERVER_ERROR: table_exists in DelayedResultExtract: {status_message} {e}",
+        status_message=f"INTERNAL_SERVER_ERROR: DelayedResultExtract: {status_message} {e}",
         status_ctx=work_item,
     )
     result["stack_trace"] = stack_trace
@@ -561,4 +637,6 @@ except (Exception, AnalysisException) as e:
 # COMMAND ----------
 
 if result:
+    print(result)
+    print(type(result))
     dbutils.notebook.exit(result)

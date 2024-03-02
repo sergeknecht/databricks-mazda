@@ -1,0 +1,48 @@
++-----------+-----------------+-------------+------------------+------------+--------------+------------+--------------+------------+-----------------------+------------------+
+|SCHEMA_NAME|TABLE_NAME       |COLUMN_ID    |COLUMN_NAME       |DATA_TYPE   |DATA_LENGTH   |DATA_SCALE  |CHAR_LENGTH   |DATA_DEFAULT|DBX_DATA_TYPE          |DBX_COLUMN_NAME   |
++-----------+-----------------+-------------+------------------+------------+--------------+------------+--------------+------------+-----------------------+------------------+
+|STG        |STG_EMOT_BTNCDHDR|1.0000000000 |CD_SYS_NR         |NUMBER      |22.0000000000 |0.0000000000|0.0000000000  |NULL        |CD_SYS_NR BIGINT       |CD_SYS_NR         |
+|STG        |STG_EMOT_BTNCDHDR|2.0000000000 |C_OR_D            |VARCHAR2    |4.0000000000  |NULL        |1.0000000000  |NULL        |NULL                   |C_OR_D            |
+|STG        |STG_EMOT_BTNCDHDR|3.0000000000 |CD_ORIG           |VARCHAR2    |12.0000000000 |NULL        |3.0000000000  |NULL        |NULL                   |CD_ORIG           |
+|STG        |STG_EMOT_BTNCDHDR|4.0000000000 |CD_DEST           |VARCHAR2    |12.0000000000 |NULL        |3.0000000000  |NULL        |NULL                   |CD_DEST           |
+|STG        |STG_EMOT_BTNCDHDR|5.0000000000 |NSC_ID            |VARCHAR2    |20.0000000000 |NULL        |5.0000000000  |NULL        |NULL                   |NSC_ID            |
+|STG        |STG_EMOT_BTNCDHDR|6.0000000000 |DLR_ID            |VARCHAR2    |20.0000000000 |NULL        |5.0000000000  |NULL        |NULL                   |DLR_ID            |
+|STG        |STG_EMOT_BTNCDHDR|7.0000000000 |DELIV_ADDR_CODE   |VARCHAR2    |20.0000000000 |NULL        |5.0000000000  |NULL        |NULL                   |DELIV_ADDR_CODE   |
+|STG        |STG_EMOT_BTNCDHDR|8.0000000000 |CD_NR             |NUMBER      |22.0000000000 |0.0000000000|0.0000000000  |NULL        |CD_NR BIGINT           |CD_NR             |
+|STG        |STG_EMOT_BTNCDHDR|9.0000000000 |CD_NR_STRING      |VARCHAR2    |60.0000000000 |NULL        |15.0000000000 |NULL        |NULL                   |CD_NR_STRING      |
+|STG        |STG_EMOT_BTNCDHDR|10.0000000000|CD_DATE           |DATE        |7.0000000000  |NULL        |0.0000000000  |NULL        |CD_DATE DATE           |CD_DATE           |
+|STG        |STG_EMOT_BTNCDHDR|11.0000000000|CD_CD_NAME        |VARCHAR2    |320.0000000000|NULL        |80.0000000000 |NULL        |NULL                   |CD_CD_NAME        |
+|STG        |STG_EMOT_BTNCDHDR|12.0000000000|CD_FIS_NAME       |VARCHAR2    |220.0000000000|NULL        |55.0000000000 |NULL        |NULL                   |CD_FIS_NAME       |
+|STG        |STG_EMOT_BTNCDHDR|13.0000000000|CD_BIL_NAME       |VARCHAR2    |320.0000000000|NULL        |80.0000000000 |NULL        |NULL                   |CD_BIL_NAME       |
+|STG        |STG_EMOT_BTNCDHDR|14.0000000000|CD_DLV_NAME       |VARCHAR2    |320.0000000000|NULL        |80.0000000000 |NULL        |NULL                   |CD_DLV_NAME       |
+|STG        |STG_EMOT_BTNCDHDR|15.0000000000|CD_VAT_RATE       |NUMBER      |22.0000000000 |2.0000000000|0.0000000000  |NULL        |NULL                   |CD_VAT_RATE       |
+|STG        |STG_EMOT_BTNCDHDR|16.0000000000|VAT_NR_FROM       |VARCHAR2    |200.0000000000|NULL        |50.0000000000 |NULL        |NULL                   |VAT_NR_FROM       |
+|STG        |STG_EMOT_BTNCDHDR|17.0000000000|VAT_NR_TO         |VARCHAR2    |200.0000000000|NULL        |50.0000000000 |NULL        |NULL                   |VAT_NR_TO         |
+|STG        |STG_EMOT_BTNCDHDR|18.0000000000|VAT_REMARK        |VARCHAR2    |600.0000000000|NULL        |150.0000000000|NULL        |NULL                   |VAT_REMARK        |
+|STG        |STG_EMOT_BTNCDHDR|19.0000000000|CRCY              |VARCHAR2    |12.0000000000 |NULL        |3.0000000000  |NULL        |NULL                   |CRCY              |
+|STG        |STG_EMOT_BTNCDHDR|20.0000000000|CD_NET_AMT        |NUMBER      |22.0000000000 |2.0000000000|0.0000000000  |NULL        |NULL                   |CD_NET_AMT        |
+|STG        |STG_EMOT_BTNCDHDR|21.0000000000|CD_VAT_AMT        |NUMBER      |22.0000000000 |2.0000000000|0.0000000000  |NULL        |NULL                   |CD_VAT_AMT        |
+|STG        |STG_EMOT_BTNCDHDR|22.0000000000|CD_TOT_AMT        |NUMBER      |22.0000000000 |2.0000000000|0.0000000000  |NULL        |NULL                   |CD_TOT_AMT        |
+|STG        |STG_EMOT_BTNCDHDR|23.0000000000|INV_SYS_NR        |NUMBER      |22.0000000000 |0.0000000000|0.0000000000  |NULL        |INV_SYS_NR BIGINT      |INV_SYS_NR        |
+|STG        |STG_EMOT_BTNCDHDR|24.0000000000|PRINTED           |VARCHAR2    |4.0000000000  |NULL        |1.0000000000  |NULL        |NULL                   |PRINTED           |
+|STG        |STG_EMOT_BTNCDHDR|25.0000000000|DUE_DATE          |DATE        |7.0000000000  |NULL        |0.0000000000  |NULL        |DUE_DATE DATE          |DUE_DATE          |
+|STG        |STG_EMOT_BTNCDHDR|26.0000000000|PAYTERM_DESC      |VARCHAR2    |400.0000000000|NULL        |100.0000000000|NULL        |NULL                   |PAYTERM_DESC      |
+|STG        |STG_EMOT_BTNCDHDR|27.0000000000|ACC_PAYTERM_CODE  |VARCHAR2    |16.0000000000 |NULL        |4.0000000000  |NULL        |NULL                   |ACC_PAYTERM_CODE  |
+|STG        |STG_EMOT_BTNCDHDR|28.0000000000|TAX_CD_ORIG       |VARCHAR2    |8.0000000000  |NULL        |2.0000000000  |NULL        |NULL                   |TAX_CD_ORIG       |
+|STG        |STG_EMOT_BTNCDHDR|29.0000000000|TAX_CD_DEST       |VARCHAR2    |8.0000000000  |NULL        |2.0000000000  |NULL        |NULL                   |TAX_CD_DEST       |
+|STG        |STG_EMOT_BTNCDHDR|30.0000000000|ACC_ORIG_BRIDGE_DT|DATE        |7.0000000000  |NULL        |0.0000000000  |NULL        |ACC_ORIG_BRIDGE_DT DATE|ACC_ORIG_BRIDGE_DT|
+|STG        |STG_EMOT_BTNCDHDR|31.0000000000|ACC_DEST_BRIDGE_DT|DATE        |7.0000000000  |NULL        |0.0000000000  |NULL        |ACC_DEST_BRIDGE_DT DATE|ACC_DEST_BRIDGE_DT|
+|STG        |STG_EMOT_BTNCDHDR|32.0000000000|LOCAL_FLAG_01     |VARCHAR2    |4.0000000000  |NULL        |1.0000000000  |NULL        |NULL                   |LOCAL_FLAG_01     |
+|STG        |STG_EMOT_BTNCDHDR|33.0000000000|LOCAL_FLAG_02     |VARCHAR2    |4.0000000000  |NULL        |1.0000000000  |NULL        |NULL                   |LOCAL_FLAG_02     |
+|STG        |STG_EMOT_BTNCDHDR|34.0000000000|LOCAL_FLAG_03     |VARCHAR2    |4.0000000000  |NULL        |1.0000000000  |NULL        |NULL                   |LOCAL_FLAG_03     |
+|STG        |STG_EMOT_BTNCDHDR|35.0000000000|L_UPD_USR         |VARCHAR2    |80.0000000000 |NULL        |20.0000000000 |NULL        |NULL                   |L_UPD_USR         |
+|STG        |STG_EMOT_BTNCDHDR|36.0000000000|L_UPD_TST         |TIMESTAMP(9)|11.0000000000 |9.0000000000|0.0000000000  |NULL        |NULL                   |L_UPD_TST         |
+|STG        |STG_EMOT_BTNCDHDR|37.0000000000|TRIGGER_TRANSP_CN |VARCHAR2    |4.0000000000  |NULL        |1.0000000000  |NULL        |NULL                   |TRIGGER_TRANSP_CN |
+|STG        |STG_EMOT_BTNCDHDR|38.0000000000|CREATE_USER       |VARCHAR2    |600.0000000000|NULL        |150.0000000000|NULL        |NULL                   |CREATE_USER       |
+|STG        |STG_EMOT_BTNCDHDR|39.0000000000|CREATE_TS         |DATE        |7.0000000000  |NULL        |0.0000000000  |NULL        |CREATE_TS DATE         |CREATE_TS         |
+|STG        |STG_EMOT_BTNCDHDR|40.0000000000|UPDATE_USER       |VARCHAR2    |600.0000000000|NULL        |150.0000000000|NULL        |NULL                   |UPDATE_USER       |
+|STG        |STG_EMOT_BTNCDHDR|41.0000000000|UPDATE_TS         |DATE        |7.0000000000  |NULL        |0.0000000000  |NULL        |UPDATE_TS DATE         |UPDATE_TS         |
+|STG        |STG_EMOT_BTNCDHDR|42.0000000000|ETL_JOB_NAME      |VARCHAR2    |600.0000000000|NULL        |150.0000000000|NULL        |NULL                   |ETL_JOB_NAME      |
+|STG        |STG_EMOT_BTNCDHDR|43.0000000000|SOURCE            |VARCHAR2    |600.0000000000|NULL        |150.0000000000|NULL        |NULL                   |SOURCE            |
+|STG        |STG_EMOT_BTNCDHDR|44.0000000000|LOAD_NR           |NUMBER      |22.0000000000 |NULL        |0.0000000000  |NULL        |NULL                   |LOAD_NR           |
++-----------+-----------------+-------------+------------------+------------+--------------+------------+--------------+------------+-----------------------+------------------+
