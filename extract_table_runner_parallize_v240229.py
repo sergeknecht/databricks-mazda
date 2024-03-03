@@ -27,14 +27,21 @@ logger.setLevel(logging.INFO)
 
 # COMMAND ----------
 
-dbutils.widgets.text("jp_action", "drop", label="Job action: drop or create or drop__create")
-dbutils.widgets.dropdown("jp_stop_on_exception", "FALSE", ["TRUE", "FALSE"], label="raise exception on data error")
+dbutils.widgets.text(
+    "jp_action", "drop", label="Job action: drop or create or drop__create"
+)
+dbutils.widgets.dropdown(
+    "jp_stop_on_exception",
+    "FALSE",
+    ["TRUE", "FALSE"],
+    label="raise exception on data error",
+)
 
 # COMMAND ----------
 
 jp_action: str = dbutils.widgets.get("jp_action")
 jp_stop_on_exception: bool = dbutils.widgets.get("jp_stop_on_exception").upper() == "TRUE"
-jp_action + ","  + str(jp_stop_on_exception)
+jp_action + "," + str(jp_stop_on_exception)
 
 # COMMAND ----------
 
@@ -1043,9 +1050,9 @@ work_jsons_source = [
 # COMMAND ----------
 
 # work_jsons.extend(work_jsons_source)
-work_jsons = [
-    {"catalog": "impetus_poc", "name": "STG.STG_EMOT_BTNCDHDR", "pii": True},
-]
+# work_jsons = [
+#     {"catalog": "impetus_poc", "name": "STG.STG_EMOT_BTNCDHDR", "pii": True},
+# ]
 
 # COMMAND ----------
 
