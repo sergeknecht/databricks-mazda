@@ -42,29 +42,11 @@ from helpers.status_helper import create_status
 # COMMAND ----------
 
 logging.basicConfig(
-    format="%(asctime)s,%(msecs)03d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
-    datefmt="%Y-%m-%d:%H:%M:%S",
-    level=logging.DEBUG,
+    level=logging.WARNING,
+    format="%(asctime)s - %(name)s:%(lineno)d - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
-stdout = logging.StreamHandler(stream=sys.stdout)
-fmt = logging.Formatter(
-    "%(name)s: %(asctime)s | %(levelname)s | %(filename)s:%(lineno)s >>> %(message)s"
-)
-stdout.setFormatter(fmt)
-logger.addHandler(stdout)
 logger.setLevel(logging.INFO)
-
-# COMMAND ----------
-
-# logging.basicConfig(
-#     level=logging.WARNING,
-#     format="%(asctime)s - [%(pathname)s %(funcName)s %(lineno)d] - %(levelname)s - %(message)s",
-# )
-# "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-# '[%(levelname)s] %(message)s [%(pathname)s %(funcName)s %(lineno)d]'
-# logger = logging.getLogger(__name__)
-# logger.setLevel(logging.INFO)
 
 # COMMAND ----------
 
@@ -182,9 +164,6 @@ if ("drop" in actions and p_mode != "append") or p_mode == "drop" or p_actions =
             )
         )
 
-# bounds = get_bounds__by_rownum(db_dict=db_conn_props, table_name=f'{p_schema_name_source}.{p_table_name_source}')
-# display(bounds)
-
 # COMMAND ----------
 
 
@@ -223,7 +202,7 @@ class DelayedResultExtract:
                 }
             )
             df_pk = get_jdbc_data_by_dict(
-                db_conn_props=db_conn_props,
+                db_conn_props=self.db_conn_props,
                 work_item={
                     "query_sql": sql_pk,
                     "query_type": "query",
@@ -237,10 +216,15 @@ class DelayedResultExtract:
                 # we will use the first primary key as the primary key in the target table
                 column_name_pks.append(row["COLUMN_NAME"])
 
-                # can we also use it as partition key? This is only available when we ingest tables, not queries
-                if self.query_type == "dbtable" and row["DATA_TYPE"] == "NUMBER":
+                # can we also use it as partition key?
+                if (
+                    not column_name_partition
+                    and self.query_type == "dbtable"
+                    and row["DATA_TYPE"] == "NUMBER"
+                ):
                     column_name_partition = row["COLUMN_NAME"]
 
+            # method 2 to determine partition key, find the column with the most distinct values
             if not column_name_partition:
                 sql_distinct = sql_top_distinct_columns_statement.format(
                     **{
@@ -249,7 +233,7 @@ class DelayedResultExtract:
                     }
                 )
                 df_distinct = get_jdbc_data_by_dict(
-                    db_conn_props=db_conn_props,
+                    db_conn_props=self.db_conn_props,
                     work_item={
                         "query_sql": sql_distinct,
                         "query_type": "query",
@@ -270,7 +254,7 @@ class DelayedResultExtract:
                 }
             )
             df_schema = get_jdbc_data_by_dict(
-                db_conn_props=db_conn_props,
+                db_conn_props=self.db_conn_props,
                 work_item={
                     "query_sql": sql_schema,
                     "query_type": "query",
@@ -287,8 +271,9 @@ class DelayedResultExtract:
                 dbx_data_type = row["DBX_DATA_TYPE"]
                 if dbx_data_type:
                     customSchemas.append(dbx_data_type)
-                # the CHAR issue is fixed by surrounding it with quotes
-                # this is handled by adapting the SELECT statement
+
+                # # the CHAR issue is fixed by surrounding it with quotes
+                # # this is handled by adapting the SELECT statement
                 dbx_column_name = row["DBX_COLUMN_NAME"]
                 if dbx_column_name:
                     column_names.append(dbx_column_name)
@@ -297,52 +282,38 @@ class DelayedResultExtract:
 
                 # now that we have bounds, we can customSchema
                 customSchema = ", ".join(customSchemas)
-                column_names = ", ".join(column_names)  # d.*
+                column_names = ", ".join(column_names)
 
                 pushdown_query = f"""(
                 select {column_names} from {table_name_source} d
                 ) dataset
                 """
 
+                if customSchema:
+                    self.db_conn_props["customSchema"] = customSchema
+                    logging.debug(f"customSchema: '{customSchema}'")
+
+                if column_names:
+                    logging.debug(f"column_names: '{column_names}'")
+
                 if not column_name_partition:
 
                     logging.warning("No partition key found: {table_name_source}")
 
-                    if customSchema:
-                        db_conn_props["customSchema"] = customSchema
-                        logging.debug(f"customSchema: '{customSchema}'")
-
-                    if column_names:
-                        logging.debug(f"column_names: '{column_names}'")
-
                     df = get_jdbc_data_by_dict(
-                        db_conn_props=db_conn_props,
+                        db_conn_props=self.db_conn_props,
                         work_item={
                             **self.work_item,
-                            "table_sql": table_name_source,
+                            "table_sql": pushdown_query,
                         },
                     )
 
                 else:
                     bounds = get_jdbc_bounds__by_partition_key(
-                        db_conn_props=db_conn_props,
+                        db_conn_props=self.db_conn_props,
                         table_name=table_name_source,
                         column_name_partition=column_name_partition,
                     )
-
-                    work_item["table_sql"] = (
-                        pushdown_query  # table_name_source  # pushdown_query
-                    )
-                    # # work_item["query_type"] = (
-                    # #     "dbtable"  # with partitioning query is not allowed
-                    # # )
-
-                    if customSchema:
-                        db_conn_props["customSchema"] = customSchema
-                        logging.debug(f"customSchema: '{customSchema}'")
-
-                    # if column_names:
-                    #     logging.debug(f"column_names: '{column_names}'")
 
                     # if column_name_partition:
                     range_size = bounds.MAX_ID - bounds.MIN_ID
@@ -351,51 +322,41 @@ class DelayedResultExtract:
                     if range_size < partition_bin_size:
                         self.partition_count = 1
                     else:
-                        # we want to have at least bin_size rows per partition with a maxum of self.partition_count
+                        # we want to have at least bin_size rows per partition with a max of self.partition_count
                         self.partition_count = min(
                             20, int(range_size / partition_bin_size)
                         )
 
-                    # logger.info(
-                    #     f"Partitioning table {table_name_source} by {column_name_partition} into {self.partition_count} partitions"
-                    # )
-
                     df = get_jdbc_data_by_dict__by_partition_key(
-                        db_conn_props=db_conn_props,
-                        work_item=self.work_item,
+                        db_conn_props=self.db_conn_props,
+                        work_item={
+                            **self.work_item,
+                            "table_sql": pushdown_query,
+                        },
                         bounds=bounds,
                         column_name_partition=column_name_partition,
                         partition_count=self.partition_count,
                     )
 
-                    # print(df.schema)
-                    # print(df.describe())
-
-                if df.count() == 0:
-                    # gracefully handle empty datasets
-                    result = create_status(
-                        scope=p_scope,
-                        status_code=204,
-                        status_message=f"NO_CONTENT: {self.fqn} resultset empty",
-                        status_ctx=self.work_item,
-                    )
-                    result["row_count"] = 0
-                    result["work_item"] = {
-                        **self.work_item,
-                        "table_sql": table_name_source,
-                    }
-                    self.result = result
-                    return
-
-                # logger.info(
-                #     f"df.count(): {df.count()} {self.fqn} {self.mode} part_count: {self.partition_count}"
-                # )
-                # logger.info(table_exists(p_catalog_name, p_schema_name, p_table_name))
+                # if df.count() == 0:
+                #     # gracefully handle empty datasets
+                #     result = create_status(
+                #         scope=p_scope,
+                #         status_code=204,
+                #         status_message=f"NO_CONTENT: {self.fqn} resultset empty",
+                #         status_ctx=self.work_item,
+                #     )
+                #     result["row_count"] = 0
+                #     result["work_item"] = {
+                #         **self.work_item,
+                #         "table_sql": table_name_source,
+                #     }
+                #     self.result = result
+                #     return
 
                 df.write.format("delta").mode(self.mode).saveAsTable(self.fqn)
 
                 # .option( "overwriteSchema", "true" )
-                # logger.info(table_exists(p_catalog_name, p_schema_name, p_table_name))
 
             # catch empty datasets
             except (PySparkException, Exception) as e:

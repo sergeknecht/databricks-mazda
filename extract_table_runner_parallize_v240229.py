@@ -13,6 +13,7 @@
 import logging
 import datetime
 import json
+import sys
 import time
 
 from helpers.app_helper import init
@@ -20,7 +21,8 @@ from helpers.app_helper import init
 # COMMAND ----------
 
 logging.basicConfig(
-    level=logging.WARNING, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.WARNING,
+    format="%(asctime)s - %(name)s:%(lineno)d - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -28,7 +30,7 @@ logger.setLevel(logging.INFO)
 # COMMAND ----------
 
 dbutils.widgets.text(
-    "jp_action", "drop", label="Job action: drop or create or drop__create"
+    "jp_action", "create", label="Job action: drop or create or drop__create"
 )
 dbutils.widgets.dropdown(
     "jp_stop_on_exception",
@@ -50,7 +52,7 @@ jp_action + "," + str(jp_stop_on_exception)
 jp_actions = jp_action.split("__")
 jp_scope = "ACC" or "PRD" or "TST" or "DEV"  # where to write the data
 jp_db_scope = "ACC"  # where to read the data
-jp_run_version = "v240229"  # version of the job
+jp_run_version = "v240301"  # version of the job
 p_db_key = "DWH_BI1__100000" or "DWH_BI1" or "DWH_BI1__500000" or "DWH_BI1__250000"
 run_ts = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
 run_name = (
