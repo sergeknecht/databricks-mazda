@@ -187,6 +187,7 @@ class DelayedResultExtract:
         self.mode = work_item["mode"]
         self.fqn = work_item["fqn"]
         self.partition_count = work_item.get("partition_count", 4)
+        self.job_id = work_item["job_id"]
         self.logger = logger
 
     def do_work(self):
@@ -368,7 +369,7 @@ class DelayedResultExtract:
                             result = create_status(
                                 scope=p_scope,
                                 status_code=204,
-                                status_message=f"NO_CONTENT: {self.fqn} resultset empty - 2",
+                                status_message=f"NO_CONTENT: {self.fqn} resultset empty - 2: job {self.job_id}",
                                 status_ctx=self.work_item,
                             )
                             result["row_count"] = 0
@@ -382,9 +383,10 @@ class DelayedResultExtract:
                         self.logger.error(
                             "Unhandled Exception 1: " + str(type(e)) + str(e)
                         )
-                        raise
+                        raise Exception(f"do_work Exception: Job{self.job_id}") from e
                 else:
                     self.logger.error("Unhandled Exception 2: " + str(type(e)) + str(e))
+                    raise Exception(f"do_work Exception: Job{self.job_id}") from e
                     raise
 
             status_message = f"{self.mode}: {self.fqn}"
@@ -440,6 +442,8 @@ class DelayedResultExtract:
             if not status_message:
                 status_message = str(e)
 
+            status_message = f"INTERNAL_SERVER_ERROR: DelayedResultExtract: job {self.job_id}: {status_message}"
+
             # remove the JVM stacktrace - to focus on python errors
             if "JVM stacktrace" in stack_trace:
                 stack_trace = stack_trace.split("JVM stacktrace:")[0]
@@ -460,13 +464,16 @@ class DelayedResultExtract:
             result = create_status(
                 scope=p_scope,
                 status_code=500,
-                status_message="INTERNAL_SERVER_ERROR: get_result: " + str(e),
+                status_message="INTERNAL_SERVER_ERROR: get_result: job "
+                + self.job_id
+                + ": "
+                + +str(e),
                 status_ctx=self.work_item,
             )
             result["traceback"] = traceback
             print(traceback)
             result["time_duration"] = time_duration
-            result["job_id"] = str(job_id)
+            result["job_id"] = str(self.job_id)
             log_to_delta_table(result)
             return json.dumps(result)
 
@@ -530,7 +537,7 @@ except (Exception, AnalysisException) as e:
     result = create_status(
         scope=p_scope,
         status_code=500,
-        status_message=f"INTERNAL_SERVER_ERROR: table_exists in prepare: {status_message}",
+        status_message=f"INTERNAL_SERVER_ERROR: table_exists in prepare: {job_id}: {status_message}",
         status_ctx=work_item,
     )
     end_time = time.time()
@@ -585,7 +592,7 @@ except (Exception, AnalysisException) as e:
     result = create_status(
         scope=p_scope,
         status_code=500,
-        status_message=f"INTERNAL_SERVER_ERROR: DelayedResultExtract: {status_message} {e}",
+        status_message=f"INTERNAL_SERVER_ERROR: DelayedResultExtract: {job_id}: {status_message} {e}",
         status_ctx=work_item,
     )
     result["stack_trace"] = stack_trace
