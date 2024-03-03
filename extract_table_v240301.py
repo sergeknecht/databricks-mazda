@@ -333,9 +333,9 @@ class DelayedResultExtract:
                     work_item["table_sql"] = (
                         pushdown_query  # table_name_source  # pushdown_query
                     )
-                    work_item["query_type"] = (
-                        "dbtable"  # with partitioning query is not allowed
-                    )
+                    # # work_item["query_type"] = (
+                    # #     "dbtable"  # with partitioning query is not allowed
+                    # # )
 
                     if customSchema:
                         db_conn_props["customSchema"] = customSchema
@@ -372,6 +372,7 @@ class DelayedResultExtract:
                     # print(df.describe())
 
                 if df.count() == 0:
+                    # gracefully handle empty datasets
                     result = create_status(
                         scope=p_scope,
                         status_code=204,
@@ -406,7 +407,7 @@ class DelayedResultExtract:
                             result = create_status(
                                 scope=p_scope,
                                 status_code=204,
-                                status_message=f"NO_CONTENT: {self.fqn} resultset empty",
+                                status_message=f"NO_CONTENT: {self.fqn} resultset empty - 2",
                                 status_ctx=self.work_item,
                             )
                             result["row_count"] = 0
@@ -509,7 +510,7 @@ class DelayedResultExtract:
             return json.dumps(result)
 
         self.result["time_duration"] = time_duration
-        logger.info(f"result: {self.result}")
+        logger.debug(f"result: {self.result}")
         log_to_delta_table(self.result)
         return json.dumps(self.result)
 
