@@ -372,7 +372,7 @@ work_jsons = [
         "pii": True,
         # "db_key": "DWH_BI1__500000",
     },
-     {"catalog": "impetus_poc", "name": "STG.STG_LEM_PARTNERS", "pii": False},
+    {"catalog": "impetus_poc", "name": "STG.STG_LEM_PARTNERS", "pii": False},
 ]
 
 # COMMAND ----------
@@ -1208,8 +1208,8 @@ def run_tasks(function, q):
 
     # decrement the thread count beccause q is empty, thread is going to be killed
     thread_count -= 1
-    app_status["status_message"]=f"Thread finished. Remaining threads: {thread_count}"
-    app_status["status_code"]=200
+    app_status["status_message"] = f"Thread finished. Remaining threads: {thread_count}"
+    app_status["status_code"] = 200
     logger.info(app_status)
     log_to_delta_table(app_status)
 
