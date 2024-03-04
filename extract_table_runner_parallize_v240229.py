@@ -16,6 +16,7 @@ import json
 import time
 
 from helpers.app_helper import init
+from helpers.logger_helper import log_to_delta_table
 
 # COMMAND ----------
 
@@ -65,8 +66,8 @@ start_time = time.time()
 
 # COMMAND ----------
 
-result = init(jp_scope)
-display(result)
+app_status = init(jp_scope)
+display(app_status)
 
 
 # COMMAND ----------
@@ -1206,6 +1207,10 @@ def run_tasks(function, q):
 
     # decrement the thread count beccause q is empty, thread is going to be killed
     thread_count -= 1
+    app_status["status_message"]=f"Thread finished. Remaining threads: {thread_count}"
+    app_status["status_code"]=200
+    logger.info(app_status)
+    log_to_delta_table(app_status)
 
 
 for work_item in work_items:
