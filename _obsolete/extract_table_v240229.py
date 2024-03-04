@@ -50,7 +50,11 @@ try:
     # The tag jobId does not exists when the notebook is not triggered by dbutils.notebook.run(...)
     job_id = notebook_info["tags"]["jobId"]
 except:
-    job_id = -1
+    job_id = "-1"
+
+
+if not job_id:
+    job_id = "-1"
 
 p_work_json: dict = json.loads(dbutils.widgets.get("p_work_json"))
 assert p_work_json, "p_work_json not set"
@@ -71,7 +75,6 @@ p_mode = p_work_json.get("mode", "overwrite")
 p_fqn = p_work_json.get("fqn", f"{p_catalog_name}.{p_schema_name}.{p_table_name}")
 
 logger.info(p_fqn)
-# logger.info(job_id)
 print(p_scope, p_db_scope)
 print(p_actions)
 print(p_mode)
@@ -114,11 +117,7 @@ if ("drop" in actions and p_mode != "append") or p_mode == "drop" or p_actions =
             )
         )
 
-# bounds = get_bounds__by_rownum(db_dict=db_conn_props, table_name=f'{p_schema_name_source}.{p_table_name_source}')
-# display(bounds)
-
 # COMMAND ----------
-
 
 class DelayedResultExtract:
     def __init__(self, work_item: dict, logger: logging.Logger = logger):
@@ -160,7 +159,7 @@ class DelayedResultExtract:
                     "query_sql": sql_pk,
                     "query_type": "query",
                 },
-            ).load()
+            )
             column_name_pks = []
             column_name_partition = None
             table_name_source = f"{self.schema_name_source}.{self.table_name_source}"
@@ -186,7 +185,7 @@ class DelayedResultExtract:
                         "query_sql": sql_distinct,
                         "query_type": "query",
                     },
-                ).load()
+                )
                 for row in df_distinct.collect():
                     column_name_partition = row["COLUMN_NAME"]
                     break
@@ -207,7 +206,7 @@ class DelayedResultExtract:
                     "query_sql": sql_schema,
                     "query_type": "query",
                 },
-            ).load()
+            )
 
             # the default data type conversion to DB data types is not always correct
             # we will use the data type translations to correct this
@@ -224,13 +223,13 @@ class DelayedResultExtract:
                     column_names.append(dbx_column_name)
 
             try:
-
+                customSchemas = [name for name in customSchemas if name.upper() != "CD_SYS_NR"]
                 # now that we have bounds, we can customSchema
                 customSchema = ", ".join(customSchemas)
-                column_names = ", ".join(column_names)  # d.*
+                column_list = ", ".join(column_names)
 
                 pushdown_query = f"""(
-                select {column_names} from {table_name_source} d
+                select {column_list} from {table_name_source} d
                 ) dataset
                 """
 
@@ -238,22 +237,16 @@ class DelayedResultExtract:
 
                     logging.warning("No partition key found: {table_name_source}")
 
-                    if customSchema:
-                        db_conn_props["customSchema"] = customSchema
-                        logging.debug(f"customSchema: '{customSchema}'")
-
-                    if column_names:
-                        logging.debug(f"column_names: '{column_names}'")
-
                     df = get_jdbc_data_by_dict(
                         db_conn_props=db_conn_props,
                         work_item={
                             **self.work_item,
                             "table_sql": table_name_source,
                         },
-                    ).load()
+                    )
 
                 else:
+
                     bounds = get_jdbc_bounds__by_partition_key(
                         db_conn_props=db_conn_props,
                         table_name=table_name_source,
@@ -261,16 +254,13 @@ class DelayedResultExtract:
                     )
 
                     work_item["table_sql"] = pushdown_query
-                    work_item["query_type"] = (
-                        "dbtable"  # with partitioning query is not allowed
-                    )
 
                     if customSchema:
                         db_conn_props["customSchema"] = customSchema
-                        logging.debug(f"customSchema: '{customSchema}'")
+                        logging.info(f"customSchema: '{customSchema}'")
 
                     if column_names:
-                        logging.debug(f"column_names: '{column_names}'")
+                        logging.info(f"column_list: '{column_list}'")
 
                     # if column_name_partition:
                     range_size = bounds.MAX_ID - bounds.MIN_ID
@@ -280,11 +270,15 @@ class DelayedResultExtract:
                         self.partition_count = 1
                     else:
                         # we want to have at least bin_size rows per partition with a maxum of self.partition_count
-                        self.partition_count = min(20, int(range_size / partition_bin_size))
+                        self.partition_count = min(
+                            20, int(range_size / partition_bin_size)
+                        )
 
                     logger.info(
                         f"Partitioning table {table_name_source} by {column_name_partition} into {self.partition_count} partitions"
                     )
+                    logger.info(self.db_conn_props)
+                    logger.info(self.work_item)
 
                     df = get_jdbc_data_by_dict__by_partition_key(
                         db_conn_props=db_conn_props,
@@ -292,15 +286,31 @@ class DelayedResultExtract:
                         bounds=bounds,
                         column_name_partition=column_name_partition,
                         partition_count=self.partition_count,
-                    ).load()
+                    )
 
-
-                df.write.format("delta").mode(self.mode).option(
-                    "overwriteSchema", "true"
-                ).saveAsTable(self.fqn)
+                logger.info("write mode: " + self.mode)
+                logger.info("write fqn: " + self.fqn)
+                if not df.count() > 0:
+                    df.write.format("delta").mode(self.mode).saveAsTable(self.fqn)
+                else:
+                    logger.warning('df.count() == 0')
+                    result = create_status(
+                        scope=p_scope,
+                        status_code=204,
+                        status_message=f"NO_CONTENT: {self.fqn} resultset empty",
+                        status_ctx=self.work_item,
+                    )
+                    result["row_count"] = 0
+                    result["work_item"] = {
+                        **self.work_item,
+                        "table_sql": table_name_source,
+                    }
+                    self.result = result
+                    return
 
             # catch empty datasets
             except PySparkException as e:
+                self.logger.error("PySparkException")
                 self.logger.error(e.getErrorClass())
                 if e.getErrorClass() == "CANNOT_INFER_EMPTY_SCHEMA":
                     logger.warning("CANNOT_INFER_EMPTY_SCHEMA: DataFrame empty")
@@ -318,10 +328,25 @@ class DelayedResultExtract:
                     self.result = result
                     return
                 else:
+                    self.logger.error("NOT a PySparkException")
                     self.logger.error("Unhandled PySparkException: " + e.getErrorClass())
-                    raise
+
+                    exc_type, exc_value, exc_tb = sys.exc_info()
+                    tb = traceback.TracebackException(exc_type, exc_value, exc_tb)
+                    stack_trace = traceback.format_exc(limit=2, chain=True)
+                    status_message = "".join(tb.format_exception_only())
+                    self.logger.error(stack_trace)
+                    self.logger.error(status_message)
+                    self.exc_info = (
+                        status_message,
+                        stack_trace,
+                    )
+                    return
+
+                    # raise
 
             status_message = f"{self.mode}: {self.fqn}"
+            self.logger.info(status_message)
 
             if self.mode == "overwrite":
 
@@ -329,11 +354,13 @@ class DelayedResultExtract:
 
                 # add tags to the table for PII/confidential data
                 if self.work_item.get("pii", False):
+                    self.logger.info("PII")
                     status_message += " with PII"
                     sqls.append(f"ALTER TABLE {self.fqn} SET TAGS ('pii_table' = 'TRUE')")
 
                 # replicate the primary keys and indexes we found in the source table
                 if column_name_pks:
+                    self.logger.info("column_name_pks")
                     sqls.append(
                         f"ALTER TABLE {self.fqn} DROP PRIMARY KEY IF EXISTS CASCADE"
                     )
@@ -404,8 +431,8 @@ class DelayedResultExtract:
         log_to_delta_table(self.result)
         return json.dumps(self.result)
 
-
 # COMMAND ----------
+
 result = None
 try:
     # we will create the target and the work item is not append mode

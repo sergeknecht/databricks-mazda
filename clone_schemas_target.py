@@ -10,14 +10,6 @@ import time
 import traceback
 
 from helpers.db_helper_delta import schema_exists, table_exists
-from helpers.db_helper_jdbc import (
-    get_connection_properties__by_key,
-    get_data,
-    get_db_dict,
-    get_jdbc_bounds__by_rownum,
-)
-from helpers.db_helper_jdbc_oracle import get_data_partitioned__by_rownum
-from helpers.db_helper_sql_oracle import sql_pk_statement
 from helpers.status_helper import create_status
 
 # COMMAND ----------
@@ -27,7 +19,7 @@ from helpers.status_helper import create_status
 # COMMAND ----------
 
 start_time = time.time()
-catalog_source = 'dev__impetus_target'
+catalog_source = 'acc__impetus_target'
 catalog_target = 'impetus_target'
 schemas = ['stg', 'stg_tmp', 'lz_lem']
 jp_action = "drop__create"
@@ -50,13 +42,8 @@ run_sql(sql)
 
 # COMMAND ----------
 
-results = get_tables(catalog_source, "stg")
-results = [
-                {'table': row['tableName'], 'schema': row['database']} for row in results
-            ]
-results
-table_exists(catalog_target, results[0]['schema'], results[0]['table'])
-
+# MAGIC %md
+# MAGIC ## Build up existing tables in delta source location which will be cloned to target delta location
 
 # COMMAND ----------
 
@@ -75,8 +62,12 @@ for schema in schemas:
             ]
             tables.extend(results)
 
-
 display(tables)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Clone Tables found 1 by 1
 
 # COMMAND ----------
 

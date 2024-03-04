@@ -2,6 +2,23 @@ import pprint as pp
 
 from databricks.sdk.runtime import *
 
+# import the required libraries when running from vcode
+try:
+    print(type(spark))
+except Exception as e:
+    print(e)
+    from databricks.connect import DatabricksSession
+    from databricks.sdk.runtime import *
+
+    spark = DatabricksSession.builder.getOrCreate()
+
+
+# from pyspark.sql import SparkSession
+# from pyspark.sql.types import *
+
+
+# spark = SparkSession.builder.getOrCreate()
+
 CATALOG = "mle_bi_app_data"
 SCHEMA = "log"
 TABLE_APPLICATION = "{scope}__application"
@@ -24,11 +41,12 @@ def log_to_delta_table(log_dict: dict):
 
     df = spark.createDataFrame(data=[log_dict])
     # write to delta table
-    df.write.format("delta").partitionBy("log_dt").mode("append").option("mergeSchema", "true").saveAsTable(FQN.format(scope=scope))
+    df.write.format("delta").partitionBy("log_dt").mode("append").option(
+        "mergeSchema", "true"
+    ).saveAsTable(FQN.format(scope=scope))
+
 
 if __name__ == "__main__":
     scope = "dev"
 
-    log = {
-        "scope": "dev"
-    }
+    log = {"scope": "dev"}

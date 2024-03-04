@@ -13,6 +13,7 @@
 import logging
 import datetime
 import json
+import sys
 import time
 
 from helpers.app_helper import init
@@ -21,19 +22,29 @@ from helpers.logger_helper import log_to_delta_table
 # COMMAND ----------
 
 logging.basicConfig(
-    level=logging.WARNING, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.WARNING,
+    format="%(asctime)s - %(name)s:%(lineno)d - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # COMMAND ----------
 
-dbutils.widgets.text("jp_action", "drop", label="Job action: drop or create or drop__create")
+dbutils.widgets.text(
+    "jp_action", "create", label="Job action: drop or create or drop__create"
+)
+dbutils.widgets.dropdown(
+    "jp_stop_on_exception",
+    "FALSE",
+    ["TRUE", "FALSE"],
+    label="raise exception on data error",
+)
 
 # COMMAND ----------
 
 jp_action: str = dbutils.widgets.get("jp_action")
-jp_action
+jp_stop_on_exception: bool = dbutils.widgets.get("jp_stop_on_exception").upper() == "TRUE"
+jp_action + "," + str(jp_stop_on_exception)
 
 # COMMAND ----------
 
@@ -42,7 +53,7 @@ jp_action
 jp_actions = jp_action.split("__")
 jp_scope = "ACC" or "PRD" or "TST" or "DEV"  # where to write the data
 jp_db_scope = "ACC"  # where to read the data
-jp_run_version = "v240229"  # version of the job
+jp_run_version = "v240301"  # version of the job
 p_db_key = "DWH_BI1__100000" or "DWH_BI1" or "DWH_BI1__500000" or "DWH_BI1__250000"
 run_ts = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
 run_name = (
@@ -1042,6 +1053,9 @@ work_jsons_source = [
 # COMMAND ----------
 
 # work_jsons.extend(work_jsons_source)
+# work_jsons = [
+#     {"catalog": "impetus_poc", "name": "STG.STG_EMOT_BTNCDHDR", "pii": True},
+# ]
 
 # COMMAND ----------
 
@@ -1103,19 +1117,6 @@ def create_work_item(wi):
 work_items = [create_work_item(wi) for wi in work_jsons]
 
 print(len(work_items))
-
-# COMMAND ----------
-
-# def is_unfinished_task(wi):
-#     if wi["action"] == "create" and wi["mode"] == "overwrite" and wi["query_type"] == "dbtable":
-#         return not table_exists(wi["catalog_name"], wi["schema_name"], wi["table_name"])
-#     else:
-#         return True
-
-# work_items = [
-#     wi for wi in work_items if is_unfinished_task(wi)
-# ]
-# print(len(work_items))
 
 # COMMAND ----------
 
@@ -1242,7 +1243,10 @@ for entry in results:
 # COMMAND ----------
 
 if error_results:
-    dbutils.notebook.exit(json.dumps(error_results))
+    if jp_stop_on_exception:
+        raise Exception("errors occured in notebook")
+    else:
+        dbutils.notebook.exit(json.dumps(error_results))
 
 # COMMAND ----------
 

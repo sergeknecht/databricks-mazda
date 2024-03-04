@@ -36,16 +36,21 @@ SELECT
     c.char_length,
     c.data_default,
     CASE
-    WHEN ( c.data_type = 'NUMBER'
-            AND c.data_length = 22
-            AND c.data_scale = 0
-          )
-            THEN c.column_name || ' ' || 'INT'
     WHEN  ( c.data_type = 'DATE'
-            AND c.data_length = 7
-            AND c.char_length = 0
-          )
-          THEN c.column_name || ' ' ||  'DATE'
+        AND c.data_length = 7
+        AND c.char_length = 0
+      )
+      THEN c.column_name || ' ' ||  'DATE'
+      WHEN ( c.data_type = 'NUMBER'
+            AND c.data_length < 16
+            AND c.data_scale = 0.0
+        )
+        THEN c.column_name || ' ' || 'INT'
+        WHEN ( c.data_type = 'NUMBER'
+                AND c.data_length >= 16
+                AND c.data_scale = 0.0
+            )
+        THEN c.column_name || ' ' || 'BIGINT'
     ELSE ''
     END DBX_DATA_TYPE,
     c.column_name DBX_COLUMN_NAME
@@ -62,10 +67,16 @@ ORDER BY
     c.column_name
 """
 
-    # CASE
-    #     WHEN c.data_type = 'CHAR' AND c.char_length > 1 THEN '''['' || ' || c.column_name || ' || '']'' AS ' || c.column_name
-    #     ELSE c.column_name
-    # END DBX_COLUMN_NAME
+# WHEN ( c.data_type = 'NUMBER'
+#         AND c.data_length = 22
+#         AND c.data_scale = 0.0
+#       )
+#         THEN c.column_name || ' ' || 'INT'
+
+# CASE
+#     WHEN c.data_type = 'CHAR' AND c.char_length > 1 THEN '''['' || ' || c.column_name || ' || '']'' AS ' || c.column_name
+#     ELSE c.column_name
+# END DBX_COLUMN_NAME
 
 
 # AND ( ( c.data_type = 'NUMBER'
@@ -96,7 +107,6 @@ WHERE
         lower(t.owner) = lower('{schema}')
     AND lower(t.table_name) = lower('{table_name}')
     AND ( c.data_type = 'NUMBER'
-            AND c.data_length = 22
             AND c.data_scale = 0
         )
       AND     rownum <= 5
@@ -107,3 +117,6 @@ ORDER BY
     c.COLUMN_ID,
     c.column_name
     """
+
+# where
+# AND c.data_length = 22
