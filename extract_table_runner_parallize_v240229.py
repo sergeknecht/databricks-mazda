@@ -1235,9 +1235,11 @@ for entry in results:
         entry = json.loads(entry)
         if entry.get("status_code", -1) >= 300:
             error_results.append(entry)
+            print(entry)
         # if entry:
         #     pp.pprint(entry)
-    except:
+    except Exception as e:
+        print(str(e))
         print(entry)
 
 # COMMAND ----------
