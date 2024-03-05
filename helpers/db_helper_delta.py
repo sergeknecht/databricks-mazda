@@ -34,7 +34,7 @@ def table_exists(catalog: str, schema: str, table_name: str):
     )
     return query.count() > 0
 
-def get_table_exists(fqn: str) -> bool:
+def has_table(fqn: str) -> bool:
     catalog, schema, table_name = fqn.split(".")
     query = spark.sql(
         f"""
