@@ -13,7 +13,7 @@ left join
      con.column_name = tc.column_name
 left join all_constraints ac
 ON tc.owner=ac.owner and tc.TABLE_NAME=ac.TABLE_NAME AND ac.CONSTRAINT_TYPE = 'P' AND con.cons=ac.CONSTRAINT_NAME
-where  tc.owner = '{schema}' and  tc.TABLE_NAME = '{table_name}' AND ac.CONSTRAINT_TYPE = 'P' AND ac.STATUS = 'ENABLED'
+where  tc.owner = '{schema}' and  tc.TABLE_NAME = '{table_name}' AND ac.CONSTRAINT_TYPE = 'P' AND ac.STATUS IN ('ENABLED', 'VALID')
 order by 1 ,2, 3
 """
 
@@ -43,12 +43,12 @@ SELECT
       THEN c.column_name || ' ' ||  'DATE'
       WHEN ( c.data_type = 'NUMBER'
             AND c.data_length < 16
-            AND c.data_scale = 0.0
+            AND (c.data_scale = 0 OR c.data_scale IS NULL)
         )
         THEN c.column_name || ' ' || 'INT'
         WHEN ( c.data_type = 'NUMBER'
                 AND c.data_length >= 16
-                AND c.data_scale = 0.0
+                AND (c.data_scale = 0 OR c.data_scale IS NULL)
             )
         THEN c.column_name || ' ' || 'BIGINT'
     ELSE ''
