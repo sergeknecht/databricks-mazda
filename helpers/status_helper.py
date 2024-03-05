@@ -49,7 +49,7 @@ def create_status(
         }
 
     if status_ctx:
-        context_keys = ["mode", "fqn", "db_key", "run_ts", "run_name", "job_id"]
+        context_keys = ["mode", "fqn", "db_key", "run_ts", "run_name", "job_id", "partition_count"]
         for ck in context_keys:
             if ck in status_ctx:
                 result[ck] = status_ctx[ck]

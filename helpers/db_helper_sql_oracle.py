@@ -107,7 +107,7 @@ WHERE
         lower(t.owner) = lower('{schema}')
     AND lower(t.table_name) = lower('{table_name}')
     AND ( c.data_type = 'NUMBER'
-            AND c.data_scale = 0
+            AND (c.data_scale = 0 OR c.data_scale IS NULL)
         )
       AND     rownum <= 5
 ORDER BY

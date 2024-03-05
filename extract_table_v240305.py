@@ -147,6 +147,7 @@ class DelayedResultExtract:
         self.fqn = work_item["fqn"]
         self.job_id = work_item["job_id"]
         self.logger = logger
+        self.partition_count = -1
 
     def do_work(self):
         try:
@@ -256,7 +257,7 @@ class DelayedResultExtract:
 
                 if not column_name_partition:
 
-                    logging.warning("No partition key found: {table_name_source}")
+                    logging.warning(f"No partition key found: {table_name_source}")
 
                     df = get_jdbc_data_by_dict(
                         db_conn_props=self.db_conn_props,
@@ -265,6 +266,7 @@ class DelayedResultExtract:
                             "table_sql": table_name_source,
                         },
                     )
+                    self.work_item["partition_count"] = self.partition_count
 
                 else:
                     bounds = get_jdbc_bounds__by_partition_key(
@@ -276,12 +278,13 @@ class DelayedResultExtract:
                     range_size = bounds.MAX_ID - bounds.MIN_ID
                     partition_bin_size = 200_000
                     if range_size < partition_bin_size:
-                        partition_count = 1
+                        self.partition_count = 1
                     else:
                         # we want to have at least bin_size rows per partition with a max of 20 partitions
-                        partition_count = min(
+                        self.partition_count = min(
                             20, int(range_size / partition_bin_size)
                         )
+                    self.work_item["partition_count"] = self.partition_count
 
                     df = get_jdbc_data_by_dict__by_partition_key(
                         db_conn_props=self.db_conn_props,
@@ -291,10 +294,10 @@ class DelayedResultExtract:
                         },
                         bounds=bounds,
                         column_name_partition=column_name_partition,
-                        partition_count=partition_count,
+                        partition_count=self.partition_count,
                     )
 
-                df.write.format("delta").mode(self.mode).saveAsTable(self.fqn)
+                df.write.format("delta").mode(self.mode).option( "overwriteSchema", "true" ).saveAsTable(self.fqn)
                 # .option( "overwriteSchema", "true" )
 
             # catch empty datasets
@@ -421,6 +424,7 @@ class DelayedResultExtract:
 
 
 # COMMAND ----------
+
 result = None
 try:
     # we will create the target and the work item is not append mode

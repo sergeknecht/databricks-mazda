@@ -63,7 +63,7 @@ run_name = (
 
 # TODO: minus 1 ? because have not yet figured out how single nodes handle this number, and we want to avoid cpu starvation
 worker_count = min(
-    40, int(sc.defaultParallelism * 0.85)
+    30, int(sc.defaultParallelism * 0.85)
 )  # 40 workers accross all nodes, but partitioning will create more tasks
 
 print(worker_count)
@@ -253,6 +253,8 @@ if df.count() == 0:
 # COMMAND ----------
 
 df = df.withColumn('json', F.to_json(F.struct(*[F.col(c) for c in df.columns])))
+work_items = [json.loads(value.json) for value in df.select("json").collect()]
+print(len(work_items))
 
 # COMMAND ----------
 
@@ -260,7 +262,6 @@ results = []
 
 
 def load_table(work_item) -> str:
-    work_item = json.loads(work_item)
     p_schema_name_source = work_item["schema_name_source"]
     p_table_name_source = work_item["table_name_source"]
     p_mode = work_item["mode"]
@@ -278,12 +279,6 @@ def load_table(work_item) -> str:
     )
     return result
 
-
-# COMMAND ----------
-
-# next one works but sequentially = slow
-# results = [result for result in map(lambda row: load_table(row.json), df.collect())]
-display(results)
 
 # COMMAND ----------
 
@@ -324,7 +319,7 @@ def run_tasks(function, q):
             )
 
             results.append(result)
-            if work_item["children"]:
+            if "children" in work_item:
                 for child in work_item["children"]:
                     q.put(create_work_item(child))
 
@@ -351,10 +346,10 @@ def run_tasks(function, q):
 
     # decrement the thread count beccause q is empty, thread is going to be killed
     thread_count -= 1
-    app_status["status_message"] = f"Thread finished. Remaining threads: {thread_count}"
-    app_status["status_code"] = 200
-    logger.info(app_status)
-    log_to_delta_table(app_status)
+    # app_status["status_message"] = f"Thread finished. Remaining: {thread_count}"
+    # app_status["status_code"] = 200
+    # logger.info(app_status)
+    # log_to_delta_table(app_status)
 
 
 for work_item in work_items:
