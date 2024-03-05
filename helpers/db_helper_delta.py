@@ -34,6 +34,16 @@ def table_exists(catalog: str, schema: str, table_name: str):
     )
     return query.count() > 0
 
+def get_table_exists(fqn: str) -> bool:
+    catalog, schema, table_name = fqn.split(".")
+    query = spark.sql(
+        f"""
+            SELECT 1
+            FROM {catalog}.information_schema.tables
+            WHERE table_name = '{table_name}'
+            AND table_schema='{schema}' LIMIT 1""",
+    )
+    return query.count() > 0
 
 def drop_table(fqn: str):
     spark.sql(f"DROP TABLE IF EXISTS {fqn}")
