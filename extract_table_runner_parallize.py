@@ -40,20 +40,25 @@ dbutils.widgets.dropdown(
     ["TRUE", "FALSE"],
     label="raise exception on data error",
 )
+dbutils.widgets.dropdown(
+    "jp_scope",
+    "DEV2",
+    ["DEV", "DEV2", "ACC", "PRD", "TST"],
+    label="UC catalog prefix (=scope)",
+)
 
 # COMMAND ----------
 
 jp_action: str = dbutils.widgets.get("jp_action")
 jp_stop_on_exception: bool = dbutils.widgets.get("jp_stop_on_exception").upper() == "TRUE"
 jp_action + "," + str(jp_stop_on_exception)
+jp_scope: str = dbutils.widgets.get("jp_scope")
 
 # COMMAND ----------
 
 # JOB PARAMETERS
-# jp_action = "create" or "drop__create" or "create" or "drop__create" or "drop"
 jp_actions = jp_action.split("__")
-jp_scope = "DEV" or "PRD" or "TST" or "DEV"  # where to write the data
-jp_db_scope = "ACC"  # where to read the data
+jp_db_scope = "ACC"  # where to read the Oracle data from
 jp_run_version = "v240305"  # version of the job
 p_db_key = "DWH_BI1__100000" or "DWH_BI1" or "DWH_BI1__500000" or "DWH_BI1__250000"
 run_ts = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
@@ -61,17 +66,19 @@ run_name = (
     dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get()
 )
 
-# TODO: minus 1 ? because have not yet figured out how single nodes handle this number, and we want to avoid cpu starvation
+# workers accross all nodes, but partitioning will create more tasks
+# however we limit it to max 20 partitions per query
+# total lis 128 CPUs, therefore workers should be limited to 128 cpu's / 20 partitions
+# to get max number of workers
 worker_count = min(
-    30, int(sc.defaultParallelism * 0.85)
-)  # 40 workers accross all nodes, but partitioning will create more tasks
+    128//20, int(sc.defaultParallelism * 0.9)
+)  
 
 print(worker_count)
 
 timeout_sec = 5400  # 1:30 hours
 
 start_time = time.time()
-
 
 # COMMAND ----------
 
@@ -267,7 +274,7 @@ def load_table(work_item) -> str:
     p_mode = work_item["mode"]
     p_sql = work_item["query_sql"]
     logger.info(
-        f"{p_schema_name_source}.{p_table_name_source} with mode {p_mode} with sql {p_sql}"
+        f"{p_schema_name_source}.{p_table_name_source} with mode {p_mode}"
     )
     # Run the extract_table notebook
     result: str = dbutils.notebook.run(
@@ -278,7 +285,6 @@ def load_table(work_item) -> str:
         },
     )
     return result
-
 
 # COMMAND ----------
 
@@ -315,7 +321,7 @@ def run_tasks(function, q):
             work_item["job_id"] = result_dict.get("job_id", 0)
 
             logger.info(
-                f"completed {result_dict.get('job_id', 0)}: {work_item.get('fqn', '')}, status_code: {result_dict.get('status_code', -1)}, time_duration: {result_dict.get('time_duration', -1)} sec ({result_dict.get('time_duration', -1)//60} min), status_message: {result_dict.get('status_message', '')}."
+                f"OK - {result_dict.get('job_id', 0)}: {work_item.get('fqn', '')}, status_code: {result_dict.get('status_code', -1)}, time_duration: {result_dict.get('time_duration', -1)} sec ({result_dict.get('time_duration', -1)//60} min), status_message: {result_dict.get('status_message', '')}."
             )
 
             results.append(result)

@@ -329,7 +329,7 @@ class DelayedResultExtract:
                     self.logger.error("Unhandled Exception 2: " + str(type(e)) + str(e))
                     raise Exception(f"do_work Exception: Job{self.job_id}") from e
 
-            status_message = f"{self.mode}: {self.fqn}"
+            status_message = f"{self.mode}: {self.fqn}, part#: {self.partition_count} [{df.count()}]"
 
             if self.mode == "overwrite":
 
@@ -358,7 +358,7 @@ class DelayedResultExtract:
                     sqls.append(
                         f"ALTER TABLE {self.fqn} ADD CONSTRAINT pk_{self.table_name}_{column_name_pks[0]} PRIMARY KEY({column_pk_names})"
                     )
-                    status_message += f" with primary key ({column_pk_names})"
+                    status_message += f" with PK ({column_pk_names})"
 
                 for curr_sql in sqls:
                     logging.info(curr_sql)

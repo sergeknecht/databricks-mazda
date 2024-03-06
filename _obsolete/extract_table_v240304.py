@@ -484,6 +484,7 @@ class DelayedResultExtract:
 
 
 # COMMAND ----------
+
 result = None
 try:
     # we will create the target and the work item is not append mode
