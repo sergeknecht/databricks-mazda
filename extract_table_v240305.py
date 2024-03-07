@@ -169,7 +169,7 @@ class DelayedResultExtract:
             )
             column_name_pks = []
             column_name_partition = None
-            table_name_source = f"{self.schema_name_source}.{self.table_name_source}"
+            schema_table_name_source = f"{self.schema_name_source}.{self.table_name_source}"
 
             for row in df_pk.collect():
                 # we will use the first primary key as the primary key in the target table
@@ -188,7 +188,7 @@ class DelayedResultExtract:
                 sql_distinct = sql_top_distinct_columns_statement.format(
                     **{
                         "schema": self.schema_name_source,
-                        "table_name": table_name_source,
+                        "table_name":self.table_name_source,
                     }
                 )
                 df_distinct = get_jdbc_data_by_dict(
@@ -257,13 +257,13 @@ class DelayedResultExtract:
 
                 if not column_name_partition:
 
-                    logging.warning(f"No partition key found: {table_name_source}")
+                    logging.warning(f"No partition key found: {self.table_name_source}")
 
                     df = get_jdbc_data_by_dict(
                         db_conn_props=self.db_conn_props,
                         work_item={
                             **self.work_item,
-                            "table_sql": table_name_source,
+                            "table_sql": schema_table_name_source,
                         },
                     )
                     self.work_item["partition_count"] = self.partition_count
@@ -271,7 +271,7 @@ class DelayedResultExtract:
                 else:
                     bounds = get_jdbc_bounds__by_partition_key(
                         db_conn_props=self.db_conn_props,
-                        table_name=table_name_source,
+                        table_name=schema_table_name_source,
                         column_name_partition=column_name_partition,
                     )
 
@@ -290,7 +290,7 @@ class DelayedResultExtract:
                         db_conn_props=self.db_conn_props,
                         work_item={
                             **self.work_item,
-                            "table_sql": table_name_source,
+                            "table_sql": schema_table_name_source,
                         },
                         bounds=bounds,
                         column_name_partition=column_name_partition,
@@ -316,7 +316,7 @@ class DelayedResultExtract:
                             result["row_count"] = 0
                             result["work_item"] = {
                                 **self.work_item,
-                                "table_sql": table_name_source,
+                                "table_sql": schema_table_name_source,
                             }
                             self.result = result
                             return
