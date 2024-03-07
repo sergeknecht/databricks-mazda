@@ -19,6 +19,10 @@ import pyspark.sql.functions as F
 
 from helpers.app_helper import init
 from helpers.db_helper_delta import has_table
+from helpers.db_helper_jdbc import (
+    get_connection_properties__by_key,
+    get_jdbc_data_by_dict,
+)
 from helpers.logger_helper import log_to_delta_table
 from helpers.status_helper import create_status
 
@@ -33,10 +37,12 @@ logger.setLevel(logging.INFO)
 
 # COMMAND ----------
 
-dbutils.widgets.text("jp_action", "create", label="Action: drop, create or drop__create")
+dbutils.widgets.dropdown(
+    "jp_action", "create", ["drop", "create", "drop__create"], label="Action to perform"
+)
 dbutils.widgets.dropdown(
     "jp_stop_on_exception",
-    "FALSE",
+    "TRUE",
     ["TRUE", "FALSE"],
     label="raise exception on data error",
 )
@@ -70,9 +76,7 @@ run_name = (
 # however we limit it to max 20 partitions per query
 # total lis 128 CPUs, therefore workers should be limited to 128 cpu's / 20 partitions
 # to get max number of workers
-worker_count = min(
-    128//20, int(sc.defaultParallelism * 0.9)
-)  
+worker_count = min(128 // 30, int(sc.defaultParallelism * 0.9))
 
 print(worker_count)
 
@@ -259,9 +263,42 @@ if df.count() == 0:
 
 # COMMAND ----------
 
-df = df.withColumn('json', F.to_json(F.struct(*[F.col(c) for c in df.columns])))
+df = df.withColumn("json", F.to_json(F.struct(*[F.col(c) for c in df.columns])))
 work_items = [json.loads(value.json) for value in df.select("json").collect()]
 print(len(work_items))
+
+# COMMAND ----------
+
+db_conn_props: dict = get_connection_properties__by_key(jp_db_scope, p_db_key)
+
+
+def get_count(wi):
+    query = f'SELECT COUNT(*) AS ROW_COUNT FROM {wi["schema_name_source"]}.{wi["table_name_source"]}'
+    df_count = get_jdbc_data_by_dict(
+        db_conn_props=db_conn_props,
+        work_item={
+            "query_sql": query,
+            "query_type": "query",
+        },
+    )
+    return int(df_count.collect()[0]["ROW_COUNT"])
+
+
+# for each work item, get the count of the table and add it to the work item dict
+for work_item in work_items:
+    range_size = get_count(work_item)
+    work_item["row_count"] = range_size
+    partition_bin_size = 200_000
+    if range_size < partition_bin_size:
+        work_item["partition_count"] = 1
+    else:
+        # we want to have at least bin_size rows per partition with a max of 20 partitions
+        work_item["partition_count"] = min(30, int(range_size / partition_bin_size))
+
+# sort workitems by count descending to get the biggest tables first
+work_items = sorted(work_items, key=lambda wi: wi["row_count"], reverse=True)
+
+# display(spark.createDataFrame(work_items))
 
 # COMMAND ----------
 
@@ -273,9 +310,7 @@ def load_table(work_item) -> str:
     p_table_name_source = work_item["table_name_source"]
     p_mode = work_item["mode"]
     p_sql = work_item["query_sql"]
-    logger.info(
-        f"{p_schema_name_source}.{p_table_name_source} with mode {p_mode}"
-    )
+    logger.info(f"{p_schema_name_source}.{p_table_name_source} with mode {p_mode}")
     # Run the extract_table notebook
     result: str = dbutils.notebook.run(
         f"extract_table_{jp_run_version}",
@@ -285,6 +320,7 @@ def load_table(work_item) -> str:
         },
     )
     return result
+
 
 # COMMAND ----------
 
@@ -323,6 +359,32 @@ def run_tasks(function, q):
             logger.info(
                 f"OK - {result_dict.get('job_id', 0)}: {work_item.get('fqn', '')}, status_code: {result_dict.get('status_code', -1)}, time_duration: {result_dict.get('time_duration', -1)} sec ({result_dict.get('time_duration', -1)//60} min), status_message: {result_dict.get('status_message', '')}."
             )
+
+            sqls = []
+            if work_item["mode"] == "overwrite":
+                # add tags to the table for PII/confidential data
+                fqn = work_item["fqn"]
+                column_name_pks = work_item.get("column_name_pks", "")
+                if work_item.get("pii", False):
+                    sqls.append(f"ALTER TABLE {fqn} SET TAGS ('pii_table' = 'TRUE')")
+                if column_name_pks:
+                    sqls.append(f"ALTER TABLE {fqn} DROP PRIMARY KEY IF EXISTS CASCADE")
+                    for column_name in column_name_pks.split(","):
+                        sqls.append(
+                            f"ALTER TABLE {fqn} ALTER COLUMN {column_name} SET NOT NULL"
+                        )
+                        sqls.append(
+                            f"ALTER TABLE {fqn} ALTER COLUMN {column_name} SET TAGS ('db_schema' = 'pk')"
+                        )
+                    table_name = work_item["table_name"]
+                    column_name_pk = column_name_pks.split(",")[0]
+                    sqls.append(
+                        f"ALTER TABLE {fqn} ADD CONSTRAINT pk_{table_name}_{column_name_pk} PRIMARY KEY({column_name_pks})"
+                    )
+
+            for curr_sql in sqls:
+                logging.debug(curr_sql)
+                spark.sql(curr_sql)
 
             results.append(result)
             if "children" in work_item:

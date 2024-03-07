@@ -148,6 +148,7 @@ class DelayedResultExtract:
         self.job_id = work_item["job_id"]
         self.logger = logger
         self.partition_count = -1
+        self.row_count = work_item["row_count"]
 
     def do_work(self):
         try:
@@ -275,16 +276,16 @@ class DelayedResultExtract:
                         column_name_partition=column_name_partition,
                     )
 
-                    range_size = bounds.MAX_ID - bounds.MIN_ID
-                    partition_bin_size = 200_000
-                    if range_size < partition_bin_size:
-                        self.partition_count = 1
-                    else:
-                        # we want to have at least bin_size rows per partition with a max of 20 partitions
-                        self.partition_count = min(
-                            20, int(range_size / partition_bin_size)
-                        )
-                    self.work_item["partition_count"] = self.partition_count
+                    # range_size = bounds.MAX_ID - bounds.MIN_ID
+                    # partition_bin_size = 200_000
+                    # if range_size < partition_bin_size:
+                    #     self.partition_count = 1
+                    # else:
+                    #     # we want to have at least bin_size rows per partition with a max of 20 partitions
+                    #     self.partition_count = min(
+                    #         20, int(range_size / partition_bin_size)
+                    #     )
+                    # self.work_item["partition_count"] = self.partition_count
 
                     df = get_jdbc_data_by_dict__by_partition_key(
                         db_conn_props=self.db_conn_props,
@@ -329,40 +330,40 @@ class DelayedResultExtract:
                     self.logger.error("Unhandled Exception 2: " + str(type(e)) + str(e))
                     raise Exception(f"do_work Exception: Job{self.job_id}") from e
 
-            status_message = f"{self.mode}: {self.fqn}, part#: {self.partition_count} [{df.count()}]"
+            status_message = f"{self.mode}: {self.fqn}, part#: {self.partition_count} [{self.row_count}]"
 
-            if self.mode == "overwrite":
+            # if self.mode == "overwrite":
 
-                sqls = []
+                # sqls = []
 
-                # add tags to the table for PII/confidential data
-                if self.work_item.get("pii", False):
-                    status_message += " with PII"
-                    sqls.append(f"ALTER TABLE {self.fqn} SET TAGS ('pii_table' = 'TRUE')")
+                # # add tags to the table for PII/confidential data
+                # if self.work_item.get("pii", False):
+                #     status_message += " with PII"
+                #     sqls.append(f"ALTER TABLE {self.fqn} SET TAGS ('pii_table' = 'TRUE')")
 
                 # replicate the primary keys and indexes we found in the source table
-                if column_name_pks:
-                    sqls.append(
-                        f"ALTER TABLE {self.fqn} DROP PRIMARY KEY IF EXISTS CASCADE"
-                    )
-                    column_pk_names = ", ".join(column_name_pks)  # can be a composite key
+                # if column_name_pks:
+                #     sqls.append(
+                #         f"ALTER TABLE {self.fqn} DROP PRIMARY KEY IF EXISTS CASCADE"
+                #     )
+                #     column_pk_names = ", ".join(column_name_pks)  # can be a composite key
 
-                    for column_name in column_name_pks:
-                        sqls.append(
-                            f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET NOT NULL"
-                        )
-                        sqls.append(
-                            f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET TAGS ('db_schema' = 'pk')"
-                        )
+                #     for column_name in column_name_pks:
+                #         sqls.append(
+                #             f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET NOT NULL"
+                #         )
+                #         sqls.append(
+                #             f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET TAGS ('db_schema' = 'pk')"
+                #         )
 
-                    sqls.append(
-                        f"ALTER TABLE {self.fqn} ADD CONSTRAINT pk_{self.table_name}_{column_name_pks[0]} PRIMARY KEY({column_pk_names})"
-                    )
-                    status_message += f" with PK ({column_pk_names})"
+                #     sqls.append(
+                #         f"ALTER TABLE {self.fqn} ADD CONSTRAINT pk_{self.table_name}_{column_name_pks[0]} PRIMARY KEY({column_pk_names})"
+                #     )
+                #     status_message += f" with PK ({column_pk_names})"
 
-                for curr_sql in sqls:
-                    logging.info(curr_sql)
-                    spark.sql(curr_sql)
+                # for curr_sql in sqls:
+                #     logging.info(curr_sql)
+                #     spark.sql(curr_sql)
 
             result = create_status(
                 scope=p_scope,
@@ -370,7 +371,9 @@ class DelayedResultExtract:
                 status_message=status_message,
                 status_ctx=self.work_item,
             )
-            result["row_count"] = df.count()
+            result["row_count"] = self.row_count
+            if column_name_pks:
+                result["column_name_pks"] = ",".join(column_name_pks)
             self.result = result
             self.exc_info = None
 
