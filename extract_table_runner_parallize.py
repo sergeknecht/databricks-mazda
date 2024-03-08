@@ -77,7 +77,7 @@ run_name = (
 # however we limit it to max 20 partitions per query
 # total lis 128 CPUs, therefore workers should be limited to 128 cpu's / 20 partitions
 # to get max number of workers
-worker_count = min(128 // 30, int(sc.defaultParallelism * 0.9))
+worker_count = int(sc.defaultParallelism * 0.75)
 
 print(worker_count)
 

@@ -147,7 +147,7 @@ class DelayedResultExtract:
         self.fqn = work_item["fqn"]
         self.job_id = work_item["job_id"]
         self.logger = logger
-        self.partition_count = -1
+        self.partition_count = work_item["partition_count"]
         self.row_count = work_item["row_count"]
 
     def do_work(self):
