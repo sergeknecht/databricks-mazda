@@ -99,20 +99,25 @@ SELECT
     c.data_length,
     c.data_scale,
     c.char_length,
-    c.data_default
+    c.data_default,
+    CASE
+     WHEN  c.data_type = 'NUMBER'  AND (c.data_scale = 0 OR c.data_scale IS NULL) THEN 1
+     WHEN  c.data_type = 'NUMBER'  AND NOT (c.data_scale = 0 OR c.data_scale IS NULL) THEN 2
+     WHEN  c.data_type = 'DATE' THEN 4
+     ELSE 9
+    END as PREFERENCE_POSITION
 FROM
          sys.all_tables t
     INNER JOIN sys.all_tab_columns c ON t.table_name = c.table_name
 WHERE
         lower(t.owner) = lower('{schema}')
     AND lower(t.table_name) = lower('{table_name}')
-    AND ( c.data_type = 'NUMBER'
-            AND (c.data_scale = 0 OR c.data_scale IS NULL)
-        )
+
       AND     rownum <= 5
 ORDER BY
     t.owner,
     t.table_name,
+    PREFERENCE_POSITION,
     c.num_distinct DESC,
     c.COLUMN_ID,
     c.column_name
@@ -120,3 +125,6 @@ ORDER BY
 
 # where
 # AND c.data_length = 22
+# AND ( c.data_type = 'NUMBER'
+#         AND (c.data_scale = 0 OR c.data_scale IS NULL)
+#     )

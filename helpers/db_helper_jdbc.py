@@ -110,12 +110,12 @@ def get_jdbc_data_by_dict__by_partition_key(
     partition_count: int = 4,
 ):
     logger.info(
-        f"{work_item['table_sql']}: partitionColumn: {column_name_partition}, numPartitions: {partition_count}, bounds: {bounds.MIN_ID:.0f} - {bounds.MAX_ID+1:.0f}"
+        f"{work_item['table_sql']}: partitionColumn: {column_name_partition}, numPartitions: {partition_count}, bounds: {bounds.MIN_ID:.0f} - {bounds.MAX_ID:.0f}"
     )
     # lowest value to pull data for with the partitionColumn
     db_conn_props["lowerBound"] = f"{bounds.MIN_ID:.0f}"
     # max value to pull data for with the partitionColumn
-    db_conn_props["upperBound"] = f"{bounds.MAX_ID+1:.0f}"
+    db_conn_props["upperBound"] = f"{bounds.MAX_ID:.0f}"
     # a column that can be used that has a uniformly distributed range of values that can be used for parallelization
     db_conn_props["partitionColumn"] = column_name_partition
     # number of partitions to distribute the data into. Do not set this very large (~hundreds)
@@ -149,7 +149,7 @@ def get_jdbc_bounds__by_partition_key(
         print(bounds)  # Output: (1, 100)
     """
     pushdown_query = f"""(
-    SELECT MIN({column_name_partition}) as MIN_ID, MAX({column_name_partition}) as MAX_ID
+    SELECT MIN({column_name_partition}) as MIN_ID, MAX({column_name_partition})+1 as MAX_ID
     FROM {table_name}
     ) dataset
     """

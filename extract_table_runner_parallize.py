@@ -14,6 +14,7 @@ import logging
 import datetime
 import json
 import time
+from math import ceil
 
 import pyspark.sql.functions as F
 
@@ -293,7 +294,7 @@ for work_item in work_items:
         work_item["partition_count"] = 1
     else:
         # we want to have at least bin_size rows per partition with a max of 20 partitions
-        work_item["partition_count"] = min(30, int(range_size / partition_bin_size))
+        work_item["partition_count"] = min(24, int(ceil(range_size / partition_bin_size)))
 
 # sort workitems by count descending to get the biggest tables first
 work_items = sorted(work_items, key=lambda wi: wi["row_count"], reverse=True)
@@ -309,7 +310,7 @@ def load_table(work_item) -> str:
     p_schema_name_source = work_item["schema_name_source"]
     p_table_name_source = work_item["table_name_source"]
     p_mode = work_item["mode"]
-    p_sql = work_item["query_sql"]
+    # p_sql = work_item["query_sql"]
     logger.info(f"{p_schema_name_source}.{p_table_name_source} with mode {p_mode}")
     # Run the extract_table notebook
     result: str = dbutils.notebook.run(
@@ -355,6 +356,7 @@ def run_tasks(function, q):
             result: str = function(work_item)
             result_dict = json.loads(result)
             work_item["job_id"] = result_dict.get("job_id", 0)
+            work_item["column_name_pks"] = result_dict.get("column_name_pks", "")
 
             logger.info(
                 f"OK - {result_dict.get('job_id', 0)}: {work_item.get('fqn', '')}, status_code: {result_dict.get('status_code', -1)}, time_duration: {result_dict.get('time_duration', -1)} sec ({result_dict.get('time_duration', -1)//60} min), status_message: {result_dict.get('status_message', '')}."
@@ -362,11 +364,15 @@ def run_tasks(function, q):
 
             sqls = []
             if work_item["mode"] == "overwrite":
+                # first task that is creating the table shall also add some additional tags and PKs
+
                 # add tags to the table for PII/confidential data
                 fqn = work_item["fqn"]
-                column_name_pks = work_item.get("column_name_pks", "")
+                column_name_pks = work_item["column_name_pks"]
                 if work_item.get("pii", False):
                     sqls.append(f"ALTER TABLE {fqn} SET TAGS ('pii_table' = 'TRUE')")
+
+                # create constraints for primary keys
                 if column_name_pks:
                     sqls.append(f"ALTER TABLE {fqn} DROP PRIMARY KEY IF EXISTS CASCADE")
                     for column_name in column_name_pks.split(","):
