@@ -40,7 +40,7 @@ from helpers.db_helper_jdbc_oracle import get_data_partitioned__by_rownum
 
 # COMMAND ----------
 
-SCOPE = 'ACC' or 'PRD' or 'ACC'
+SCOPE = 'PRD' or 'ACC' or 'PRD' or 'ACC'
 DB_KEY = 'DWH_BI1'
 
 
