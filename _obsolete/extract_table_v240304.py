@@ -26,7 +26,7 @@ from helpers.db_helper_sql_oracle import (
     sql_table_schema_statement,
     sql_top_distinct_columns_statement,
 )
-from helpers.logger_helper import log_to_delta_table
+from helpers.logger_helper import log_to_delta
 from helpers.status_helper import create_status
 
 # # import the required libraries when running from vcode
@@ -474,12 +474,12 @@ class DelayedResultExtract:
             print(traceback)
             result["time_duration"] = time_duration
             result["job_id"] = str(self.job_id)
-            log_to_delta_table(result)
+            log_to_delta(result)
             return json.dumps(result)
 
         self.result["time_duration"] = time_duration
         logger.debug(f"result: {self.result}")
-        log_to_delta_table(self.result)
+        log_to_delta(self.result)
         return json.dumps(self.result)
 
 
@@ -546,7 +546,7 @@ except (Exception, AnalysisException) as e:
     result["time_duration"] = time_duration
     result["stack_trace"] = stack_trace
 
-    log_to_delta_table(result)
+    log_to_delta(result)
 
     dbutils.notebook.exit(json.dumps(result))
 
@@ -556,7 +556,7 @@ if result:
     end_time = time.time()
     time_duration = int(end_time - start_time)
     result["time_duration"] = time_duration
-    log_to_delta_table(result)
+    log_to_delta(result)
     logger.info(pp.pformat(result))
     dbutils.notebook.exit(json.dumps(result))
 
@@ -601,7 +601,7 @@ except (Exception, AnalysisException) as e:
     time_duration = int(end_time - start_time)
     result["time_duration"] = time_duration
 
-    log_to_delta_table(result)
+    log_to_delta(result)
     dbutils.notebook.exit(json.dumps(result))
 
 # COMMAND ----------

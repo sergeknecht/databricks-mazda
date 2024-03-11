@@ -24,7 +24,7 @@ from helpers.db_helper_jdbc import (
     get_connection_properties__by_key,
     get_jdbc_data_by_dict,
 )
-from helpers.logger_helper import log_to_delta_table
+from helpers.logger_helper import log_to_delta
 from helpers.status_helper import create_status
 
 # COMMAND ----------
@@ -197,7 +197,7 @@ if "drop" in jp_actions:
         if result["status_code"] != 404:
             # dropped or exception
             print(result)
-            log_to_delta_table(result)
+            log_to_delta(result)
             if result["status_code"] >= 500:
                 errors.append(result)
 
@@ -293,7 +293,7 @@ for work_item in work_items:
     if range_size < partition_bin_size:
         work_item["partition_count"] = 1
     else:
-        # we want to have at least bin_size rows per partition with a max of 20 partitions
+        # we want to have at least bin_size rows per partition with a max of 24 partitions
         work_item["partition_count"] = min(24, int(ceil(range_size / partition_bin_size)))
 
 # sort workitems by count descending to get the biggest tables first

@@ -50,8 +50,7 @@ def drop_table(fqn: str):
 
 
 def get_or_create_schema(catalog: str, schema_name: str):
-    if not schema_exists(catalog, schema_name):
-        spark.sql(f"CREATE SCHEMA IF NOT EXISTS {catalog}.{schema_name}")
+    spark.sql(f"CREATE SCHEMA IF NOT EXISTS {catalog}.{schema_name}")
     return f"{catalog}.{schema_name}"
 
 
@@ -64,7 +63,13 @@ def create_or_append_table(
     overwrite: bool = False,
 ):
     mode = "overwrite"
-    if table_exists(catalog, schema, table_name):
+    if catalog == "hive_metastore":
+        if overwrite:
+            spark.sql(f"DROP TABLE IF EXISTS {catalog}.{schema}.{table_name}")
+            mode = "overwrite"
+        else:
+            mode = "append"
+    elif table_exists(catalog, schema, table_name):
         if overwrite:
             spark.sql(f"DROP TABLE IF EXISTS {catalog}.{schema}.{table_name}")
             mode = "overwrite"
@@ -82,8 +87,6 @@ def create_or_append_table(
         df.write.format("delta").mode(mode).saveAsTable(
             f"{catalog}.{schema}.{table_name}"
         )
-
-    # df.write.format("delta").partitionBy(partition_cols).saveAsTable(f"{catalog}.{schema}.{table_name}")
 
     if overwrite:
         return f"REPLACED: {catalog}.{schema}.{table_name}"

@@ -26,7 +26,7 @@ FQN = "mle_bi_app_data.log.{scope}__application"
 
 
 # method that accepts a dic and writes it to a databricks delta table
-def log_to_delta_table(log_dict: dict):
+def log_to_delta(log_dict: dict, catalog: str = CATALOG, schema: str = SCHEMA, table: str = TABLE_APPLICATION):
 
     if type(log_dict) is not dict:
         raise TypeError("log_dict must be a dictionary")
@@ -38,12 +38,13 @@ def log_to_delta_table(log_dict: dict):
     assert "scope" in log_dict, "scope not found in log_dict: " + pp.pformat(log_dict)
 
     scope = log_dict["scope"].lower()
+    fqn = "{catalog}.{schema}.{table}".format(scope=scope, catalog=catalog, schema=schema, table=table)
 
     df = spark.createDataFrame(data=[log_dict])
     # write to delta table
     df.write.format("delta").partitionBy("log_dt").mode("append").option(
         "mergeSchema", "true"
-    ).saveAsTable(FQN.format(scope=scope))
+    ).saveAsTable(fqn)
 
 
 if __name__ == "__main__":

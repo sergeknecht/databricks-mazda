@@ -23,7 +23,7 @@ from helpers.db_helper_jdbc import (
     get_jdbc_data_by_dict__by_partition_key,
 )
 from helpers.db_helper_sql_oracle import sql_pk_statement
-from helpers.logger_helper import log_to_delta_table
+from helpers.logger_helper import log_to_delta
 from helpers.status_helper import create_status
 
 # COMMAND ----------
@@ -330,12 +330,12 @@ class DelayedResultExtract:
             result["traceback"] = traceback
             result["time_duration"] = time_duration
             result["job_id"] = job_id
-            log_to_delta_table(result)
+            log_to_delta(result)
             return json.dumps(result)
 
         self.result["time_duration"] = time_duration
         logger.info(f"result: {self.result}")
-        log_to_delta_table(self.result)
+        log_to_delta(self.result)
         return json.dumps(self.result)
 
 
@@ -397,7 +397,7 @@ except (Exception, AnalysisException) as e:
     result["time_duration"] = time_duration
     result["stack_trace"] = stack_trace
 
-    log_to_delta_table(result)
+    log_to_delta(result)
 
     dbutils.notebook.exit(json.dumps(result))
 
@@ -407,7 +407,7 @@ if result:
     end_time = time.time()
     time_duration = int(end_time - start_time)
     result["time_duration"] = time_duration
-    log_to_delta_table(result)
+    log_to_delta(result)
     logger.info(pp.ppformat(result))
     dbutils.notebook.exit(json.dumps(result))
 
@@ -424,7 +424,7 @@ try:
 
     assert type(result) == str, "result is not a string"
 
-    log_to_delta_table(json.loads(result))
+    log_to_delta(json.loads(result))
 
 except (Exception, AnalysisException) as e:
     exc_type, exc_value, exc_tb = sys.exc_info()
@@ -449,7 +449,7 @@ except (Exception, AnalysisException) as e:
     time_duration = int(end_time - start_time)
     result["time_duration"] = time_duration
 
-    log_to_delta_table(result)
+    log_to_delta(result)
     dbutils.notebook.exit(json.dumps(result))
 
 # COMMAND ----------
