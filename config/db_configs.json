@@ -16,6 +16,11 @@
             "hostName": "accdw-scan.mle.mazdaeur.com",
             "databaseName": "ACC_DWH",
             "fetchSize": "100000"
+        },"DWH_BI1__100000_COMP": {
+            "hostName": "accdw-scan.mle.mazdaeur.com",
+            "databaseName": "ACC_DWH",
+            "fetchSize": "100000",
+            "properties": {"oracle.net.networkCompression": "on", "oracle.net.networkCompressionThreshold": "1024"}
         },
         "DWH_BI1__250000": {
             "hostName": "accdw-scan.mle.mazdaeur.com",

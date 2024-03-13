@@ -34,7 +34,13 @@ def get_db_dict(db_scope: str, db_key: str = "DWH_BI1", default="DEFAULT"):
     with open("./config/db_configs.json") as f:
         db_configs = json.load(f)
 
-    return {**db_configs[db_scope][default], **db_configs[db_scope][db_key]}
+    db_dict = {**db_configs[db_scope][default], **db_configs[db_scope][db_key]}
+
+    if "properties" in db_dict:
+        db_dict = {**db_dict, **db_dict["properties"]}
+        del db_dict["properties"]
+
+    return db_dict
 
 
 def get_connection_properties__by_key(db_scope: str = "ACC", db_key: str = "DWH_BI1"):
