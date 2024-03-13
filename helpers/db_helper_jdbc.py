@@ -26,6 +26,8 @@ JDBC_KEYS_ALLOWED = [
     "pooling",
     "port",
     "customSchema",
+    "oracle.net.networkCompression",
+    "oracle.net.networkCompressionThreshold"
 ]
 
 
