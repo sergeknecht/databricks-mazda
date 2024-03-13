@@ -38,6 +38,7 @@ def log_to_delta(log_dict: dict, catalog: str = CATALOG, schema: str = SCHEMA, t
     assert "scope" in log_dict, "scope not found in log_dict: " + pp.pformat(log_dict)
 
     scope = log_dict["scope"].lower()
+    table = table.format(scope=scope)
     fqn = "{catalog}.{schema}.{table}".format(scope=scope, catalog=catalog, schema=schema, table=table)
 
     df = spark.createDataFrame(data=[log_dict])
