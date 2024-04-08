@@ -79,9 +79,9 @@ run_name = (
 # to get max number of workers
 worker_count = int(sc.defaultParallelism * 0.75)
 
-print(worker_count)
+print(jp_action, worker_count)
 
-timeout_sec = 5400  # 1:30 hours
+timeout_sec = 3600  # 1:00 hours
 
 start_time = time.time()
 

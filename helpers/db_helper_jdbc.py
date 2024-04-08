@@ -101,7 +101,7 @@ def get_jdbc_data_by_dict(
     db_conn_props = {k: v for k, v in db_conn_props.items() if v}
 
     logger.info(f"get_jdbc_data_by_dict: {query_type}: {query_sql}")
-    logger.debug(db_conn_props)
+    logger.info(db_conn_props)
 
     df = (
         spark.read.format("jdbc")
