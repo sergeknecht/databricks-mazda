@@ -53,6 +53,12 @@ dbutils.widgets.dropdown(
     ["DEV", "DEV2", "ACC", "PRD", "TST"],
     label="UC catalog prefix (=scope)",
 )
+dbutils.widgets.dropdown(
+    "p_db_key",
+    "DWH_BI1__100000_COMP",
+    ["DWH_BI1__100000_COMP" , "DWH_BI1__100000" , "DWH_BI1" , "DWH_BI1__500000" , "DWH_BI1__250000"],
+    label="DB Config to use",
+)
 
 # COMMAND ----------
 
@@ -60,6 +66,7 @@ jp_action: str = dbutils.widgets.get("jp_action")
 jp_stop_on_exception: bool = dbutils.widgets.get("jp_stop_on_exception").upper() == "TRUE"
 jp_action + "," + str(jp_stop_on_exception)
 jp_scope: str = dbutils.widgets.get("jp_scope")
+p_db_key: str = dbutils.widgets.get("p_db_key")
 
 # COMMAND ----------
 
@@ -79,7 +86,7 @@ run_name = (
 # to get max number of workers
 worker_count = int(sc.defaultParallelism * 0.75)
 
-print(jp_action, worker_count)
+print(p_db_key, jp_action, worker_count)
 
 timeout_sec = 3600  # 1:00 hours
 
