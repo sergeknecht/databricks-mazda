@@ -105,15 +105,19 @@ SELECT
      WHEN  c.data_type = 'NUMBER'  AND NOT (c.data_scale = 0 OR c.data_scale IS NULL) THEN 2
      WHEN  c.data_type = 'DATE' THEN 4
      ELSE 9
-    END as PREFERENCE_POSITION
+    END as PREFERENCE_POSITION,
+    t.NUM_ROWS,
+    t.AVG_ROW_LEN,
+    c.NUM_NULLS,
+    c.NULLABLE
 FROM
          sys.all_tables t
     INNER JOIN sys.all_tab_columns c ON t.table_name = c.table_name
 WHERE
         lower(t.owner) = lower('{schema}')
     AND lower(t.table_name) = lower('{table_name}')
-
-      AND     rownum <= 5
+    AND c.data_type NOT IN ('VARCHAR', 'VARCHAR2', 'CHAR')
+    AND c.COLUMN_NAME NOT IN ('LOAD_NR')
 ORDER BY
     t.owner,
     t.table_name,

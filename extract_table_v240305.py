@@ -59,26 +59,28 @@ except:
 
 DEBUG = False
 if DEBUG:
-    p_work_json = {
-        "pii": True,
-        "scope": "ACC",
-        "catalog_name_source": "",
-        "schema_name_source": "STG",
-        "table_name_source": "STG_EMOT_BTNCDHDR",
-        "catalog_name": "acc__impetus_poc_pii",
-        "schema_name": "stg",
-        "table_name": "stg_emot_btncdhdr",
-        "db_scope": "ACC",
-        "db_key": "DWH_BI1__100000",
-        "query_type": "dbtable",
-        "query_sql": "",
-        "mode": "overwrite",
-        # "children": [],
-        "run_ts": "2024-03-02T11:05:46.107518+00:00",
-        "run_name": "/Users/sknecht@mazdaeur.com/.ide/databricks-mazda-ca32a17d/extract_table_runner_parallize_v240229",
-        "fqn": "acc__impetus_poc_pii.stg.stg_emot_btncdhdr",
-        "job_id": "766761984965330",
-    }
+    # p_work_json = {
+    #     "pii": True,
+    #     "scope": "ACC",
+    #     "catalog_name_source": "",
+    #     "schema_name_source": "STG",
+    #     "table_name_source": "STG_EMOT_BTNCDHDR",
+    #     "catalog_name": "acc__impetus_poc_pii",
+    #     "schema_name": "stg",
+    #     "table_name": "stg_emot_btncdhdr",
+    #     "db_scope": "ACC",
+    #     "db_key": "DWH_BI1__100000",
+    #     "query_type": "dbtable",
+    #     "query_sql": "",
+    #     "mode": "overwrite",
+    #     # "children": [],
+    #     "run_ts": "2024-03-02T11:05:46.107518+00:00",
+    #     "run_name": "/Users/sknecht@mazdaeur.com/.ide/databricks-mazda-ca32a17d/extract_table_runner_parallize_v240229",
+    #     "fqn": "acc__impetus_poc_pii.stg.stg_emot_btncdhdr",
+    #     "job_id": "766761984965330",
+    # }
+    # p_work_json = {'catalog_name': 'dev2__impetus_target', 'catalog_name_source': '', 'db_key': 'DWH_BI1__100000', 'db_scope': 'ACC', 'fqn': 'dev2__impetus_target.stg_tmp.v__temp_200_all_svc', 'mode': 'overwrite', 'pii': False, 'query_sql': '', 'query_type': 'dbtable', 'run_name': '/Repos/sknecht@mazdaeur.com/databricks-mazda/extract_table_runner_parallize', 'run_ts': '2024-04-05T09:46:12.053972+00:00', 'schema_name': 'stg_tmp', 'schema_name_source': 'STG_TMP', 'scope': 'DEV2', 'table_name': 'v__temp_200_all_svc', 'table_name_source': 'V$_TEMP_200_ALL_SVC', 'row_count': 26818087, 'partition_count': 24}
+    p_work_json = {'catalog_name': 'dev2__impetus_poc', 'catalog_name_source': '', 'db_key': 'DWH_BI1__100000', 'db_scope': 'ACC', 'fqn': 'dev2__impetus_poc.stg.stg_veh_master_btv14010', 'mode': 'overwrite', 'pii': False, 'query_sql': '', 'query_type': 'dbtable', 'run_name': '/Repos/sknecht@mazdaeur.com/databricks-mazda/extract_table_runner_parallize', 'run_ts': '2024-04-08T11:13:36.235945+00:00', 'schema_name': 'stg', 'schema_name_source': 'STG', 'scope': 'DEV2', 'table_name': 'stg_veh_master_btv14010', 'table_name_source': 'STG_VEH_MASTER_BTV14010', 'row_count': 7825615, 'partition_count': 24, 'job_id': '369886017422563'}
 else:
     p_work_json: dict = json.loads(dbutils.widgets.get("p_work_json"))
     assert p_work_json, "p_work_json not set"
@@ -180,7 +182,7 @@ class DelayedResultExtract:
                 if (
                     not column_name_partition
                     and self.query_type == "dbtable"
-                    and row["DATA_TYPE"] == "NUMBER"
+                    and row["DATA_TYPE"] in ("NUMBER", "DATE")
                 ):
                     column_name_partition = row["COLUMN_NAME"]
 
