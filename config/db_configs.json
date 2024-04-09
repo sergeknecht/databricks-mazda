@@ -55,6 +55,11 @@
             "hostName": "prddw-scan.mle.mazdaeur.com",
             "databaseName": "PRD_DWH"
         },
+        "DWH_BI1__100000": {
+            "hostName": "prddw-scan.mle.mazdaeur.com",
+            "databaseName": "PRD_DWH",
+            "fetchSize": "100000"
+        },
         "DWH_BI1__100000_COMP": {
             "hostName": "prddw-scan.mle.mazdaeur.com",
             "databaseName": "PRD_DWH",

@@ -257,7 +257,6 @@
     {"catalog": "impetus_src", "name": "LZ_INC.DMM_TDEFI", "pii": false},
     {"catalog": "impetus_src", "name": "LZ_INC.DMM_VIN_DATA", "pii": false},
     {"catalog": "impetus_src", "name": "LZ_INC.DMM_VIN_RESULT", "pii": false},
-    {"catalog": "impetus_src", "name": "LZ_INC.TBDFP_VINPAYMENT", "pii": false},
     {"catalog": "impetus_src", "name": "LZ_INC.TBINC_CAMPAIGN_CAR", "pii": false},
     {"catalog": "impetus_src", "name": "LZ_INC.TBINC_COND", "pii": false},
     {"catalog": "impetus_src", "name": "LZ_INC.TBINC_CPNTYPE", "pii": false},
