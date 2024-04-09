@@ -65,6 +65,8 @@ dbutils.widgets.dropdown(
     ["DVL", "ACC", "PRD", "TST"],
     label="where to read the Oracle DB data from",
 )
+dbutils.widgets.text("jp_worker_count", "", label="workers accross all nodes, partitioning will create more tasks")
+dbutils.widgets.text("jp_partition_count_max", "", label="max number of partitions used by JDBC when reading tables")
 
 # COMMAND ----------
 
@@ -74,6 +76,17 @@ jp_action + "," + str(jp_stop_on_exception)
 jp_scope: str = dbutils.widgets.get("jp_scope")
 p_db_key: str = dbutils.widgets.get("p_db_key")
 jp_db_scope: str = dbutils.widgets.get("jp_db_scope")
+jp_worker_count = dbutils.widgets.get("jp_worker_count")
+jp_partition_count_max = dbutils.widgets.get("jp_partition_count_max")
+#defaults
+if not jp_worker_count:
+    jp_worker_count = None
+else:
+    jp_worker_count = int(jp_worker_count)
+if not jp_partition_count_max:
+    jp_partition_count_max = None
+else:
+    jp_partition_count_max = int(jp_partition_count_max)
 
 # COMMAND ----------
 
@@ -89,10 +102,10 @@ run_name = (
 # however we limit it to max 20 partitions per query
 # total lis 128 CPUs, therefore workers should be limited to 128 cpu's / 20 partitions
 # to get max number of workers
-worker_count = int(sc.defaultParallelism * 1.00)
-MAX_PARTITIONS = 28
+worker_count = jp_worker_count or int(sc.defaultParallelism * 0.90)
+MAX_PARTITIONS =  jp_partition_count_max or (8*3)
 
-print(p_db_key, jp_action, worker_count)
+print(p_db_key, jp_action, worker_count, MAX_PARTITIONS)
 
 timeout_sec = 3600  # 1:00 hours
 
@@ -100,7 +113,7 @@ start_time = time.time()
 
 # COMMAND ----------
 
-with open("./config/work_items__impetus_src.json") as f: # was _poc
+with open("./config/work_items__impetus_poc.json") as f: 
     work_jsons = json.load(f)
 
 print(len(work_jsons))
@@ -301,6 +314,8 @@ def get_count(wi):
 # for each work item, get the count of the table and add it to the work item dict
 for work_item in work_items:
     range_size = get_count(work_item)
+    if range_size == 0:
+        logger.info(f"data source table empty: {work_item['schema_name_source']}.{work_item['table_name_source']}")
     work_item["row_count"] = range_size
     partition_bin_size = 200_000
     if range_size < partition_bin_size:
@@ -309,10 +324,19 @@ for work_item in work_items:
         # we want to have at least bin_size rows per partition with a max of 24 partitions
         work_item["partition_count"] = min(MAX_PARTITIONS, int(ceil(range_size / partition_bin_size)))
 
+# remove tables with 0 records (count = 0)
+work_items = [work_item for work_item in work_items if work_item["row_count"] > 0]
+
+if len(work_items) == 0:
+    logger.info("after counting rows no more items were left - quiting")
+    dbutils.notebook.exit("{}")
+
+
 # sort workitems by count descending to get the biggest tables first
 work_items = sorted(work_items, key=lambda wi: wi["row_count"], reverse=True)
 
 # display(spark.createDataFrame(work_items))
+
 
 # COMMAND ----------
 
