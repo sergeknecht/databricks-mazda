@@ -59,6 +59,12 @@ dbutils.widgets.dropdown(
     ["DWH_BI1__100000_COMP" , "DWH_BI1__100000" , "DWH_BI1" , "DWH_BI1__500000" , "DWH_BI1__250000"],
     label="DB Config to use",
 )
+dbutils.widgets.dropdown(
+    "jp_db_scope",
+    "ACC",
+    ["DVL", "ACC", "PRD", "TST"],
+    label="where to read the Oracle DB data from",
+)
 
 # COMMAND ----------
 
@@ -67,12 +73,12 @@ jp_stop_on_exception: bool = dbutils.widgets.get("jp_stop_on_exception").upper()
 jp_action + "," + str(jp_stop_on_exception)
 jp_scope: str = dbutils.widgets.get("jp_scope")
 p_db_key: str = dbutils.widgets.get("p_db_key")
+jp_db_scope: str = dbutils.widgets.get("jp_db_scope")
 
 # COMMAND ----------
 
 # JOB PARAMETERS
 jp_actions = jp_action.split("__")
-jp_db_scope = "ACC"  # where to read the Oracle data from
 jp_run_version = "v240305"  # version of the job
 # obsolete, now parameter above: p_db_key = "DWH_BI1__100000" or "DWH_BI1" or "DWH_BI1__500000" or "DWH_BI1__250000"
 run_ts = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
