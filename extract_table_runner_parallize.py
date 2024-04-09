@@ -100,7 +100,7 @@ start_time = time.time()
 
 # COMMAND ----------
 
-with open("./config/work_items__impetus_poc.json") as f:
+with open("./config/work_items__impetus_src.json") as f: # was _poc
     work_jsons = json.load(f)
 
 print(len(work_jsons))
