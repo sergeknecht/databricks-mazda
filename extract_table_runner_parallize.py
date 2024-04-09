@@ -80,7 +80,6 @@ jp_db_scope: str = dbutils.widgets.get("jp_db_scope")
 # JOB PARAMETERS
 jp_actions = jp_action.split("__")
 jp_run_version = "v240305"  # version of the job
-# obsolete, now parameter above: p_db_key = "DWH_BI1__100000" or "DWH_BI1" or "DWH_BI1__500000" or "DWH_BI1__250000"
 run_ts = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
 run_name = (
     dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get()
@@ -90,7 +89,7 @@ run_name = (
 # however we limit it to max 20 partitions per query
 # total lis 128 CPUs, therefore workers should be limited to 128 cpu's / 20 partitions
 # to get max number of workers
-worker_count = int(sc.defaultParallelism * 0.95)
+worker_count = int(sc.defaultParallelism * 1.00)
 MAX_PARTITIONS = 28
 
 print(p_db_key, jp_action, worker_count)
