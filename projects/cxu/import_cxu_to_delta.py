@@ -6,10 +6,12 @@
 
 import os
 import time
-from pyspark.sql.functions import col
+
 import pyspark.sql.functions as F
+from pyspark.sql.functions import col
+
 from helpers.app_helper import init
-from helpers.logger_helper import log_to_delta 
+from helpers.logger_helper import log_to_delta
 from helpers.status_helper import create_status
 
 # COMMAND ----------
@@ -84,18 +86,18 @@ df.show()
 # DBTITLE 1,Split the files in 1 categories, LAST (to be processed) and NOT LAST (to be moved to processed archive)
 df_lf = df.groupby('data_type').agg(F.max('modificationTime').alias("modificationTime")).alias("df_lf")
 # df_lf = df_lf.filter(F.col('modificationTime') > 1709901250000)
-df_not_process = df.join(df_lf, 
-               (df.data_type == df_lf.data_type) & (df.modificationTime == df_lf.modificationTime), 
+df_not_process = df.join(df_lf,
+               (df.data_type == df_lf.data_type) & (df.modificationTime == df_lf.modificationTime),
                "left_anti").select("df.*")
-df_todo = df.join(df_lf, 
-               (df.data_type == df_lf.data_type) & (df.modificationTime == df_lf.modificationTime), 
+df_todo = df.join(df_lf,
+               (df.data_type == df_lf.data_type) & (df.modificationTime == df_lf.modificationTime),
                "inner").select("df.*")
 
 # COMMAND ----------
 
 def move_file_to_processed(row):
   path = row["path"]
-  file_name_archive = os.path.join(dir_path_processed, row["name"])  
+  file_name_archive = os.path.join(dir_path_processed, row["name"])
   dbutils.fs.mv(path, file_name_archive)
   print("\t --> " + file_name_archive)
 

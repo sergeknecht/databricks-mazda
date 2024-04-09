@@ -5,8 +5,7 @@
             "fetchSize": "5000",
             "pooling": "true",
             "port": "1521",
-            "db_type": "oracle",
-            "allowed_keys": "url, port, driver, fetchSize, pooling, db_type"
+            "db_type": "oracle"
         },
         "DWH_BI1": {
             "hostName": "accdw-scan.mle.mazdaeur.com",
@@ -16,11 +15,14 @@
             "hostName": "accdw-scan.mle.mazdaeur.com",
             "databaseName": "ACC_DWH",
             "fetchSize": "100000"
-        },"DWH_BI1__100000_COMP": {
+        },
+        "DWH_BI1__100000_COMP": {
             "hostName": "accdw-scan.mle.mazdaeur.com",
             "databaseName": "ACC_DWH",
             "fetchSize": "100000",
-            "properties": {"oracle.net.networkCompression": "on"}
+            "properties": {
+                "oracle.net.networkCompression": "on"
+            }
         },
         "DWH_BI1__250000": {
             "hostName": "accdw-scan.mle.mazdaeur.com",
@@ -52,6 +54,14 @@
         "DWH_BI1": {
             "hostName": "prddw-scan.mle.mazdaeur.com",
             "databaseName": "PRD_DWH"
+        },
+        "DWH_BI1__100000_COMP": {
+            "hostName": "prddw-scan.mle.mazdaeur.com",
+            "databaseName": "PRD_DWH",
+            "fetchSize": "100000",
+            "properties": {
+                "oracle.net.networkCompression": "on"
+            }
         }
     }
 }

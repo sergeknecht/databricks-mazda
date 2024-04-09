@@ -1,7 +1,7 @@
 import logging
+import datetime
 import json
 import pprint as pp
-import datetime
 
 from helpers.db_helper_jdbc_oracle import get_jdbc_url
 from helpers.dbx_init import dbutils, spark
@@ -138,7 +138,7 @@ def get_jdbc_data_by_dict__by_partition_key(
         db_conn_props["sessionInitStatement" ] = "ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD'"
     else:
         bound_min : str = f"{bounds.MIN_ID:.0f}"
-        bound_max : str = f"{bounds.MAX_ID:.0f}"  
+        bound_max : str = f"{bounds.MAX_ID:.0f}"
 
     logger.info(
         f"{work_item['table_sql']}: partitionColumn: {column_name_partition}, numPartitions: {partition_count}, bounds: {bound_min} - {bound_max}"
@@ -189,10 +189,10 @@ def get_jdbc_bounds__by_partition_key(
     # WITH BASE AS (
     #     SELECT MIN({column_name_partition}) as MIN_ID, MAX({column_name_partition})+1 as MAX_ID   FROM {table_name}
     #     )
-    #     SELECT 
+    #     SELECT
     #         CASE WHEN MIN_ID = DATE '0001-01-01' THEN DATE '1970-01-01'
-    #         ELSE MIN_ID 
-    #         END as MIN_ID, 
+    #         ELSE MIN_ID
+    #         END as MIN_ID,
     #         MAX_ID
     #     FROM BASE
     # ) dataset
