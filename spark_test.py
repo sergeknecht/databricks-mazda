@@ -25,7 +25,7 @@ def spark() -> SparkSession:
 # | 1  | 0.23  | Ideal | E     | SI2     | 61.5  | 55    | 326   | 3.95 | 3. 98 | 2.43 |
 # +----+-------+-------+-------+---------+-------+-------+-------+------+-------+------+
 # ...
-#
+
 def test_spark(spark):
     spark.sql('USE catalog samples')
     spark.sql('USE tpch')
