@@ -4,7 +4,8 @@
     {"catalog": "impetus_poc", "name": "STG.IOT_STG_DLR_DIST_INTERFACE", "pii": false},
     {"catalog": "impetus_poc", "name": "STG.IOT_DIM_DIST", "pii": false},
     {"catalog": "impetus_poc", "name": "STG.STG_DSR_DIST_CONVERSION", "pii": false},
-    {"catalog": "impetus_poc", "name": "STG.STG_DSR_VEHICLE_MASTER", "pii": false},
+    {"catalog": "impetus_poc", "name": "STG.STG_DSR_VEHICLE_MASTER", "pii": false,
+    "partition_multiplier": 5},
     {"catalog": "impetus_poc", "name": "STG.STG_DSR_SVC_RECORDS", "pii": false},
     {"catalog": "impetus_poc", "name": "STG.STG_EMOT_BTNREGH", "pii": false},
     {"catalog": "impetus_poc", "name": "STG.STG_LEM_VEHICLE_DISTRIBUTORS", "pii": false},
@@ -21,7 +22,8 @@
     {
         "catalog": "impetus_poc",
         "name": "STG.STG_EMOT_BTNPPLNH",
-        "pii": false
+        "pii": false,
+        "partition_multiplier": 5
     },
     {"catalog": "impetus_poc", "name": "STG.STG_EPD_CUSTCLASSIFICATION", "pii": false},
     {
@@ -77,7 +79,8 @@
     {"catalog": "impetus_poc", "name": "STG.STG_LEM_RTDAM_AUDIT", "pii": false},
     {"catalog": "impetus_poc", "name": "STG.STG_LEM_PLANTS", "pii": false},
     {"catalog": "impetus_poc", "name": "STG.IOT_DIM_PRTN", "pii": false},
-    {"catalog": "impetus_poc", "name": "STG.STG_VEH_MASTER_BTV14010", "pii": false},
+    {"catalog": "impetus_poc", "name": "STG.STG_VEH_MASTER_BTV14010", "pii": false,
+    "partition_multiplier": 5},
     {"catalog": "impetus_poc", "name": "STG.IOT_DIM_INTR_COLOR", "pii": false},
     {"catalog": "impetus_poc", "name": "STG.IOT_DIM_EXTR_COLOR", "pii": false},
     {"catalog": "impetus_poc", "name": "STG.STG_EMOT_BTNPLDEL", "pii": false},
@@ -195,7 +198,8 @@
     {
         "catalog": "impetus_target",
         "name": "STG.STG_DIM_VIN",
-        "pii": true
+        "pii": true,
+        "partition_multiplier": 5
     },
     {"catalog": "impetus_poc", "name": "STG.STG_LEM_PARTNERS", "pii": false}
 ]

@@ -102,7 +102,7 @@ run_name = (
 # however we limit it to max 20 partitions per query
 # total lis 128 CPUs, therefore workers should be limited to 128 cpu's / 20 partitions
 # to get max number of workers
-worker_count = jp_worker_count or int(sc.defaultParallelism * 0.90)
+worker_count = jp_worker_count or int(sc.defaultParallelism * 0.95)
 MAX_PARTITIONS =  jp_partition_count_max or (8*3)
 
 print(p_db_key, jp_action, worker_count, MAX_PARTITIONS)
@@ -113,7 +113,7 @@ start_time = time.time()
 
 # COMMAND ----------
 
-with open("./config/work_items__impetus_poc.json") as f: 
+with open("./config/work_items__impetus_poc.json") as f:
     work_jsons = json.load(f)
 
 print(len(work_jsons))
@@ -172,6 +172,7 @@ def create_work_item(wi):
         # "children": wi.get("children", []),
         "run_ts": run_ts,
         "run_name": run_name,
+        "partition_multiplier": wi.get("partition_multiplier", 1),
     }
     wi["fqn"] = f"{wi['catalog_name']}.{wi['schema_name']}.{wi['table_name']}"
     return wi
@@ -317,12 +318,12 @@ for work_item in work_items:
     if range_size == 0:
         logger.info(f"data source table empty: {work_item['schema_name_source']}.{work_item['table_name_source']}")
     work_item["row_count"] = range_size
-    partition_bin_size = 200_000
+    partition_bin_size = 100_000  # best same value as resultset size from db connection
     if range_size < partition_bin_size:
-        work_item["partition_count"] = 1
+        work_item["partition_count"] = 1 * work_item["partition_multiplier"]
     else:
         # we want to have at least bin_size rows per partition with a max of 24 partitions
-        work_item["partition_count"] = min(MAX_PARTITIONS, int(ceil(range_size / partition_bin_size)))
+        work_item["partition_count"] = min(MAX_PARTITIONS, int(ceil(range_size / partition_bin_size))) * work_item["partition_multiplier"]
 
 # remove tables with 0 records (count = 0)
 work_items = [work_item for work_item in work_items if work_item["row_count"] > 0]

@@ -82,7 +82,28 @@ if DEBUG:
     # p_work_json = {'catalog_name': 'dev2__impetus_target', 'catalog_name_source': '', 'db_key': 'DWH_BI1__100000', 'db_scope': 'ACC', 'fqn': 'dev2__impetus_target.stg_tmp.v__temp_200_all_svc', 'mode': 'overwrite', 'pii': False, 'query_sql': '', 'query_type': 'dbtable', 'run_name': '/Repos/sknecht@mazdaeur.com/databricks-mazda/extract_table_runner_parallize', 'run_ts': '2024-04-05T09:46:12.053972+00:00', 'schema_name': 'stg_tmp', 'schema_name_source': 'STG_TMP', 'scope': 'DEV2', 'table_name': 'v__temp_200_all_svc', 'table_name_source': 'V$_TEMP_200_ALL_SVC', 'row_count': 26818087, 'partition_count': 24}
     # p_work_json = {'catalog_name': 'dev2__impetus_poc', 'catalog_name_source': '', 'db_key': 'DWH_BI1__100000', 'db_scope': 'ACC', 'fqn': 'dev2__impetus_poc.stg.stg_veh_master_btv14010', 'mode': 'overwrite', 'pii': False, 'query_sql': '', 'query_type': 'dbtable', 'run_name': '/Repos/sknecht@mazdaeur.com/databricks-mazda/extract_table_runner_parallize', 'run_ts': '2024-04-08T11:13:36.235945+00:00', 'schema_name': 'stg', 'schema_name_source': 'STG', 'scope': 'DEV2', 'table_name': 'stg_veh_master_btv14010', 'table_name_source': 'STG_VEH_MASTER_BTV14010', 'row_count': 7825615, 'partition_count': 24, 'job_id': '369886017422563'}
     # p_work_json = {'catalog_name': 'dev2__impetus_poc', 'catalog_name_source': '', 'db_key': 'DWH_BI1__100000_COMP', 'db_scope': 'ACC', 'fqn': 'dev2__impetus_poc.stg.stg_dsr_vehicle_master', 'mode': 'overwrite', 'pii': False, 'query_sql': '', 'query_type': 'dbtable', 'run_name': '/Repos/sknecht@mazdaeur.com/databricks-mazda/extract_table_runner_parallize_compression', 'run_ts': '2024-04-08T16:14:35.676627+00:00', 'schema_name': 'stg', 'schema_name_source': 'STG', 'scope': 'DEV2', 'table_name': 'stg_dsr_vehicle_master', 'table_name_source': 'STG_DSR_VEHICLE_MASTER', 'row_count': 7824741, 'partition_count': 24}
-    p_work_json = {'catalog_name': 'dev2__impetus_target_pii', 'catalog_name_source': '', 'db_key': 'DWH_BI1__100000', 'db_scope': 'ACC', 'fqn': 'dev2__impetus_target_pii.stg.stg_dim_vin', 'mode': 'overwrite', 'pii': True, 'query_sql': '', 'query_type': 'dbtable', 'run_name': '/Repos/sknecht@mazdaeur.com/databricks-mazda/extract_table_runner_parallize', 'run_ts': '2024-04-10T08:10:15.752164+00:00', 'schema_name': 'stg', 'schema_name_source': 'STG', 'scope': 'DEV2', 'table_name': 'stg_dim_vin', 'table_name_source': 'STG_DIM_VIN', 'row_count': 8217903, 'partition_count': 16, 'partition_key': 'VEH_MDL_LOC_SK' }
+    p_work_json = {
+        "catalog_name": "dev2__impetus_target_pii",
+        "catalog_name_source": "",
+        "db_key": "DWH_BI1__100000",
+        "db_scope": "ACC",
+        "fqn": "dev2__impetus_target_pii.stg.stg_dim_vin",
+        "mode": "overwrite",
+        "pii": True,
+        "query_sql": "",
+        "query_type": "dbtable",
+        "run_name": "/Repos/sknecht@mazdaeur.com/databricks-mazda/extract_table_runner_parallize",
+        "run_ts": "2024-04-10T08:10:15.752164+00:00",
+        "schema_name": "stg",
+        "schema_name_source": "STG",
+        "scope": "DEV2",
+        "table_name": "stg_dim_vin",
+        "table_name_source": "STG_DIM_VIN",
+        "row_count": 8217903,
+        "partition_count": 16*5,
+        "partition_key": "VEH_MDL_LOC_SK",
+        "partition_multiplier": 5.0,
+    }
 else:
     p_work_json: dict = json.loads(dbutils.widgets.get("p_work_json"))
     assert p_work_json, "p_work_json not set"
@@ -154,6 +175,7 @@ class DelayedResultExtract:
         self.partition_count = work_item["partition_count"]
         self.partition_key = work_item.get("partition_key", None)
         self.row_count = work_item["row_count"]
+        self.partition_multiplier = work_item.get("partition_multiplier", 1.0)
 
     def do_work(self):
         try:
@@ -175,7 +197,9 @@ class DelayedResultExtract:
             )
             column_name_pks = []
             column_name_partition = self.partition_key
-            schema_table_name_source = f"{self.schema_name_source}.{self.table_name_source}"
+            schema_table_name_source = (
+                f"{self.schema_name_source}.{self.table_name_source}"
+            )
 
             for row in df_pk.collect():
                 # we will use the first primary key as the primary key in the target table
@@ -194,7 +218,7 @@ class DelayedResultExtract:
                 sql_distinct = sql_top_distinct_columns_statement.format(
                     **{
                         "schema": self.schema_name_source,
-                        "table_name":self.table_name_source,
+                        "table_name": self.table_name_source,
                     }
                 )
                 df_distinct = get_jdbc_data_by_dict(
@@ -303,7 +327,9 @@ class DelayedResultExtract:
                         partition_count=self.partition_count,
                     )
 
-                df.write.format("delta").mode(self.mode).option( "overwriteSchema", "true" ).saveAsTable(self.fqn)
+                df.write.format("delta").mode(self.mode).option(
+                    "overwriteSchema", "true"
+                ).saveAsTable(self.fqn)
                 # .option( "overwriteSchema", "true" )
 
             # catch empty datasets
@@ -339,36 +365,36 @@ class DelayedResultExtract:
 
             # if self.mode == "overwrite":
 
-                # sqls = []
+            # sqls = []
 
-                # # add tags to the table for PII/confidential data
-                # if self.work_item.get("pii", False):
-                #     status_message += " with PII"
-                #     sqls.append(f"ALTER TABLE {self.fqn} SET TAGS ('pii_table' = 'TRUE')")
+            # # add tags to the table for PII/confidential data
+            # if self.work_item.get("pii", False):
+            #     status_message += " with PII"
+            #     sqls.append(f"ALTER TABLE {self.fqn} SET TAGS ('pii_table' = 'TRUE')")
 
-                # replicate the primary keys and indexes we found in the source table
-                # if column_name_pks:
-                #     sqls.append(
-                #         f"ALTER TABLE {self.fqn} DROP PRIMARY KEY IF EXISTS CASCADE"
-                #     )
-                #     column_pk_names = ", ".join(column_name_pks)  # can be a composite key
+            # replicate the primary keys and indexes we found in the source table
+            # if column_name_pks:
+            #     sqls.append(
+            #         f"ALTER TABLE {self.fqn} DROP PRIMARY KEY IF EXISTS CASCADE"
+            #     )
+            #     column_pk_names = ", ".join(column_name_pks)  # can be a composite key
 
-                #     for column_name in column_name_pks:
-                #         sqls.append(
-                #             f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET NOT NULL"
-                #         )
-                #         sqls.append(
-                #             f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET TAGS ('db_schema' = 'pk')"
-                #         )
+            #     for column_name in column_name_pks:
+            #         sqls.append(
+            #             f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET NOT NULL"
+            #         )
+            #         sqls.append(
+            #             f"ALTER TABLE {self.fqn} ALTER COLUMN {column_name} SET TAGS ('db_schema' = 'pk')"
+            #         )
 
-                #     sqls.append(
-                #         f"ALTER TABLE {self.fqn} ADD CONSTRAINT pk_{self.table_name}_{column_name_pks[0]} PRIMARY KEY({column_pk_names})"
-                #     )
-                #     status_message += f" with PK ({column_pk_names})"
+            #     sqls.append(
+            #         f"ALTER TABLE {self.fqn} ADD CONSTRAINT pk_{self.table_name}_{column_name_pks[0]} PRIMARY KEY({column_pk_names})"
+            #     )
+            #     status_message += f" with PK ({column_pk_names})"
 
-                # for curr_sql in sqls:
-                #     logging.info(curr_sql)
-                #     spark.sql(curr_sql)
+            # for curr_sql in sqls:
+            #     logging.info(curr_sql)
+            #     spark.sql(curr_sql)
 
             result = create_status(
                 scope=p_scope,
