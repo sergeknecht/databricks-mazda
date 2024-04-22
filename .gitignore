@@ -183,3 +183,4 @@ config.json
 
 .DS_Store
 tests/data/out/*.json
+projects/odi/delta_tables/~$*.xlsx
