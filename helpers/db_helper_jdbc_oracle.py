@@ -46,7 +46,7 @@ def get_data_partitioned__by_rownum(
         # number of partitions to distribute the data into. Do not set this very large (~hundreds)
         .option("numPartitions", numPartitions)
         # # Oracle’s default fetchSize is 10
-        # .option("fetchSize", "100")
+        # .option("fetchSize", "100") # this option is set by db_dict on the next line
         .options(**db_dict).load()
     )
 
