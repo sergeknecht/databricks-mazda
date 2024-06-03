@@ -23,6 +23,7 @@ from helpers.db_helper_jdbc import (
 )
 from helpers.db_helper_sql_oracle import (
     sql_pk_statement,
+    sql_table_schema_statement,
     sql_top_distinct_columns_statement,
 )
 from helpers.logger_helper import log_to_delta
@@ -206,58 +207,58 @@ class DelayedResultExtract:
                     column_name_partition = row["COLUMN_NAME"]
                     break
 
-            # # correction for bad column data type translations
-            # # CHAR should remain CHAR not VARCHAR - PROBLEM: DBX does not have fixed size strings
-            # # DATE should remain DATE not TIMESTAMP
-            # # NUMBER should be INT if scale is 0
-            # sql_schema = sql_table_schema_statement.format(
-            #     **{
-            #         "schema": self.schema_name_source,
-            #         "table_name": self.table_name_source,
-            #     }
-            # )
-            # df_schema = get_jdbc_data_by_dict(
-            #     db_conn_props=self.db_conn_props,
-            #     work_item={
-            #         "query_sql": sql_schema,
-            #         "query_type": "query",
-            #     },
-            # )
+            # correction for bad column data type translations
+            # CHAR should remain CHAR not VARCHAR - PROBLEM: DBX does not have fixed size strings
+            # DATE should remain DATE not TIMESTAMP
+            # NUMBER should be INT if scale is 0
+            sql_schema = sql_table_schema_statement.format(
+                **{
+                    "schema": self.schema_name_source,
+                    "table_name": self.table_name_source,
+                }
+            )
+            df_schema = get_jdbc_data_by_dict(
+                db_conn_props=self.db_conn_props,
+                work_item={
+                    "query_sql": sql_schema,
+                    "query_type": "query",
+                },
+            )
 
-            # df_schema.show(100, False)
+            df_schema.show(100, False)
 
-            # # the default data type conversion to DB data types is not always correct
-            # # we will use the data type translations to correct this
-            # # customSchemas = []
-            # # column_names = []
-            # for row in df_schema.collect():
-            #     dbx_data_type = row["DBX_DATA_TYPE"]
-            #     if dbx_data_type:
-            #         customSchemas.append(dbx_data_type)
+            # the default data type conversion to DB data types is not always correct
+            # we will use the data type translations to correct this
+            customSchemas = []
+            column_names = []
+            for row in df_schema.collect():
+                dbx_data_type = row["DBX_DATA_TYPE"]
+                if dbx_data_type:
+                    customSchemas.append(dbx_data_type)
 
-            #     # # the CHAR issue is fixed by surrounding it with quotes
-            #     # # this is handled by adapting the SELECT statement
-            #     dbx_column_name = row["DBX_COLUMN_NAME"]
-            #     if dbx_column_name:
-            #         column_names.append(dbx_column_name)
+                # # the CHAR issue is fixed by surrounding it with quotes
+                # # this is handled by adapting the SELECT statement
+                dbx_column_name = row["DBX_COLUMN_NAME"]
+                if dbx_column_name:
+                    column_names.append(dbx_column_name)
 
             try:
 
-                # # now that we have bounds, we can customSchema
-                # customSchema = ", ".join(customSchemas)
-                # column_names = ", ".join(column_names)
+                # now that we have bounds, we can customSchema
+                customSchema = ", ".join(customSchemas)
+                column_names = ", ".join(column_names)
 
                 # pushdown_query = f"""(
                 # select {column_names} from {table_name_source} d
                 # ) dataset
                 # """
 
-                # if customSchema:
-                #     self.db_conn_props["customSchema"] = customSchema
-                #     logging.debug(f"customSchema: '{customSchema}'")
+                if customSchema:
+                    self.db_conn_props["customSchema"] = customSchema
+                    logging.debug(f"customSchema: '{customSchema}'")
 
-                # if column_names:
-                #     logging.debug(f"column_names: '{column_names}'")
+                if column_names:
+                    logging.debug(f"column_names: '{column_names}'")
 
                 if not column_name_partition:
 
@@ -279,16 +280,6 @@ class DelayedResultExtract:
                         column_name_partition=column_name_partition,
                     )
 
-                    # range_size = bounds.MAX_ID - bounds.MIN_ID
-                    # partition_bin_size = 200_000
-                    # if range_size < partition_bin_size:
-                    #     self.partition_count = 1
-                    # else:
-                    #     # we want to have at least bin_size rows per partition with a max of 20 partitions
-                    #     self.partition_count = min(
-                    #         20, int(range_size / partition_bin_size)
-                    #     )
-                    # self.work_item["partition_count"] = self.partition_count
 
                     df = get_jdbc_data_by_dict__by_partition_key(
                         db_conn_props=self.db_conn_props,
