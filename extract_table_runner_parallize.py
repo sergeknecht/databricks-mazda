@@ -15,6 +15,8 @@ import datetime
 import json
 import time
 from math import ceil
+from queue import Queue
+from threading import Thread
 
 import pyspark.sql.functions as F
 
@@ -368,9 +370,8 @@ def load_table(work_item) -> str:
 
 # COMMAND ----------
 
-from queue import Queue
-from threading import Thread
 
+start_time_load = time.time()
 q = Queue()
 
 thread_count = 0
@@ -475,7 +476,19 @@ q.join()
 
 end_time = time.time()
 time_duration = int(end_time - start_time)
-print(f"duration notebook seconds: {time_duration}")
+print(f"duration notebook: {time_duration} seconds")
+# print time_duration in format minutes:seconds
+minutes = time_duration // 60
+seconds = time_duration % 60
+print(f"duration notebook: {minutes} minutes {seconds} seconds")
+# load
+time_duration = int(end_time - start_time_load)
+print(f"duration notebook LOAD: {time_duration} seconds")
+# print time_duration in format minutes:seconds
+minutes = time_duration // 60
+seconds = time_duration % 60
+print(f"duration notebook LOAD: {minutes} minutes {seconds} seconds")
+
 
 # COMMAND ----------
 

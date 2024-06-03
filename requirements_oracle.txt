@@ -1,1 +1,1 @@
-oracledb>=1.4.2
+oracledb==2.2.1

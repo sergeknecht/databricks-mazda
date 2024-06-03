@@ -1,2 +1,2 @@
-oracledb>=1.4.2
+oracledb==2.2.1
 python-dotenv>=1.0.1
