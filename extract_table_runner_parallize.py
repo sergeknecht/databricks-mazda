@@ -51,14 +51,20 @@ dbutils.widgets.dropdown(
 )
 dbutils.widgets.dropdown(
     "jp_scope",
-    "DEV2",
-    ["DEV", "DEV2", "ACC", "PRD", "TST"],
+    "DEV",
+    ["DEV", "UAT", "PRD", "TST"],
     label="UC catalog prefix (=scope)",
 )
 dbutils.widgets.dropdown(
     "p_db_key",
     "DWH_BI1__100000_COMP",
-    ["DWH_BI1__100000_COMP" , "DWH_BI1__100000" , "DWH_BI1" , "DWH_BI1__500000" , "DWH_BI1__250000"],
+    [
+        "DWH_BI1__100000_COMP",
+        "DWH_BI1__100000",
+        "DWH_BI1",
+        "DWH_BI1__500000",
+        "DWH_BI1__250000",
+    ],
     label="DB Config to use",
 )
 dbutils.widgets.dropdown(
@@ -67,8 +73,25 @@ dbutils.widgets.dropdown(
     ["DVL", "ACC", "PRD", "TST"],
     label="where to read the Oracle DB data from",
 )
-dbutils.widgets.text("jp_worker_count", "", label="workers accross all nodes, partitioning will create more tasks")
-dbutils.widgets.text("jp_partition_count_max", "", label="max number of partitions used by JDBC when reading tables")
+dbutils.widgets.text(
+    "jp_worker_count",
+    "",
+    label="workers accross all nodes, partitioning will create more tasks",
+)
+dbutils.widgets.text(
+    "jp_partition_count_max",
+    "",
+    label="max number of partitions used by JDBC when reading tables",
+)
+dbutils.widgets.text(
+    "jp_work_config_filename", "", label="filename.json containing the work items"
+)
+dbutils.widgets.dropdown(
+    "jp_prefix_catalog",
+    "TRUE",
+    ["TRUE", "FALSE"],
+    label="catalog name will be prefixed with '{jp_scope}__'",
+)
 
 # COMMAND ----------
 
@@ -80,7 +103,10 @@ p_db_key: str = dbutils.widgets.get("p_db_key")
 jp_db_scope: str = dbutils.widgets.get("jp_db_scope")
 jp_worker_count = dbutils.widgets.get("jp_worker_count")
 jp_partition_count_max = dbutils.widgets.get("jp_partition_count_max")
-#defaults
+jp_work_config_filename = dbutils.widgets.get("jp_work_config_filename")
+jp_prefix_catalog: bool = dbutils.widgets.get("jp_prefix_catalog").upper() == "TRUE"
+
+# defaults
 if not jp_worker_count:
     jp_worker_count = None
 else:
@@ -89,12 +115,14 @@ if not jp_partition_count_max:
     jp_partition_count_max = None
 else:
     jp_partition_count_max = int(jp_partition_count_max)
+if not jp_work_config_filename:
+    jp_work_config_filename = "work_items__impetus_poc.json"
 
 # COMMAND ----------
 
 # JOB PARAMETERS
 jp_actions = jp_action.split("__")
-jp_run_version = "v240305"  # version of the job
+jp_run_version = "v240603"  # version of the job
 run_ts = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
 run_name = (
     dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get()
@@ -105,7 +133,7 @@ run_name = (
 # total lis 128 CPUs, therefore workers should be limited to 128 cpu's / 20 partitions
 # to get max number of workers
 worker_count = jp_worker_count or int(sc.defaultParallelism * 0.95)
-MAX_PARTITIONS =  jp_partition_count_max or (8*3)
+MAX_PARTITIONS = jp_partition_count_max or (8 * 3)
 
 print(p_db_key, jp_action, worker_count, MAX_PARTITIONS)
 
@@ -115,7 +143,7 @@ start_time = time.time()
 
 # COMMAND ----------
 
-with open("./config/work_items__impetus_poc.json") as f:
+with open(f"./config/{jp_work_config_filename}") as f:
     work_jsons = json.load(f)
 
 print(len(work_jsons))
@@ -133,7 +161,7 @@ for wi in work_jsons:
     assert "name" in wi, f"name not found in {wi}"
 
 
-def get_schema_name_source(x):
+def get_schema_name_source(x: dict) -> str:
     schema = x["name"].split(".")[0]
     if schema == "STAGING":
         return "STG"
@@ -152,18 +180,22 @@ def get_schema_name_source(x):
 get_table_name_source = lambda x: x["name"].split(".")[1]
 
 
-def create_work_item(wi):
+def get_catalog_name(wi: dict) -> str:
+    return (
+        f"{jp_scope.lower()}__{wi['catalog']}"
+        if not wi["pii"]
+        else f"{jp_scope.lower()}__{wi['catalog']}_pii"
+    )
+
+
+def create_work_item(wi: dict) -> dict:
     wi = {
         "pii": wi["pii"],
         "scope": jp_scope,
         "catalog_name_source": "",
         "schema_name_source": get_schema_name_source(wi),
         "table_name_source": get_table_name_source(wi),
-        "catalog_name": (
-            f"{jp_scope.lower()}__{wi['catalog']}"
-            if not wi["pii"]
-            else f"{jp_scope.lower()}__{wi['catalog']}_pii"
-        ),
+        "catalog_name": get_catalog_name(wi),
         "schema_name": get_schema_name_source(wi).lower().replace("$", "_"),
         "table_name": get_table_name_source(wi).lower().replace("$", "_"),
         "db_scope": jp_db_scope,
@@ -318,14 +350,19 @@ def get_count(wi):
 for work_item in work_items:
     range_size = get_count(work_item)
     if range_size == 0:
-        logger.info(f"data source table empty: {work_item['schema_name_source']}.{work_item['table_name_source']}")
+        logger.info(
+            f"data source table empty: {work_item['schema_name_source']}.{work_item['table_name_source']}"
+        )
     work_item["row_count"] = range_size
     partition_bin_size = 100_000  # best same value as resultset size from db connection
     if range_size < partition_bin_size:
         work_item["partition_count"] = 1 * work_item["partition_multiplier"]
     else:
         # we want to have at least bin_size rows per partition with a max of 24 partitions
-        work_item["partition_count"] = min(MAX_PARTITIONS, int(ceil(range_size / partition_bin_size))) * work_item["partition_multiplier"]
+        work_item["partition_count"] = (
+            min(MAX_PARTITIONS, int(ceil(range_size / partition_bin_size)))
+            * work_item["partition_multiplier"]
+        )
 
 # remove tables with 0 records (count = 0)
 work_items = [work_item for work_item in work_items if work_item["row_count"] > 0]

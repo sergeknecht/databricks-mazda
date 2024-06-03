@@ -23,7 +23,7 @@
         "catalog": "impetus_poc",
         "name": "STG.STG_EMOT_BTNPPLNH",
         "pii": false,
-        "partition_multiplier": 5
+        "partition_multiplier": 10
     },
     {"catalog": "impetus_poc", "name": "STG.STG_EPD_CUSTCLASSIFICATION", "pii": false},
     {
