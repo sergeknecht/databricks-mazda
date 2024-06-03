@@ -1,5 +1,0 @@
-[
-    {"catalog": "ga4_data", "name": "DWH.DIM_DIST", "pii": false},
-    {"catalog": "ga4_data", "name": "DWH.DIM_DLR", "pii": false},
-    {"catalog": "ga4_data", "name": "DWH.DIM_CAL", "pii": false}
-]

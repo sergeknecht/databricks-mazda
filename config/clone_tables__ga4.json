@@ -1,0 +1,5 @@
+[
+    {"catalog": "raw", "name": "DWH.DIM_DIST", "pii": false},
+    {"catalog": "raw", "name": "DWH.DIM_DLR", "pii": false},
+    {"catalog": "raw", "name": "DWH.DIM_CAL", "pii": false}
+]

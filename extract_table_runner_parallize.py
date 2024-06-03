@@ -86,12 +86,7 @@ dbutils.widgets.text(
 dbutils.widgets.text(
     "jp_work_config_filename", "", label="filename.json containing the work items"
 )
-dbutils.widgets.dropdown(
-    "jp_prefix_catalog",
-    "TRUE",
-    ["TRUE", "FALSE"],
-    label="catalog name will be prefixed with '{jp_scope}__'",
-)
+
 
 # COMMAND ----------
 
@@ -104,7 +99,7 @@ jp_db_scope: str = dbutils.widgets.get("jp_db_scope")
 jp_worker_count = dbutils.widgets.get("jp_worker_count")
 jp_partition_count_max = dbutils.widgets.get("jp_partition_count_max")
 jp_work_config_filename = dbutils.widgets.get("jp_work_config_filename")
-jp_prefix_catalog: bool = dbutils.widgets.get("jp_prefix_catalog").upper() == "TRUE"
+
 
 # defaults
 if not jp_worker_count:
@@ -181,11 +176,9 @@ get_table_name_source = lambda x: x["name"].split(".")[1]
 
 
 def get_catalog_name(wi: dict) -> str:
-    return (
-        f"{jp_scope.lower()}__{wi['catalog']}"
-        if not wi["pii"]
-        else f"{jp_scope.lower()}__{wi['catalog']}_pii"
-    )
+    return  f"{jp_scope.lower()}_{wi['catalog']}"
+        # if not wi["pii"]
+        # else f"{jp_scope.lower()}_{wi['catalog']}_pii"
 
 
 def create_work_item(wi: dict) -> dict:
