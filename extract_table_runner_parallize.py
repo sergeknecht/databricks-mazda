@@ -390,6 +390,7 @@ def load_table(work_item) -> str:
             "p_work_json": json.dumps(work_item),
         },
     )
+    logger.debug(json.dumps(work_item))
     return result
 
 
@@ -434,10 +435,13 @@ def run_tasks(function, q):
             sqls = []
             if work_item["mode"] == "overwrite":
                 # first task that is creating the table shall also add some additional tags and PKs
+                logging.debug('work_item["mode"] == "overwrite"')
 
                 # add tags to the table for PII/confidential data
                 fqn = work_item["fqn"]
+                logging.debug(fqn)
                 column_name_pks = work_item["column_name_pks"]
+                logging.debug(column_name_pks)
                 if work_item.get("pii", False):
                     sqls.append(f"ALTER TABLE {fqn} SET TAGS ('pii_table' = 'TRUE')")
 
@@ -462,19 +466,19 @@ def run_tasks(function, q):
                 spark.sql(curr_sql)
 
             results.append(result)
-            if "children" in work_item:
-                for child in work_item["children"]:
-                    q.put(create_work_item(child))
+            # if "children" in work_item:
+            #     for child in work_item["children"]:
+            #         q.put(create_work_item(child))
 
-                # check if we have a thread for each child added
-                child_count = len(work_item["children"])
-                if child_count > thread_count:
-                    max_threads = (
-                        worker_count
-                        if worker_count < len(work_item["children"])
-                        else len(work_item["children"])
-                    )
-                    create_threads(max_threads - thread_count)
+            #     # check if we have a thread for each child added
+            #     child_count = len(work_item["children"])
+            #     if child_count > thread_count:
+            #         max_threads = (
+            #             worker_count
+            #             if worker_count < len(work_item["children"])
+            #             else len(work_item["children"])
+            #         )
+            #         create_threads(max_threads - thread_count)
 
         except Exception as e:
             logger.error(

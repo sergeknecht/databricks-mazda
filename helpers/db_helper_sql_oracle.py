@@ -56,7 +56,7 @@ SELECT
     c.column_name DBX_COLUMN_NAME
 FROM
     sys.all_tables t
-    INNER JOIN sys.all_tab_columns c ON t.table_name = c.table_name
+    INNER JOIN sys.all_tab_columns c ON t.table_name = c.table_name and t.owner=c.owner 
 WHERE
         lower(t.owner) = lower('{schema}')
     AND lower(t.table_name) = lower('{table_name}')
