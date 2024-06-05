@@ -46,7 +46,7 @@ SELECT
         AND c.data_length = 7
         AND c.char_length = 0
       )
-      THEN TO_DATE(c.column_name, 'yyyy-mm-dd') || ' ' ||  'DATE'
+      THEN 'TO_DATE(' || c.column_name || ', ''yyyy-mm-dd'')' || ' ' ||  'DATE'
       WHEN ( c.data_type = 'NUMBER'
             AND c.data_length < 16
             AND (c.data_scale = 0 OR c.data_scale IS NULL)
