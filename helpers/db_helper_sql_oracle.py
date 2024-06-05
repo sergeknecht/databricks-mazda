@@ -23,6 +23,12 @@ order by 1 ,2, 3
 # code to get data type of table
 # and convert it to spark data type that is compatible with it
 # https://docs.databricks.com/en/sql/language-manual/sql-ref-datatypes.html
+# 05/06/2024: added following constraints
+#     AND c.LOW_VALUE IS NOT NULL
+#     AND c.HIGH_VALUE IS NOT NULL; -- we should have at least 1 value
+#
+#     SOME Dates can not be parsed, e.g. 2-01-01
+#     TO_DATE(c.column_name, 'yyyy-mm-dd') || ' ' ||  'DATE'
 
 sql_table_schema_statement = """
 SELECT
@@ -40,7 +46,7 @@ SELECT
         AND c.data_length = 7
         AND c.char_length = 0
       )
-      THEN c.column_name || ' ' ||  'DATE'
+      THEN TO_DATE(c.column_name, 'yyyy-mm-dd') || ' ' ||  'DATE'
       WHEN ( c.data_type = 'NUMBER'
             AND c.data_length < 16
             AND (c.data_scale = 0 OR c.data_scale IS NULL)
@@ -56,10 +62,12 @@ SELECT
     c.column_name DBX_COLUMN_NAME
 FROM
     sys.all_tables t
-    INNER JOIN sys.all_tab_columns c ON t.table_name = c.table_name and t.owner=c.owner 
+    INNER JOIN sys.all_tab_columns c ON t.table_name = c.table_name and t.owner=c.owner
 WHERE
         lower(t.owner) = lower('{schema}')
     AND lower(t.table_name) = lower('{table_name}')
+    AND c.LOW_VALUE IS NOT NULL
+    AND c.HIGH_VALUE IS NOT NULL
 ORDER BY
     t.owner,
     t.table_name,

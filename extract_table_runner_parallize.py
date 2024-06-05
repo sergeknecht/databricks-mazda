@@ -36,7 +36,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s:%(lineno)d - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.WARNING)
 
 # COMMAND ----------
 
@@ -428,9 +428,15 @@ def run_tasks(function, q):
             work_item["job_id"] = result_dict.get("job_id", 0)
             work_item["column_name_pks"] = result_dict.get("column_name_pks", "")
 
-            logger.info(
-                f"OK - {result_dict.get('job_id', 0)}: {work_item.get('fqn', '')}, status_code: {result_dict.get('status_code', -1)}, time_duration: {result_dict.get('time_duration', -1)} sec ({result_dict.get('time_duration', -1)//60} min), status_message: {result_dict.get('status_message', '')}."
-            )
+            status_code = result_dict.get("status_code", -1)
+            if status_code >= 300:
+                logger.error(
+                    f"ERROR - {result_dict.get('job_id', 0)}: {work_item.get('fqn', '')}, status_code: {result_dict.get('status_code', -1)}, time_duration: {result_dict.get('time_duration', -1)} sec ({result_dict.get('time_duration', -1)//60} min), status_message: {result_dict.get('status_message', '')}."
+                )
+            else:
+                logger.info(
+                    f"OK - {result_dict.get('job_id', 0)}: {work_item.get('fqn', '')}, status_code: {result_dict.get('status_code', -1)}, time_duration: {result_dict.get('time_duration', -1)} sec ({result_dict.get('time_duration', -1)//60} min), status_message: {result_dict.get('status_message', '')}."
+                )
 
             sqls = []
             if work_item["mode"] == "overwrite":
