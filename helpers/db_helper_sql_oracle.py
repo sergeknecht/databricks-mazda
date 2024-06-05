@@ -126,6 +126,8 @@ WHERE
     AND lower(t.table_name) = lower('{table_name}')
     AND c.data_type NOT IN ('VARCHAR', 'VARCHAR2', 'CHAR')
     AND c.COLUMN_NAME NOT IN ('LOAD_NR')
+    AND c.LOW_VALUE IS NOT NULL
+    AND c.HIGH_VALUE IS NOT NULL
 ORDER BY
     t.owner,
     t.table_name,

@@ -84,6 +84,7 @@ if DEBUG:
     # p_work_json = {'catalog_name': 'dev2__impetus_poc', 'catalog_name_source': '', 'db_key': 'DWH_BI1__100000', 'db_scope': 'ACC', 'fqn': 'dev2__impetus_poc.stg.stg_veh_master_btv14010', 'mode': 'overwrite', 'pii': False, 'query_sql': '', 'query_type': 'dbtable', 'run_name': '/Repos/sknecht@mazdaeur.com/databricks-mazda/extract_table_runner_parallize', 'run_ts': '2024-04-08T11:13:36.235945+00:00', 'schema_name': 'stg', 'schema_name_source': 'STG', 'scope': 'DEV2', 'table_name': 'stg_veh_master_btv14010', 'table_name_source': 'STG_VEH_MASTER_BTV14010', 'row_count': 7825615, 'partition_count': 24, 'job_id': '369886017422563'}
     p_work_json = {'catalog_name': 'dev2__impetus_poc', 'catalog_name_source': '', 'db_key': 'DWH_BI1__100000_COMP', 'db_scope': 'ACC', 'fqn': 'dev2__impetus_poc.stg.stg_dsr_vehicle_master', 'mode': 'overwrite', 'pii': False, 'query_sql': '', 'query_type': 'dbtable', 'run_name': '/Repos/sknecht@mazdaeur.com/databricks-mazda/extract_table_runner_parallize_compression', 'run_ts': '2024-04-08T16:14:35.676627+00:00', 'schema_name': 'stg', 'schema_name_source': 'STG', 'scope': 'DEV2', 'table_name': 'stg_dsr_vehicle_master', 'table_name_source': 'STG_DSR_VEHICLE_MASTER', 'row_count': 7824741, 'partition_count': 24}
     p_work_json = {"catalog_name": "dev_raw", "catalog_name_source": "", "db_key": "DWH_BI1__100000_COMP", "db_scope": "ACC", "fqn": "dev_raw.dwh.dim_dist", "mode": "overwrite", "partition_multiplier": 1, "pii": False, "query_sql": "", "query_type": "dbtable", "run_name": "/Repos/sknecht@mazdaeur.com/databricks-mazda/extract_table_runner_parallize", "run_ts": "2024-06-03T15:08:47.887904+00:00", "schema_name": "dwh", "schema_name_source": "DWH", "scope": "DEV", "table_name": "dim_dist", "table_name_source": "DIM_DIST", "action": "create", "row_count": 401, "partition_count": 1, "job_id": "707216970643174", "column_name_pks": "DIST_SK", "status_code": 500}
+    p_work_json = {'catalog_name': 'dev_test', 'catalog_name_source': '', 'db_key': 'DWH_BI1__100000', 'db_scope': 'ACC', 'fqn': 'dev_test.lz_osb.event_details_files', 'mode': 'overwrite', 'partition_multiplier': 1, 'pii': False, 'query_sql': '', 'query_type': 'dbtable', 'run_name': '/Repos/sknecht@mazdaeur.com/databricks-mazda/extract_table_runner_parallize', 'run_ts': '2024-06-05T15:25:22.856542+00:00', 'schema_name': 'lz_osb', 'schema_name_source': 'lz_osb', 'scope': 'DEV', 'table_name': 'event_details_files', 'table_name_source': 'EVENT_DETAILS_FILES', 'row_count': 8, 'partition_count': 1}
 else:
     p_work_json: dict = json.loads(dbutils.widgets.get("p_work_json"))
     assert p_work_json, "p_work_json not set"
@@ -189,6 +190,8 @@ class DelayedResultExtract:
                 ):
                     column_name_partition = row["COLUMN_NAME"]
 
+            self.logger.debug(f"column_name_partition: '{column_name_partition}'")
+
             # method 2 to determine partition key, find the column with the most distinct values
             if not column_name_partition:
                 sql_distinct = sql_top_distinct_columns_statement.format(
@@ -232,6 +235,10 @@ class DelayedResultExtract:
             # we will use the data type translations to correct this
             customSchemas = []
             column_names = []
+
+            self.logger.debug(f"customSchemas: '{customSchemas}'")
+
+
             for row in df_schema.collect():
                 dbx_data_type = row["DBX_DATA_TYPE"]
                 if dbx_data_type:
@@ -246,24 +253,18 @@ class DelayedResultExtract:
             try:
 
                 # now that we have bounds, we can customSchema
-                customSchema = ", ".join(customSchemas)
-                column_names = ", ".join(column_names)
-
-                # pushdown_query = f"""(
-                # select {column_names} from {table_name_source} d
-                # ) dataset
-                # """
-
-                if customSchema:
+                if customSchemas:
+                    customSchema = ", ".join(customSchemas)
                     self.db_conn_props["customSchema"] = customSchema
-                    logging.debug(f"customSchema: '{customSchema}'")
+                    self.logger.debug(f"customSchema: '{customSchema}'")
 
                 if column_names:
-                    logging.debug(f"column_names: '{column_names}'")
+                    column_names = ", ".join(column_names)
+                    self.logger.debug(f"column_names: '{column_names}'")
 
                 if not column_name_partition:
 
-                    logging.warning(f"No partition key found: {self.table_name_source}")
+                    self.logger.warning(f"No partition key found: {self.table_name_source}")
 
                     df = get_jdbc_data_by_dict(
                         db_conn_props=self.db_conn_props,
@@ -275,6 +276,8 @@ class DelayedResultExtract:
                     self.work_item["partition_count"] = self.partition_count
 
                 else:
+                    self.logger.info(f"Partition key found: {self.table_name_source}: {column_name_partition}")
+
                     bounds = get_jdbc_bounds__by_partition_key(
                         db_conn_props=self.db_conn_props,
                         table_name=schema_table_name_source,
