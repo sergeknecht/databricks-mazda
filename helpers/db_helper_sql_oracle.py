@@ -30,6 +30,9 @@ order by 1 ,2, 3
 #     SOME Dates can not be parsed, e.g. 2-01-01
 #     TO_DATE(c.column_name, 'yyyy-mm-dd') || ' ' ||  'DATE'
 
+# 06/06/2024: patch sql syntax error
+# DBX_DATA_TYPE can not have functions. it can only have column_name and data_type
+# DBX_COLUMN_NAME is the one where we can patch error values like Dates can not be parsed, e.g. 2-01-01, fixed with TO_DATE(c.column_name, 'yyyy-mm-dd') || ' ' ||  c.column_name
 sql_table_schema_statement = """
 SELECT
     t.owner AS schema_name,
@@ -46,7 +49,7 @@ SELECT
         AND c.data_length = 7
         AND c.char_length = 0
       )
-      THEN 'TO_DATE(' || c.column_name || ', ''yyyy-mm-dd'')' || ' ' ||  'DATE'
+      THEN c.column_name || ' ' ||  'DATE'
       WHEN ( c.data_type = 'NUMBER'
             AND c.data_length < 16
             AND (c.data_scale = 0 OR c.data_scale IS NULL)
@@ -59,7 +62,14 @@ SELECT
         THEN c.column_name || ' ' || 'BIGINT'
     ELSE ''
     END DBX_DATA_TYPE,
-    c.column_name DBX_COLUMN_NAME
+    CASE
+    WHEN  ( c.data_type = 'DATE'
+        AND c.data_length = 7
+        AND c.char_length = 0
+      )
+      THEN 'TO_DATE(' || c.column_name || ', ''yyyy-mm-dd'')' || ' ' ||  c.column_name
+    ELSE c.column_name
+    END  DBX_COLUMN_NAME
 FROM
     sys.all_tables t
     INNER JOIN sys.all_tab_columns c ON t.table_name = c.table_name and t.owner=c.owner
@@ -74,6 +84,8 @@ ORDER BY
     c.COLUMN_ID,
     c.column_name
 """
+# removed 
+
 
 # WHEN ( c.data_type = 'NUMBER'
 #         AND c.data_length = 22

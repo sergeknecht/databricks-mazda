@@ -236,9 +236,6 @@ class DelayedResultExtract:
             customSchemas = []
             column_names = []
 
-            self.logger.debug(f"customSchemas: '{customSchemas}'")
-
-
             for row in df_schema.collect():
                 dbx_data_type = row["DBX_DATA_TYPE"]
                 if dbx_data_type:
@@ -253,6 +250,8 @@ class DelayedResultExtract:
             try:
 
                 # now that we have bounds, we can customSchema
+                self.logger.debug(f"customSchemas: '{customSchemas}'")
+
                 if customSchemas:
                     customSchema = ", ".join(customSchemas)
                     self.db_conn_props["customSchema"] = customSchema
@@ -303,7 +302,7 @@ class DelayedResultExtract:
             except (PySparkException, Exception) as e:
                 if hasattr(e, "getErrorClass"):
                     if e.getErrorClass():
-                        self.logger.error(e.getErrorClass())
+                        self.logger.error(f"e.getErrorClass: {e.getErrorClass()}")
                         if e.getErrorClass() == "CANNOT_INFER_EMPTY_SCHEMA":
                             logger.warning("CANNOT_INFER_EMPTY_SCHEMA: DataFrame empty")
                             result = create_status(
