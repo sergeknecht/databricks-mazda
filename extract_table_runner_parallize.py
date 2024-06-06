@@ -11,6 +11,7 @@
 # COMMAND ----------
 
 import logging
+import asyncio
 import datetime
 import json
 import time
@@ -21,6 +22,7 @@ from threading import Thread
 import pyspark.sql.functions as F
 
 from helpers.app_helper import init
+from helpers.asyncio_helper import run_parallel, run_sequence
 from helpers.db_helper_delta import has_table
 from helpers.db_helper_jdbc import (
     get_connection_properties__by_key,
@@ -40,8 +42,13 @@ logger.setLevel(logging.WARNING)
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ## Parameter Definition Using Widgets
+
+# COMMAND ----------
+
 dbutils.widgets.dropdown(
-    "jp_action", "create", ["drop", "create", "drop__create"], label="Action to perform"
+    "jp_action", "CREATE", ["DROP", "CREATE", "DROP__CREATE"], label="Action to perform"
 )
 dbutils.widgets.dropdown(
     "jp_stop_on_exception",
@@ -90,7 +97,7 @@ dbutils.widgets.text(
 
 # COMMAND ----------
 
-jp_action: str = dbutils.widgets.get("jp_action")
+jp_action: str = dbutils.widgets.get("jp_action").upper()
 jp_stop_on_exception: bool = dbutils.widgets.get("jp_stop_on_exception").upper() == "TRUE"
 jp_action + "," + str(jp_stop_on_exception)
 jp_scope: str = dbutils.widgets.get("jp_scope")
@@ -111,7 +118,19 @@ if not jp_partition_count_max:
 else:
     jp_partition_count_max = int(jp_partition_count_max)
 if not jp_work_config_filename:
-    jp_work_config_filename = "work_items__impetus_poc.json"
+    jp_work_config_filename = (
+        "clone_tables__impetus_src.json" or "work_items__impetus_poc.json"
+    )
+
+
+# COMMAND ----------
+
+DEBUG = False
+if DEBUG:
+    jp_action = "CREATE"
+    jp_worker_count = 30
+    jp_partition_count_max = 20
+    jp_work_config_filename = "clone_tables__impetus_src.json"
 
 # COMMAND ----------
 
@@ -138,6 +157,11 @@ start_time = time.time()
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ## Load the work items (tables to load) from json file
+
+# COMMAND ----------
+
 with open(f"./config/{jp_work_config_filename}") as f:
     work_jsons = json.load(f)
 
@@ -145,8 +169,18 @@ print(len(work_jsons))
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ## Initialize logging to Delta Application Log Table
+
+# COMMAND ----------
+
 app_status = init(jp_scope)
 display(app_status)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Based on job parameters and loaded json file build the work items (a list of dictionaries)
 
 # COMMAND ----------
 
@@ -176,9 +210,9 @@ get_table_name_source = lambda x: x["name"].split(".")[1]
 
 
 def get_catalog_name(wi: dict) -> str:
-    return  f"{jp_scope.lower()}_{wi['catalog']}"
-        # if not wi["pii"]
-        # else f"{jp_scope.lower()}_{wi['catalog']}_pii"
+    return f"{jp_scope.lower()}_{wi['catalog']}"
+    # if not wi["pii"]
+    # else f"{jp_scope.lower()}_{wi['catalog']}_pii"
 
 
 def create_work_item(wi: dict) -> dict:
@@ -211,7 +245,7 @@ print(len(work_items))
 
 # COMMAND ----------
 
-work_items
+work_items[:2]
 
 # COMMAND ----------
 
@@ -221,13 +255,13 @@ display(df)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## DROP tables if exist
+# MAGIC ## DROP tables in target location (delta) if it exist
 
 # COMMAND ----------
 
-if "drop" in jp_actions:
+if "DROP" in jp_actions:
 
-    def drop_table_delta(row):
+    async def drop_table_delta(row) -> dict:
         if has_table(row.fqn):
             spark.sql(f"DROP TABLE IF EXISTS {row.fqn}")
             result = create_status(
@@ -246,22 +280,32 @@ if "drop" in jp_actions:
             )
             return result
 
+    # async def drop_tables(df):
+    #     ioresults = []
+    #     ioresults.extend( await run_parallel(*[drop_table_delta(row) for row in df.collect()]))
+    #     return ioresults
+
+    results =  await run_parallel(*[drop_table_delta(row) for row in df.collect()])
+
+    # for result in map(lambda row: drop_table_delta(row), df.collect()):
     errors = []
-    for result in map(lambda row: drop_table_delta(row), df.collect()):
+    for result in results:
         if result["status_code"] != 404:
             # dropped or exception
             print(result)
             log_to_delta(result)
             if result["status_code"] >= 500:
                 errors.append(result)
+        elif DEBUG:
+            print(result)
 
-    if jp_action == "drop":
+    if jp_action == "DROP":
         if errors and jp_stop_on_exception:
             raise Exception("errors occured in notebook")
         else:
             dbutils.notebook.exit(json.dumps(errors))  # empty or with errors
     else:
-        jp_action = "create"
+        jp_action = "CREATE"
         jp_actions = [jp_action]
         df = df.withColumn("action", F.lit(jp_action))
         display(df)
@@ -270,43 +314,46 @@ if "drop" in jp_actions:
 
 # MAGIC %md
 # MAGIC ## Create SCHEMA if not exists
+# MAGIC For this we create a unique list of schema names based on the work item list
 
 # COMMAND ----------
 
-if "create" in jp_actions:
+if "CREATE" in jp_actions:
 
-    def create_schema(row):
+    async def create_schema(row):
         sql = f"CREATE SCHEMA IF NOT EXISTS {row.catalog_name}.{row.schema_name} WITH DBPROPERTIES (scope='{row.scope}')"
         spark.sql(sql)
         return (True, sql)
-
-    errors = [
-        result
-        for result in map(
-            lambda row: create_schema(row),
-            df.select("catalog_name", "schema_name", "scope").distinct().collect(),
-        )
-    ]
+    
+    errors = await run_parallel(*[create_schema(row) for row in df.select("catalog_name", "schema_name", "scope").distinct().collect()])
     display(errors)
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC ## In CREATE mode only try to create tables that do not yet exist
-# MAGIC ### Filter the list
+# MAGIC Filter the list by checking if they already exist in target. This allows us to retry running this notebook and skip work items created in previous try
 
 # COMMAND ----------
 
 
-def is_table_to_create(row):
+async def is_table_to_create(row):
     return (has_table(row.fqn), row.fqn)
 
+tables_to_create = await run_parallel(*[is_table_to_create(row) for row in df.collect()])
+# result is a list of tuples of (result, fqn)
+tables_to_create = [t[1] for t in tables_to_create if not t[0]]
 
-tables_to_create = []
-for result, fqn in map(lambda row: is_table_to_create(row), df.collect()):
-    if not result:
-        tables_to_create.append(fqn)
-print(tables_to_create)
+# tables_to_create = []
+# for result, fqn in map(lambda row: is_table_to_create(row), df.collect()):
+#     if not result:
+#         tables_to_create.append(fqn)
+print(tables_to_create[:3])
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC Filter out the already created tables. If no tables are left we quit early
 
 # COMMAND ----------
 
@@ -324,10 +371,19 @@ print(len(work_items))
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC - Initialize oracle connection
+# MAGIC - Get count of each table
+# MAGIC - Calculate partition size
+# MAGIC - Sort tables (most records first)
+
+# COMMAND ----------
+
 db_conn_props: dict = get_connection_properties__by_key(jp_db_scope, p_db_key)
 
+async def get_count_and_calculate_partition_size(wi:dict) -> dict:
 
-def get_count(wi):
+    # def get_count(wi):
     query = f'SELECT COUNT(*) AS ROW_COUNT FROM {wi["schema_name_source"]}.{wi["table_name_source"]}'
     df_count = get_jdbc_data_by_dict(
         db_conn_props=db_conn_props,
@@ -336,26 +392,28 @@ def get_count(wi):
             "query_type": "query",
         },
     )
-    return int(df_count.collect()[0]["ROW_COUNT"])
-
-
-# for each work item, get the count of the table and add it to the work item dict
-for work_item in work_items:
-    range_size = get_count(work_item)
+    range_size = int(df_count.collect()[0]["ROW_COUNT"])
+    
+    # get the count of the table 
+    # range_size = get_count(wi)
     if range_size == 0:
         logger.info(
-            f"data source table empty: {work_item['schema_name_source']}.{work_item['table_name_source']}"
+            f"data source table empty: {wi['schema_name_source']}.{wi['table_name_source']}"
         )
-    work_item["row_count"] = range_size
+    wi["row_count"] = range_size
     partition_bin_size = 100_000  # best same value as resultset size from db connection
     if range_size < partition_bin_size:
-        work_item["partition_count"] = 1 * work_item["partition_multiplier"]
+        wi["partition_count"] = 1 * wi["partition_multiplier"]
     else:
         # we want to have at least bin_size rows per partition with a max of 24 partitions
-        work_item["partition_count"] = (
+        wi["partition_count"] = (
             min(MAX_PARTITIONS, int(ceil(range_size / partition_bin_size)))
-            * work_item["partition_multiplier"]
+            * wi["partition_multiplier"]
         )
+    return wi
+
+# for each work item, get the count of the table and add it to the work item dict
+work_items = await run_parallel(*[get_count_and_calculate_partition_size(wi) for wi in work_items])
 
 # remove tables with 0 records (count = 0)
 work_items = [work_item for work_item in work_items if work_item["row_count"] > 0]
@@ -368,8 +426,10 @@ if len(work_items) == 0:
 # sort workitems by count descending to get the biggest tables first
 work_items = sorted(work_items, key=lambda wi: wi["row_count"], reverse=True)
 
-# display(spark.createDataFrame(work_items))
+# COMMAND ----------
 
+if DEBUG:
+    display(spark.createDataFrame(work_items))
 
 # COMMAND ----------
 
@@ -401,14 +461,13 @@ def load_table(work_item) -> str:
 
 # COMMAND ----------
 
-
 start_time_load = time.time()
 q = Queue()
 
 thread_count = 0
 
-
 def create_threads(threads_to_create):
+    logger.info(f"create_threads: {threads_to_create}")
     global thread_count
     if threads_to_create > 0:
         for i in range(threads_to_create):

@@ -11,7 +11,6 @@
 # COMMAND ----------
 
 import logging
-import asyncio
 import datetime
 import json
 import time
@@ -22,7 +21,6 @@ from threading import Thread
 import pyspark.sql.functions as F
 
 from helpers.app_helper import init
-from helpers.asyncio_helper import run_parallel, run_sequence
 from helpers.db_helper_delta import has_table
 from helpers.db_helper_jdbc import (
     get_connection_properties__by_key,
@@ -43,7 +41,7 @@ logger.setLevel(logging.WARNING)
 # COMMAND ----------
 
 dbutils.widgets.dropdown(
-    "jp_action", "CREATE", ["DROP", "CREATE", "DROP__CREATE"], label="Action to perform"
+    "jp_action", "create", ["drop", "create", "drop__create"], label="Action to perform"
 )
 dbutils.widgets.dropdown(
     "jp_stop_on_exception",
@@ -92,7 +90,7 @@ dbutils.widgets.text(
 
 # COMMAND ----------
 
-jp_action: str = dbutils.widgets.get("jp_action").upper()
+jp_action: str = dbutils.widgets.get("jp_action")
 jp_stop_on_exception: bool = dbutils.widgets.get("jp_stop_on_exception").upper() == "TRUE"
 jp_action + "," + str(jp_stop_on_exception)
 jp_scope: str = dbutils.widgets.get("jp_scope")
@@ -113,19 +111,7 @@ if not jp_partition_count_max:
 else:
     jp_partition_count_max = int(jp_partition_count_max)
 if not jp_work_config_filename:
-    jp_work_config_filename = (
-        "clone_tables__impetus_src.json" or "work_items__impetus_poc.json"
-    )
-
-
-# COMMAND ----------
-
-DEBUG = True
-if DEBUG:
-    jp_action = "DROP"
-    jp_worker_count = 30
-    jp_partition_count_max = 20
-    jp_work_config_filename = "clone_tables__impetus_src.json"
+    jp_work_config_filename = "work_items__impetus_poc.json"
 
 # COMMAND ----------
 
@@ -190,9 +176,9 @@ get_table_name_source = lambda x: x["name"].split(".")[1]
 
 
 def get_catalog_name(wi: dict) -> str:
-    return f"{jp_scope.lower()}_{wi['catalog']}"
-    # if not wi["pii"]
-    # else f"{jp_scope.lower()}_{wi['catalog']}_pii"
+    return  f"{jp_scope.lower()}_{wi['catalog']}"
+        # if not wi["pii"]
+        # else f"{jp_scope.lower()}_{wi['catalog']}_pii"
 
 
 def create_work_item(wi: dict) -> dict:
@@ -229,7 +215,7 @@ work_items
 
 # COMMAND ----------
 
-df : pyspark.sql.dataframe.DataFrame = spark.createDataFrame(work_items)
+df = spark.createDataFrame(work_items)
 display(df)
 
 # COMMAND ----------
@@ -239,7 +225,7 @@ display(df)
 
 # COMMAND ----------
 
-if "DROP" in jp_actions:
+if "drop" in jp_actions:
 
     def drop_table_delta(row):
         if has_table(row.fqn):
@@ -261,15 +247,7 @@ if "DROP" in jp_actions:
             return result
 
     errors = []
-
-    async def drop_tables(df):
-        results = await run_parallel(*[drop_table_delta(row) for row in df.collect()])
-        return results
-
-    results = asyncio.run(drop_tables(df))
-
-    # for result in map(lambda row: drop_table_delta(row), df.collect()):
-    for result in results:
+    for result in map(lambda row: drop_table_delta(row), df.collect()):
         if result["status_code"] != 404:
             # dropped or exception
             print(result)
@@ -277,13 +255,13 @@ if "DROP" in jp_actions:
             if result["status_code"] >= 500:
                 errors.append(result)
 
-    if jp_action == "DROP":
+    if jp_action == "drop":
         if errors and jp_stop_on_exception:
             raise Exception("errors occured in notebook")
         else:
             dbutils.notebook.exit(json.dumps(errors))  # empty or with errors
     else:
-        jp_action = "CREATE"
+        jp_action = "create"
         jp_actions = [jp_action]
         df = df.withColumn("action", F.lit(jp_action))
         display(df)
@@ -295,7 +273,7 @@ if "DROP" in jp_actions:
 
 # COMMAND ----------
 
-if "CREATE" in jp_actions:
+if "create" in jp_actions:
 
     def create_schema(row):
         sql = f"CREATE SCHEMA IF NOT EXISTS {row.catalog_name}.{row.schema_name} WITH DBPROPERTIES (scope='{row.scope}')"
