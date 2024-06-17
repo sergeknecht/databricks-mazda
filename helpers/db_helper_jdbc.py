@@ -62,6 +62,8 @@ def get_connection_properties__by_key(db_scope: str = "ACC", db_key: str = "DWH_
     assert username, "secret username not retrieved"
     assert password, "secret password not retrieved"
 
+    # get db_dict from db_configs.json
+    # this contains: hostName, databaseName, fetchSize, port
     db_dict = get_db_dict(db_scope, db_key)
 
     url = get_jdbc_url(db_dict)

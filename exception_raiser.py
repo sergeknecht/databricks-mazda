@@ -4,4 +4,4 @@
 
 # COMMAND ----------
 
-raise Exception('This is a notebook to stop flows.')
+raise Exception('This is a notebook used to stop flows.')
