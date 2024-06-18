@@ -127,11 +127,22 @@ def get_jdbc_data_by_dict__by_partition_key(
     if type(bounds.MIN_ID) == datetime.datetime or type(bounds.MIN_ID) ==  datetime.date:
         logger.info("BOUNDS Data Type is datetime/date")
         bound_min = f"{bounds.MIN_ID:%Y-%m-%d}" # f"{bounds.MIN_ID:%Y-%m-%d %H:%M:%S%z}"   %d%b%Y}
-        if bound_min.startswith("1-"):
-            bound_min = "000" + bound_min
+
+        # Cannot parse the bound value 14-05-28 as date. The date format should be yyyy-mm-dd
+        # if bound_min.startswith("1-"):
+        #     bound_min = "000" + bound_min
+        length_year = len(bound_min.split("-")[0])
+        if length_year < 4:
+            # add leading zeros to year so that size becomes 4
+            bound_min = "0" * (4 - length_year) + bound_min
+
         bound_max = f"{bounds.MAX_ID:%Y-%m-%d}" # f"{bounds.MAX_ID:%Y-%m-%d %H:%M:%S%z}"
-        if bound_max.startswith("1-"):
-            bound_max = "000" + bound_max
+        length_year = len(bound_max.split("-")[0])
+        if length_year < 4:
+            # add leading zeros to year so that size becomes 4
+            bound_max = "0" * (4 - length_year) + bound_max
+        # if bound_max.startswith("1-"):
+        #     bound_max = "000" + bound_max
         # oracle.jdbc.mapDateToTimestamp defaults to true. If this flag is not disabled, column d
         # (Oracle DATE) will be resolved as Catalyst Timestamp, which will fail bound evaluation of
         # the partition column. E.g. 2018-07-06 cannot be evaluated as Timestamp, and the error
