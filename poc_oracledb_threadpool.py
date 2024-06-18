@@ -16,7 +16,7 @@ db_dict["VERBOSE"] = True
 # value is the SQL query to be executed
 task_count = 6
 sql = "select sysdate from dual"
-query_tasks = {id: sql for id in range(task_count)}
+query_tasks = [{"__query_id__": id, "sql": sql} for id in range(task_count)]
 
 print("Tasks to be executed in parallel:")
 pp.pprint(query_tasks)

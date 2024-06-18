@@ -13,8 +13,8 @@ def create_db_pool(db_dict: dict[str, str]) -> oracledb.ConnectionPool:
         host=db_dict.get("hostName", None) or db_dict["DB_HOST"],
         port=db_dict.get("port", None) or db_dict["DB_PORT"],
         service_name=db_dict.get("databaseName", None) or db_dict["DB_SERVICE_NAME"],
-        min=int(db_dict.get("pool_size_min", 2)), # in case value is string
-        max=int(db_dict.get("pool_size_max", 8)), # in case value is string
+        min=int(db_dict.get("pool_size_min", 2)),  # in case value is string
+        max=int(db_dict.get("pool_size_max", 8)),  # in case value is string
         increment=1,
         getmode=oracledb.POOL_GETMODE_WAIT,
     )
@@ -29,8 +29,12 @@ def do_query(
     ), "Unusable connection. Please check the database and network settings."
 
     cursor = con.cursor()
-    cursor.prefetchrows = int(db_dict.get("fetchSize", 100))  # in case value is string    db_dict.get("fetchSize", 100)
-    cursor.arraysize = int(db_dict.get("fetchSize", 100))  # in case value is string    db_dict.get("fetchSize", 100)
+    cursor.prefetchrows = int(
+        db_dict.get("fetchSize", 100)
+    )  # in case value is string    db_dict.get("fetchSize", 100)
+    cursor.arraysize = int(
+        db_dict.get("fetchSize", 100)
+    )  # in case value is string    db_dict.get("fetchSize", 100)
 
     if db_dict.get("SIMULATE_LONG_RUNNING_QUERY", False):
         time.sleep(4)  # sleep seconds to simulate a long running query
@@ -45,7 +49,11 @@ def do_query(
 
     if db_dict.get("VERBOSE", False):
         print(
-            "__query_id__", __query_id__, threading.current_thread().name, "fetched:", results
+            "__query_id__",
+            __query_id__,
+            threading.current_thread().name,
+            "fetched:",
+            results,
         )
 
     pool.release(con)
@@ -58,12 +66,12 @@ def create_threadpool(db_dict: dict[str, str]):
     return t_pool
 
 
-def do_parallel_query(db_dict: dict[str, str], query_task_dict: dict[int, str]):
+def do_parallel_query(db_dict: dict[str, str], query_task_dicts: list[dict[str, str]]):
     db_pool = create_db_pool(db_dict)
     t_pool = create_threadpool(db_dict)
     items = [
-        (db_dict, db_pool, __query_id__, sql)
-        for __query_id__, sql in query_task_dict.items()
+        (db_dict, db_pool, query_task_dict["__query_id__"], query_task_dict["sql"])
+        for query_task_dict in query_task_dicts
     ]
 
     results_by_query_id = {}

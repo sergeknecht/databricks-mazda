@@ -12,14 +12,12 @@
 
 import logging
 import asyncio
-import copy
 import datetime
 import json
 import time
 from math import ceil
 from queue import Queue
 from threading import Thread
-import pprint as pp
 
 import pyspark.sql.functions as F
 
@@ -31,7 +29,6 @@ from helpers.db_helper_jdbc import (
     get_jdbc_data_by_dict,
 )
 from helpers.logger_helper import log_to_delta
-from helpers.oracledb_helper import do_parallel_query
 from helpers.status_helper import create_status
 
 # COMMAND ----------
@@ -124,33 +121,6 @@ if not jp_work_config_filename:
     jp_work_config_filename = (
         "clone_tables__impetus_src.json" or "work_items__impetus_poc.json"
     )
-
-# COMMAND ----------
-
-db_conn_props: dict = get_connection_properties__by_key(jp_db_scope, p_db_key)
-
-# create deep copy db_conn_props to db_dict
-db_dict = copy.deepcopy(db_conn_props)
-db_dict["pool_size_max"] = 2
-db_dict["SIMULATE_LONG_RUNNING_QUERY"] = False
-db_dict["VERBOSE"] = True
-
-# Create a dictionary of tasks to be executed in parallel
-# key is an identifier (int) for the query
-# value is the SQL query to be executed
-task_count = 6
-sql = "select sysdate from dual"
-query_tasks = {id: sql for id in range(task_count)}
-
-print("Tasks to be executed in parallel:")
-pp.pprint(query_tasks)
-
-results_by_query_id = do_parallel_query(db_dict, query_tasks)
-
-print("Results of parallel queries:")
-pp.pprint(results_by_query_id)
-
-
 
 
 # COMMAND ----------
@@ -410,35 +380,6 @@ print(len(work_items))
 # COMMAND ----------
 
 db_conn_props: dict = get_connection_properties__by_key(jp_db_scope, p_db_key)
-
-
-# COMMAND ----------
-
-db_conn_props: dict = get_connection_properties__by_key(jp_db_scope, p_db_key)
-
-# create deep copy db_conn_props to db_dict
-db_dict = copy.deepcopy(db_conn_props)
-db_dict["pool_size_max"] = 2
-db_dict["SIMULATE_LONG_RUNNING_QUERY"] = False
-db_dict["VERBOSE"] = True
-
-# Create a dictionary of tasks to be executed in parallel
-# key is an identifier (int) for the query
-# value is the SQL query to be executed
-task_count = 6
-sql = "select sysdate from dual"
-query_tasks = {id: sql for id in range(task_count)}
-
-print("Tasks to be executed in parallel:")
-pp.pprint(query_tasks)
-
-results_by_query_id = do_parallel_query(db_dict, query_tasks)
-
-print("Results of parallel queries:")
-pp.pprint(results_by_query_id)
-
-
-# COMMAND ----------
 
 async def get_count_and_calculate_partition_size(wi:dict) -> dict:
 
