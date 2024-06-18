@@ -13,8 +13,8 @@ def create_db_pool(db_dict: dict[str, str]) -> oracledb.ConnectionPool:
         host=db_dict.get("hostName", None) or db_dict["DB_HOST"],
         port=db_dict.get("port", None) or db_dict["DB_PORT"],
         service_name=db_dict.get("databaseName", None) or db_dict["DB_SERVICE_NAME"],
-        min=db_dict.get("pool_size_min", 2),
-        max=db_dict.get("pool_size_max", 8),
+        min=int(db_dict.get("pool_size_min", 2)), # in case value is string
+        max=int(db_dict.get("pool_size_max", 8)), # in case value is string
         increment=1,
         getmode=oracledb.POOL_GETMODE_WAIT,
     )
@@ -29,8 +29,8 @@ def do_query(
     ), "Unusable connection. Please check the database and network settings."
 
     cursor = con.cursor()
-    cursor.prefetchrows = db_dict.get("fetchSize", 100)
-    cursor.arraysize = db_dict.get("fetchSize", 100)
+    cursor.prefetchrows = int(db_dict.get("fetchSize", 100))  # in case value is string    db_dict.get("fetchSize", 100)
+    cursor.arraysize = int(db_dict.get("fetchSize", 100))  # in case value is string    db_dict.get("fetchSize", 100)
 
     if db_dict.get("SIMULATE_LONG_RUNNING_QUERY", False):
         time.sleep(4)  # sleep seconds to simulate a long running query
@@ -53,8 +53,8 @@ def do_query(
 
 
 def create_threadpool(db_dict: dict[str, str]):
-    print("Creating thread pool with max size:", db_dict.get("pool_size_max", 1))
-    t_pool = ThreadPool(processes=db_dict.get("pool_size_max", 1))
+    print("Creating thread pool with max size:", int(db_dict.get("pool_size_max", 1)))
+    t_pool = ThreadPool(processes=int(db_dict.get("pool_size_max", 1)))
     return t_pool
 
 
