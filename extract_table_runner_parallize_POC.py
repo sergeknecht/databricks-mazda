@@ -126,7 +126,6 @@ if not jp_work_config_filename:
     )
 
 
-
 # COMMAND ----------
 
 DEBUG = False
@@ -243,7 +242,9 @@ def create_work_item(wi: dict) -> dict:
     return wi
 
 
-work_items = [create_work_item(wi) | {"__query_id__": idx} for idx, wi in enumerate(work_jsons)]
+work_items = [
+    create_work_item(wi) | {"__query_id__": idx} for idx, wi in enumerate(work_jsons)
+]
 
 print(len(work_items))
 
@@ -261,7 +262,24 @@ display(df)
 # MAGIC %md
 # MAGIC ## DROP tables in target location (delta) if it exist
 
+
+# MAGIC %md
+# MAGIC ## TEST TO DO - write drop commands in poc_multiple_sqls.sql and run notebook. should be MUCH FASTER
+
 # COMMAND ----------
+
+result: str = dbutils.notebook.run(
+    f"poc_sql_notebook_writer",
+    timeout_sec,
+    # {
+    #     "p_work_json": json.dumps(work_item),
+    # },
+)
+print(result)
+
+
+# COMMAND ----------
+
 
 if "DROP" in jp_actions:
 
@@ -275,13 +293,13 @@ if "DROP" in jp_actions:
             #     status_ctx=row,
             # )
             return result
-        # else:
-        #     result = create_status(
-        #         scope=jp_scope,
-        #         status_code=404,
-        #         status_message=f"NOT_FOUND: {row.fqn}",
-        #         status_ctx=row,
-        #     )
+            # else:
+            #     result = create_status(
+            #         scope=jp_scope,
+            #         status_code=404,
+            #         status_message=f"NOT_FOUND: {row.fqn}",
+            #         status_ctx=row,
+            #     )
             return result
 
     # async def drop_tables(df):
@@ -289,7 +307,7 @@ if "DROP" in jp_actions:
     #     ioresults.extend( await run_parallel(*[drop_table_delta(row) for row in df.collect()]))
     #     return ioresults
 
-    results =  await run_parallel(*[drop_table_delta(row) for row in df.collect()])
+    results = await run_parallel(*[drop_table_delta(row) for row in df.collect()])
 
     # for result in map(lambda row: drop_table_delta(row), df.collect()):
     errors = []
@@ -329,7 +347,14 @@ if "CREATE" in jp_actions:
         spark.sql(sql)
         return (True, sql)
 
-    errors = await run_parallel(*[create_schema(row) for row in df.select("catalog_name", "schema_name", "scope").distinct().collect()])
+    errors = await run_parallel(
+        *[
+            create_schema(row)
+            for row in df.select("catalog_name", "schema_name", "scope")
+            .distinct()
+            .collect()
+        ]
+    )
     display(errors)
 
 # COMMAND ----------
@@ -343,6 +368,7 @@ if "CREATE" in jp_actions:
 
 async def is_table_to_create(row):
     return (has_table(row.fqn), row.fqn)
+
 
 tables_to_create = await run_parallel(*[is_table_to_create(row) for row in df.collect()])
 # result is a list of tuples of (result, fqn)
@@ -385,7 +411,13 @@ print(len(work_items))
 
 # for each work item, get the count of the table and add it to the work item dict
 # add the count of the table to the work item dict as the sql query
-work_items = [wi | {"sql": f'SELECT COUNT(*) AS ROW_COUNT FROM {wi["schema_name_source"]}.{wi["table_name_source"]}'} for wi in work_items]
+work_items = [
+    wi
+    | {
+        "sql": f'SELECT COUNT(*) AS ROW_COUNT FROM {wi["schema_name_source"]}.{wi["table_name_source"]}'
+    }
+    for wi in work_items
+]
 display(work_items[:3])
 
 # COMMAND ----------
@@ -397,38 +429,14 @@ db_dict = copy.deepcopy(db_conn_props)
 db_dict["pool_size_max"] = 20
 db_dict["SIMULATE_LONG_RUNNING_QUERY"] = False
 db_dict["VERBOSE"] = False
-
-# # Create a dictionary of tasks to be executed in parallel
-# # key is an identifier (int) for the query
-# # value is the SQL query to be executed
-# task_count = 6
-# sql = "select sysdate from dual"
-# query_tasks = {id: sql for id in range(task_count)}
-
-# print("Tasks to be executed in parallel:")
-# pp.pprint(query_tasks)
-
 results_by_query_id = do_parallel_query(db_dict, work_items)
 
-# print("Results of parallel queries:")
-# pp.pprint(results_by_query_id)
 
+def get_count_and_calculate_partition_size(wi: dict, result: list) -> dict:
 
-def get_count_and_calculate_partition_size(wi:dict, result: list) -> dict:
-
-    # # def get_count(wi):
-    # query = f'SELECT COUNT(*) AS ROW_COUNT FROM {wi["schema_name_source"]}.{wi["table_name_source"]}'
-    # df_count = get_jdbc_data_by_dict(
-    #     db_conn_props=db_conn_props,
-    #     work_item={
-    #         "query_sql": query,
-    #         "query_type": "query",
-    #     },
-    # )
     range_size = int(result[0]["ROW_COUNT"])
 
     # get the count of the table
-    # range_size = get_count(wi)
     if range_size == 0:
         logger.info(
             f"data source table empty: {wi['schema_name_source']}.{wi['table_name_source']}"
@@ -448,48 +456,12 @@ def get_count_and_calculate_partition_size(wi:dict, result: list) -> dict:
     return wi
 
 
-work_items = [get_count_and_calculate_partition_size(wi, results_by_query_id[wi["__query_id__"]]) for wi in work_items]
+work_items = [
+    get_count_and_calculate_partition_size(wi, results_by_query_id[wi["__query_id__"]])
+    for wi in work_items
+]
 
 pp.pp(work_items[:3])
-
-
-# COMMAND ----------
-
-# db_conn_props: dict = get_connection_properties__by_key(jp_db_scope, p_db_key)
-
-# async def get_count_and_calculate_partition_size(wi:dict) -> dict:
-
-#     # def get_count(wi):
-#     query = f'SELECT COUNT(*) AS ROW_COUNT FROM {wi["schema_name_source"]}.{wi["table_name_source"]}'
-#     df_count = get_jdbc_data_by_dict(
-#         db_conn_props=db_conn_props,
-#         work_item={
-#             "query_sql": query,
-#             "query_type": "query",
-#         },
-#     )
-#     range_size = int(df_count.collect()[0]["ROW_COUNT"])
-
-#     # get the count of the table
-#     # range_size = get_count(wi)
-#     if range_size == 0:
-#         logger.info(
-#             f"data source table empty: {wi['schema_name_source']}.{wi['table_name_source']}"
-#         )
-#     wi["row_count"] = range_size
-#     partition_bin_size = 100_000  # best same value as resultset size from db connection
-#     if range_size < partition_bin_size:
-#         wi["partition_count"] = 1 * wi["partition_multiplier"]
-#     else:
-#         # we want to have at least bin_size rows per partition with a max of 24 partitions
-#         wi["partition_count"] = (
-#             min(MAX_PARTITIONS, int(ceil(range_size / partition_bin_size)))
-#             * wi["partition_multiplier"]
-#         )
-#     return wi
-
-# # for each work item, get the count of the table and add it to the work item dict
-# work_items = await run_parallel(*[get_count_and_calculate_partition_size(wi) for wi in work_items])
 
 # COMMAND ----------
 
@@ -543,6 +515,7 @@ start_time_load = time.time()
 q = Queue()
 
 thread_count = 0
+
 
 def create_threads(threads_to_create):
     logger.info(f"create_threads: {threads_to_create}")
