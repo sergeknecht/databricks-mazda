@@ -27,5 +27,5 @@ if __name__ == "__main__":
     notebook_path = "."
     notebook_name = "poc_sql_notebook_writer_GENERATED"
     notebook_content = ["select current_date()", "select current_date()", "select current_date()"]
-    write_notebook_sql(notebook_path, notebook_name, notebook_content)
-    write_notebook_py(notebook_path, notebook_name, notebook_content)
+    write_notebook_sql(notebook_path, notebook_name + "_SQL", notebook_content)
+    write_notebook_py(notebook_path, notebook_name + "_PY", notebook_content)
