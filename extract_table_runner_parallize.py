@@ -386,6 +386,7 @@ print(len(work_items))
 # for each work item, get the count of the table and add it to the work item dict
 # add the count of the table to the work item dict as the sql query
 work_items = [wi | {"sql": f'SELECT COUNT(*) AS ROW_COUNT FROM {wi["schema_name_source"]}.{wi["table_name_source"]}'} for wi in work_items]
+display(work_items[:3])
 
 # COMMAND ----------
 
@@ -395,7 +396,7 @@ db_conn_props: dict = get_connection_properties__by_key(jp_db_scope, p_db_key)
 db_dict = copy.deepcopy(db_conn_props)
 db_dict["pool_size_max"] = 20
 db_dict["SIMULATE_LONG_RUNNING_QUERY"] = False
-db_dict["VERBOSE"] = True
+db_dict["VERBOSE"] = False
 
 # # Create a dictionary of tasks to be executed in parallel
 # # key is an identifier (int) for the query
@@ -446,7 +447,8 @@ def get_count_and_calculate_partition_size(wi:dict, result: list) -> dict:
     del wi["sql"]
     return wi
 
-work_items = [get_count_and_calculate_partition_size(wi, results_by_query_id["__query_id__"]) for wi in work_items]
+
+work_items = [get_count_and_calculate_partition_size(wi, results_by_query_id[wi["__query_id__"]]) for wi in work_items]
 
 pp.pp(work_items[:3])
 
