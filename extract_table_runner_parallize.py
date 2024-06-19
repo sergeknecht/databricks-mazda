@@ -10,6 +10,10 @@
 
 # COMMAND ----------
 
+spark.conf.set('spark.sql.session.timeZone', 'Europe/Brussels')
+
+# COMMAND ----------
+
 import os
 import logging
 import asyncio
@@ -281,6 +285,17 @@ notebook_path = "./config"
 notebook_name = f"drop__{config_name_base}"
 notebook_path_full = f"{notebook_path}/{notebook_name}"
 write_notebook_py(notebook_path, notebook_name, tasks)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## TODO: using import export API copy generated files into place 
+# MAGIC Whereby the type will becom notebook and it will be executable from another notebook.
+# MAGIC Note: use secret DBX__PAT
+
+# COMMAND ----------
+
+
 
 # COMMAND ----------
 
