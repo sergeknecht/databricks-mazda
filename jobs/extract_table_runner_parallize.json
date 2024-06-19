@@ -1,0 +1,347 @@
+{
+    "job_id": 916883640758559,
+    "creator_user_name": "sknecht@mazdaeur.com",
+    "run_as_user_name": "sknecht@mazdaeur.com",
+    "run_as_owner": true,
+    "settings": {
+        "name": "extract_table_runner_parallize",
+        "email_notifications": {
+            "on_success": [
+                "sknecht@mazdaeur.com"
+            ],
+            "on_failure": [
+                "sknecht@mazdaeur.com"
+            ],
+            "no_alert_for_skipped_runs": true
+        },
+        "webhook_notifications": {},
+        "notification_settings": {
+            "no_alert_for_skipped_runs": true,
+            "no_alert_for_canceled_runs": false
+        },
+        "timeout_seconds": 5400,
+        "health": {
+            "rules": [
+                {
+                    "metric": "RUN_DURATION_SECONDS",
+                    "op": "GREATER_THAN",
+                    "value": 3600
+                }
+            ]
+        },
+        "schedule": {
+            "quartz_cron_expression": "19 0 11 * * ?",
+            "timezone_id": "Europe/Berlin",
+            "pause_status": "PAUSED"
+        },
+        "max_concurrent_runs": 2,
+        "tasks": [
+            {
+                "task_key": "extract_table__drop",
+                "run_if": "ALL_SUCCESS",
+                "notebook_task": {
+                    "notebook_path": "/Repos/sknecht@mazdaeur.com/databricks-mazda/extract_table_runner_parallize",
+                    "base_parameters": {
+                        "jp_action": "DROP"
+                    },
+                    "source": "WORKSPACE"
+                },
+                "job_cluster_key": "extract_table_runner_parallize_cluster",
+                "libraries": [
+                    {
+                        "maven": {
+                            "coordinates": "com.oracle.database.jdbc:ojdbc11:23.4.0.24.05"
+                        }
+                    },
+                    {
+                        "pypi": {
+                            "package": "oracledb==2.2.1"
+                        }
+                    }
+                ],
+                "timeout_seconds": 0,
+                "email_notifications": {},
+                "notification_settings": {
+                    "no_alert_for_skipped_runs": false,
+                    "no_alert_for_canceled_runs": false,
+                    "alert_on_last_attempt": false
+                },
+                "webhook_notifications": {}
+            },
+            {
+                "task_key": "extract_table__create",
+                "depends_on": [
+                    {
+                        "task_key": "extract_table__drop"
+                    }
+                ],
+                "run_if": "ALL_SUCCESS",
+                "notebook_task": {
+                    "notebook_path": "/Repos/sknecht@mazdaeur.com/databricks-mazda/extract_table_runner_parallize",
+                    "base_parameters": {
+                        "jp_action": "CREATE",
+                        "jp_stop_on_exception": "TRUE",
+                        "jp_worker_count": "40",
+                        "jp_partition_count_max": "30"
+                    },
+                    "source": "WORKSPACE"
+                },
+                "job_cluster_key": "extract_table_runner_parallize_cluster",
+                "libraries": [
+                    {
+                        "maven": {
+                            "coordinates": "com.oracle.database.jdbc:ojdbc11:23.4.0.24.05"
+                        }
+                    },
+                    {
+                        "pypi": {
+                            "package": "oracledb==2.2.1"
+                        }
+                    }
+                ],
+                "max_retries": 2,
+                "min_retry_interval_millis": 300000,
+                "retry_on_timeout": true,
+                "timeout_seconds": 7200,
+                "health": {
+                    "rules": [
+                        {
+                            "metric": "RUN_DURATION_SECONDS",
+                            "op": "GREATER_THAN",
+                            "value": 3600
+                        }
+                    ]
+                },
+                "email_notifications": {},
+                "notification_settings": {
+                    "no_alert_for_skipped_runs": false,
+                    "no_alert_for_canceled_runs": false,
+                    "alert_on_last_attempt": false
+                },
+                "webhook_notifications": {}
+            },
+            {
+                "task_key": "IF__jp_scope_ACC_THEN_continue",
+                "depends_on": [
+                    {
+                        "task_key": "extract_table__create"
+                    }
+                ],
+                "run_if": "ALL_SUCCESS",
+                "condition_task": {
+                    "op": "EQUAL_TO",
+                    "left": "{{job.parameters.jp_scope]}}",
+                    "right": "ACC"
+                },
+                "timeout_seconds": 0,
+                "email_notifications": {},
+                "notification_settings": {
+                    "no_alert_for_skipped_runs": false,
+                    "no_alert_for_canceled_runs": false,
+                    "alert_on_last_attempt": false
+                },
+                "webhook_notifications": {}
+            },
+            {
+                "task_key": "dwh2_clone_impetus_poc",
+                "depends_on": [
+                    {
+                        "task_key": "IF__jp_scope_ACC_THEN_continue",
+                        "outcome": "true"
+                    }
+                ],
+                "run_if": "ALL_SUCCESS",
+                "notebook_task": {
+                    "notebook_path": "/Repos/sknecht@mazdaeur.com/databricks-mazda/clone_schemas",
+                    "source": "WORKSPACE"
+                },
+                "job_cluster_key": "dwh2_clone_impetus_poc_cluster",
+                "timeout_seconds": 0,
+                "email_notifications": {},
+                "notification_settings": {
+                    "no_alert_for_skipped_runs": false,
+                    "no_alert_for_canceled_runs": false,
+                    "alert_on_last_attempt": false
+                },
+                "webhook_notifications": {}
+            },
+            {
+                "task_key": "dwh2_clone_impetus_target",
+                "depends_on": [
+                    {
+                        "task_key": "IF__jp_scope_ACC_THEN_continue",
+                        "outcome": "true"
+                    }
+                ],
+                "run_if": "ALL_SUCCESS",
+                "notebook_task": {
+                    "notebook_path": "/Repos/sknecht@mazdaeur.com/databricks-mazda/clone_schemas_target",
+                    "source": "WORKSPACE"
+                },
+                "job_cluster_key": "dwh2_clone_impetus_target_cluster",
+                "timeout_seconds": 0,
+                "email_notifications": {},
+                "notification_settings": {
+                    "no_alert_for_skipped_runs": false,
+                    "no_alert_for_canceled_runs": false,
+                    "alert_on_last_attempt": false
+                },
+                "webhook_notifications": {}
+            },
+            {
+                "task_key": "apply_data_governance_pii",
+                "depends_on": [
+                    {
+                        "task_key": "dwh2_clone_impetus_poc"
+                    },
+                    {
+                        "task_key": "dwh2_clone_impetus_target"
+                    }
+                ],
+                "run_if": "ALL_SUCCESS",
+                "notebook_task": {
+                    "notebook_path": "/Repos/sknecht@mazdaeur.com/databricks-mazda/projects/pocs/impetus/mle_dbx_procedure/impetus_apply_pii_mask",
+                    "source": "WORKSPACE",
+                    "warehouse_id": "b9aa4380e0c75e36"
+                },
+                "timeout_seconds": 0,
+                "email_notifications": {},
+                "notification_settings": {
+                    "no_alert_for_skipped_runs": false,
+                    "no_alert_for_canceled_runs": false,
+                    "alert_on_last_attempt": false
+                },
+                "webhook_notifications": {}
+            },
+            {
+                "task_key": "ctas_pii_tables_to_impetus",
+                "depends_on": [
+                    {
+                        "task_key": "apply_data_governance_pii"
+                    }
+                ],
+                "run_if": "ALL_SUCCESS",
+                "notebook_task": {
+                    "notebook_path": "/Repos/sknecht@mazdaeur.com/databricks-mazda/projects/pocs/impetus/mle_dbx_procedure/impetus_copy_pii_tables",
+                    "source": "WORKSPACE",
+                    "warehouse_id": "b9aa4380e0c75e36"
+                },
+                "timeout_seconds": 0,
+                "email_notifications": {},
+                "notification_settings": {
+                    "no_alert_for_skipped_runs": false,
+                    "no_alert_for_canceled_runs": false,
+                    "alert_on_last_attempt": false
+                },
+                "webhook_notifications": {}
+            }
+        ],
+        "job_clusters": [
+            {
+                "job_cluster_key": "dwh2_clone_impetus_poc_cluster",
+                "new_cluster": {
+                    "cluster_name": "",
+                    "spark_version": "14.3.x-scala2.12",
+                    "spark_conf": {
+                        "spark.master": "local[*, 4]",
+                        "spark.databricks.cluster.profile": "singleNode"
+                    },
+                    "aws_attributes": {
+                        "first_on_demand": 1,
+                        "availability": "SPOT_WITH_FALLBACK",
+                        "zone_id": "eu-west-1c",
+                        "spot_bid_price_percent": 100,
+                        "ebs_volume_count": 0
+                    },
+                    "node_type_id": "r5d.large",
+                    "driver_node_type_id": "r5d.large",
+                    "custom_tags": {
+                        "ResourceClass": "SingleNode"
+                    },
+                    "enable_elastic_disk": true,
+                    "data_security_mode": "SINGLE_USER",
+                    "runtime_engine": "STANDARD",
+                    "num_workers": 0
+                }
+            },
+            {
+                "job_cluster_key": "dwh2_clone_impetus_target_cluster",
+                "new_cluster": {
+                    "cluster_name": "",
+                    "spark_version": "14.3.x-scala2.12",
+                    "spark_conf": {
+                        "spark.master": "local[*, 4]",
+                        "spark.databricks.cluster.profile": "singleNode"
+                    },
+                    "aws_attributes": {
+                        "first_on_demand": 1,
+                        "availability": "SPOT_WITH_FALLBACK",
+                        "zone_id": "eu-west-1c",
+                        "spot_bid_price_percent": 100,
+                        "ebs_volume_count": 0
+                    },
+                    "node_type_id": "r5d.large",
+                    "driver_node_type_id": "r5d.large",
+                    "custom_tags": {
+                        "ResourceClass": "SingleNode"
+                    },
+                    "enable_elastic_disk": true,
+                    "data_security_mode": "SINGLE_USER",
+                    "runtime_engine": "STANDARD",
+                    "num_workers": 0
+                }
+            },
+            {
+                "job_cluster_key": "extract_table_runner_parallize_cluster",
+                "new_cluster": {
+                    "cluster_name": "",
+                    "spark_version": "14.3.x-scala2.12",
+                    "aws_attributes": {
+                        "first_on_demand": 7,
+                        "availability": "SPOT_WITH_FALLBACK",
+                        "zone_id": "eu-west-1c",
+                        "spot_bid_price_percent": 100,
+                        "ebs_volume_type": "GENERAL_PURPOSE_SSD",
+                        "ebs_volume_count": 1,
+                        "ebs_volume_size": 100
+                    },
+                    "node_type_id": "r6i.2xlarge",
+                    "driver_node_type_id": "r5d.4xlarge",
+                    "spark_env_vars": {
+                        "JNAME": "zulu17-ca-amd64"
+                    },
+                    "enable_elastic_disk": true,
+                    "data_security_mode": "SINGLE_USER",
+                    "runtime_engine": "STANDARD",
+                    "autoscale": {
+                        "min_workers": 4,
+                        "max_workers": 8
+                    }
+                }
+            }
+        ],
+        "format": "MULTI_TASK",
+        "queue": {
+            "enabled": true
+        },
+        "parameters": [
+            {
+                "name": "jp_db_scope",
+                "default": "ACC"
+            },
+            {
+                "name": "jp_scope",
+                "default": "DEV"
+            },
+            {
+                "name": "jp_work_config_filename",
+                "default": "clone_tables__impetus_src.json"
+            },
+            {
+                "name": "p_db_key",
+                "default": "DWH_BI1__100000"
+            }
+        ]
+    },
+    "created_time": 1709278320349
+}
