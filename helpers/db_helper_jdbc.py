@@ -52,7 +52,9 @@ def get_connection_properties__by_key(db_scope: str = "ACC", db_key: str = "DWH_
 
     db_key_base = db_key.split("__")[0]
 
-    
+    username = dbutils.secrets.get(
+        scope=db_scope.upper(), key=f"{db_key_base}__JDBC_USERNAME"
+    )
     password = dbutils.secrets.get(
         scope=db_scope.upper(), key=f"{db_key_base}__JDBC_PASSWORD"
     )
