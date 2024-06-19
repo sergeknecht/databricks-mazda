@@ -1,0 +1,1025 @@
+{
+	"info": {
+		"_postman_id": "07e90689-ae35-49d2-8c0d-de0fc754615f",
+		"name": "Databricks",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34528138"
+	},
+	"item": [
+		{
+			"name": "Compute",
+			"item": [
+				{
+					"name": "Clusters",
+					"item": [
+						{
+							"name": "cluster get info",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "cluster_id",
+											"value": "{{CLUSTER_ID__SKN_PC}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/clusters/get",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"clusters",
+										"get"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "start terminated cluster",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{PAT}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "cluster_id",
+											"value": "{{CLUSTER_ID__SKN_PC}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/clusters/start",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"clusters",
+										"start"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "terminate cluster",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 200\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(200);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response has the required Content-Type header\", function () {\r",
+											"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response body schema is valid JSON\", function () {\r",
+											"    pm.response.to.be.json;\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response time is less than 400ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below(400);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{PAT}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "cluster_id",
+											"value": "{{CLUSTER_ID__SKN_PC}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/clusters/delete",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"clusters",
+										"delete"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "pin cluster",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{PAT}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "cluster_id",
+											"value": "{{CLUSTER_ID__SKN_PC}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/clusters/pin",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"clusters",
+										"pin"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "list all",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "cluster_id",
+											"value": "{{CLUSTER_ID__SKN_PC}}",
+											"type": "text",
+											"disabled": true
+										}
+									]
+								},
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/clusters/list?cab_use_client=NOTEBOOKS ",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"clusters",
+										"list"
+									],
+									"query": [
+										{
+											"key": "cab_use_client",
+											"value": "NOTEBOOKS "
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "list available spark versions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/clusters/spark-versions",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"clusters",
+										"spark-versions"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Cluster Policies",
+					"item": [
+						{
+							"name": "list",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/policies/clusters/list?sort_order=ASC&sort_column=POLICY_NAME",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"policies",
+										"clusters",
+										"list"
+									],
+									"query": [
+										{
+											"key": "sort_order",
+											"value": "ASC"
+										},
+										{
+											"key": "sort_column",
+											"value": "POLICY_NAME"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Managed Libraries",
+			"item": [
+				{
+					"name": "Get cluster status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Validate the structure of the response object\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.cluster_id).to.exist.and.to.be.a('string');",
+									"    pm.expect(responseData.library_statuses).to.exist.and.to.be.an('array');",
+									"    responseData.library_statuses.forEach(function(libraryStatus) {",
+									"        pm.expect(libraryStatus).to.be.an('object');",
+									"        pm.expect(libraryStatus.library).to.exist.and.to.be.an('object');",
+									"       // pm.expect(libraryStatus.library.maven).to.exist.and.to.be.an('object');",
+									"        pm.expect(libraryStatus.status).to.exist.and.to.be.a('string');",
+									"        pm.expect(libraryStatus.is_library_for_all_clusters).to.exist.and.to.be.a('boolean');",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Ensure the presence of required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.cluster_id).to.exist;",
+									"    pm.expect(responseData.library_statuses).to.exist.and.to.be.an('array');",
+									"    ",
+									"    responseData.library_statuses.forEach(function(libraryStatus) {",
+									"        pm.expect(libraryStatus.library).to.exist.and.to.be.an('object');",
+									"",
+									"        pm.expect(libraryStatus.status).to.exist;",
+									"        pm.expect(libraryStatus.is_library_for_all_clusters).to.exist;",
+									"",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Check if the 'maven' object within 'library' has the required field - coordinates\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.library_statuses).to.be.an('array');",
+									"    ",
+									"    responseData.library_statuses.forEach(function(libraryStatus) {",
+									"        pm.expect(libraryStatus.library).to.be.an('object');",
+									"        if (libraryStatus.library.maven) {",
+									"            pm.expect(libraryStatus.library.maven.coordinates).to.exist.and.to.be.an('string')",
+									"            pm.expect(libraryStatus.library.maven.coordinates).to.exist.and.to.be.eq('com.oracle.database.jdbc:ojdbc11:23.4.0.24.05')",
+									"        }",
+									"        if (libraryStatus.library.pypi) {",
+									"            pm.expect(libraryStatus.library.pypi.package).to.exist.and.to.be.an('string')",
+									"            pm.expect(libraryStatus.library.pypi.package).to.exist.and.to.be.eq('oracledb==2.2.1')",
+									"        }",
+									"    });",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{DATABRICKS_HOST}}/api/2.0/libraries/cluster-status?cluster_id={{CLUSTER_ID__SKN_PC}}",
+							"host": [
+								"{{DATABRICKS_HOST}}"
+							],
+							"path": [
+								"api",
+								"2.0",
+								"libraries",
+								"cluster-status"
+							],
+							"query": [
+								{
+									"key": "cluster_id",
+									"value": "{{CLUSTER_ID__SKN_PC}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all statuses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{DATABRICKS_HOST}}/api/2.0/libraries/all-cluster-statuses",
+							"host": [
+								"{{DATABRICKS_HOST}}"
+							],
+							"path": [
+								"api",
+								"2.0",
+								"libraries",
+								"all-cluster-statuses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add libraries oracle",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response time is less than 400ms\", function () {\r",
+									"  pm.expect(pm.response.responseTime).to.be.below(400);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response has the required schema\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response schema matches the expected format\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData).to.be.an('object');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"cluster_id\": \"{{CLUSTER_ID__SKN_PC}}\",\r\n  \"libraries\": [\r\n    {\r\n      \"pypi\": {\r\n        \"package\": \"oracledb==2.2.1\"\r\n      },\r\n      \"maven\": {\r\n        \"coordinates\": \"com.oracle.database.jdbc:ojdbc11:23.4.0.24.05\"\r\n      }\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{DATABRICKS_HOST}}/api/2.0/libraries/install",
+							"host": [
+								"{{DATABRICKS_HOST}}"
+							],
+							"path": [
+								"api",
+								"2.0",
+								"libraries",
+								"install"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Policy Families",
+			"item": [
+				{
+					"name": "Get all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{DATABRICKS_HOST}}/api/2.0/policy-families",
+							"host": [
+								"{{DATABRICKS_HOST}}"
+							],
+							"path": [
+								"api",
+								"2.0",
+								"policy-families"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Workflows",
+			"item": [
+				{
+					"name": "Jobs",
+					"item": [
+						{
+							"name": "List Jobs",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/jobs/list",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"jobs",
+										"list"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get a single job",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/jobs/get?job_id=916883640758559",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"jobs",
+										"get"
+									],
+									"query": [
+										{
+											"key": "job_id",
+											"value": "916883640758559"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Databricks Workspace",
+			"item": [
+				{
+					"name": "Git Credentials",
+					"item": [
+						{
+							"name": "git-credentials",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{PAT}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": []
+								},
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/git-credentials",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"git-credentials"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "git-credentials",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{PAT}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "personal_access_token",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "git_username",
+											"value": "sknecht",
+											"type": "text"
+										},
+										{
+											"key": "git_provider",
+											"value": "bitbucketServer",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/git-credentials",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"git-credentials"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Secret",
+					"item": [
+						{
+							"name": "List secret keys",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/secrets/list?scope={{SCOPE}}",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"secrets",
+										"list"
+									],
+									"query": [
+										{
+											"key": "scope",
+											"value": "{{SCOPE}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add a secret",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "scope",
+											"value": "{{SCOPE}}",
+											"type": "text"
+										},
+										{
+											"key": "key",
+											"value": "DBX__PAT",
+											"type": "text"
+										},
+										{
+											"key": "string_value",
+											"value": "{{DBX__PAT}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/secrets/put",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"secrets",
+										"put"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Lists ACLs",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/secrets/acls/list?scope={{SCOPE}}",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"secrets",
+										"acls",
+										"list"
+									],
+									"query": [
+										{
+											"key": "scope",
+											"value": "{{SCOPE}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List all scopes",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/secrets/scopes/list",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"secrets",
+										"scopes",
+										"list"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Workspace",
+					"item": [
+						{
+							"name": "List contents",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/workspace/list?path=/Workspace/Repos/sknecht@mazdaeur.com/databricks-mazda/config",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"workspace",
+										"list"
+									],
+									"query": [
+										{
+											"key": "path",
+											"value": "/Workspace/Repos/sknecht@mazdaeur.com/databricks-mazda/config"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Export a workspace object",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status test\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"let response_text = pm.response.text()\r",
+											"pm.collectionVariables.set(\"response_text\", response_text);\r",
+											"console.log(response_text)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/workspace/export?path=/Workspace/Repos/sknecht@mazdaeur.com/databricks-mazda/config/drop__clone_tables__ga4_GENERATED_PY.py&direct_download=true&format=SOURCE",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"workspace",
+										"export"
+									],
+									"query": [
+										{
+											"key": "path",
+											"value": "/Workspace/Repos/sknecht@mazdaeur.com/databricks-mazda/config/drop__clone_tables__ga4_GENERATED_PY.py",
+											"description": "The absolute path of the object or directory. Exporting a directory is only supported for the DBC, SOURCE, and AUTO format."
+										},
+										{
+											"key": "direct_download",
+											"value": "true",
+											"description": "[{\"key\":\"language\",\"value\":\"PYTHON \",\"equals\":true,\"description\":\"Flag to enable direct download. If it is true, the response is the exported file itself. Otherwise, by default, the response contains content in the form of a base64 encoded string.\",\"enabled\":true,\"uuid\":\"db75c395-f3ae-4f4f-8015-d2c8c5d3f0a3\"}]"
+										},
+										{
+											"key": "format",
+											"value": "SOURCE",
+											"description": "SOURCE | HTML | JUPYTER | DBC | R_MARKDOWN | AUTO. \nThis specifies the format of the exported file. By default, this is SOURCE\n\nThe value is case sensitive.\nSOURCE: The notebook is exported as source code. Directory exports will not include non-notebook entries.\nHTML: The notebook is exported as an HTML file.\nJUPYTER: The notebook is exported as a Jupyter/IPython Notebook file.\nDBC: The notebook is exported in Databricks archive format. Directory exports will not include non-notebook entries.\nR_MARKDOWN: The notebook is exported to R Markdown format.\nAUTO: The object or directory is exported depending on the objects type. Directory exports will include notebooks and workspace files.\n"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Import a workspace object",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let response_text = pm.collectionVariables.get(\"response_text\");\r",
+											"\r",
+											"const btoa_required = require('btoa');\r",
+											"let content = btoa_required(response_text);\r",
+											"\r",
+											"console.log(content); // Output: \"Hello, world!\"\r",
+											"pm.collectionVariables.set(\"content\", content);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "path",
+											"value": "/Workspace/Repos/sknecht@mazdaeur.com/databricks-mazda/config/drop__clone_tables__ga4_IMPORT",
+											"description": "The absolute path of the object or directory. Importing a directory is only supported for the DBC and SOURCE formats.",
+											"type": "text"
+										},
+										{
+											"key": "content",
+											"value": "{{content}}",
+											"description": "The base64-encoded content. This has a limit of 10 MB.\nIf the limit (10MB) is exceeded, exception with error code MAX_NOTEBOOK_SIZE_EXCEEDED is thrown. This parameter might be absent, and instead a posted file is used.",
+											"type": "text"
+										},
+										{
+											"key": "format",
+											"value": "SOURCE",
+											"description": "Enum: SOURCE | HTML | JUPYTER | DBC | R_MARKDOWN | AUTO\nDefault \"SOURCE\"\nThis specifies the format of the file to be imported.\nThe value is case sensitive.\nAUTO: The item is imported depending on an analysis of the item's extension and the header content provided in the request. If the item is imported as a notebook, then the item's extension is automatically removed.\nSOURCE: The notebook or directory is imported as source code.\nHTML: The notebook is imported as an HTML file.\nJUPYTER: The notebook is imported as a Jupyter/IPython Notebook file.\nDBC: The notebook is imported in Databricks archive format. Required for directories.\nR_MARKDOWN: The notebook is imported from R Markdown format.",
+											"type": "text"
+										},
+										{
+											"key": "language",
+											"value": "PYTHON",
+											"description": "Enum: SCALA | PYTHON | SQL | R\nThe language of the object. This value is set only if the object type is NOTEBOOK.",
+											"type": "text"
+										},
+										{
+											"key": "overwrite",
+											"value": "true",
+											"description": "Default false\nThe flag that specifies whether to overwrite existing object. It is false by default. For DBC format, overwrite is not supported since it may contain a directory.",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{DATABRICKS_HOST}}/api/2.0/workspace/import",
+									"host": [
+										"{{DATABRICKS_HOST}}"
+									],
+									"path": [
+										"api",
+										"2.0",
+										"workspace",
+										"import"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{DBX__PAT}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "DBX__PAT",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "DATABRICKS_HOST",
+			"value": "https://mazdaeur-mazdaeur-mazda-bi20-nonprdvpc.cloud.databricks.com",
+			"type": "string"
+		},
+		{
+			"key": "CLUSTER_ID__SKN_PC",
+			"value": "0619-080226-cutpmt8j",
+			"type": "string"
+		},
+		{
+			"key": "response_text",
+			"value": ""
+		},
+		{
+			"key": "content",
+			"value": ""
+		},
+		{
+			"key": "SCOPE",
+			"value": "ACC",
+			"type": "string"
+		}
+	]
+}
