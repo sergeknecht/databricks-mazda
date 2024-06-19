@@ -18,7 +18,7 @@ def write_notebook_sql(notebook_path, notebook_name, notebook_content: list, suf
     notebook_content = "\n\n-- COMMAND ----------\n\n".join(notebook_content)
     notebook_content = f"-- Databricks notebook source\n{notebook_content}"
 
-    with open(f"{notebook_path}/{notebook_name}{suffix}.sql", "w") as notebook:
+    with open(f"{notebook_path}/{notebook_name}{suffix}.py", "w") as notebook:
         notebook.write(notebook_content)
     print(f"Notebook {notebook_name}.ipynb has been written to {notebook_path}")
 
