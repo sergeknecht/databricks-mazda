@@ -621,12 +621,12 @@
 									"formdata": [
 										{
 											"key": "personal_access_token",
-											"value": "",
+											"value": "{{BB__PAT}}",
 											"type": "text"
 										},
 										{
 											"key": "git_username",
-											"value": "sknecht",
+											"value": "{{BB_USER}}",
 											"type": "text"
 										},
 										{
@@ -1020,6 +1020,15 @@
 			"key": "SCOPE",
 			"value": "ACC",
 			"type": "string"
+		},
+		{
+			"key": "BB__PAT",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "BB_USER",
+			"value": "sknecht"
 		}
 	]
 }
