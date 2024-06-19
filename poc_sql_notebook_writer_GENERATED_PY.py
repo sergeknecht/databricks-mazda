@@ -15,7 +15,3 @@
 # COMMAND ----------
 
 # MAGIC %sh ls
-
-# COMMAND ----------
-
-# MAGIC %sh cat poc_sql_notebook_writer_GENERATED_PY

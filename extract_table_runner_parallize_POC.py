@@ -282,7 +282,8 @@ write_notebook_py(notebook_path, notebook_name, tasks)
 
 # /Workspace/Repos/sknecht@mazdaeur.com/databricks-mazda/poc_dbx_notebook_writer_GENERATED_PY
 result: str = dbutils.notebook.run(
-    f"poc_dbx_notebook_writer_GENERATED_PY",
+    #f"poc_dbx_notebook_writer_GENERATED_PY",
+    "/Workspace/Repos/sknecht@mazdaeur.com/databricks-mazda/poc_dbx_notebook_writer_GENERATED_PY",
     timeout_sec,
     # {
     #     "p_work_json": json.dumps(work_item),
