@@ -261,15 +261,28 @@ display(df)
 
 # MAGIC %md
 # MAGIC ## DROP tables in target location (delta) if it exist
-
-
-# MAGIC %md
+# MAGIC
 # MAGIC ## TEST TO DO - write drop commands in poc_multiple_sqls.sql and run notebook. should be MUCH FASTER
 
 # COMMAND ----------
 
+def drop_table_delta(row) -> str:
+        return f"DROP TABLE IF EXISTS {row.fqn}"
+tasks = [drop_table_delta(row) for row in df.collect()]
+pp.pprint(tasks[:3])
+
+# COMMAND ----------
+
+from helpers.databricks.dbx_sql_notebook_writer import write_notebook_py
+notebook_path = "."
+notebook_name = "poc_dbx_notebook_writer"
+write_notebook_py(notebook_path, notebook_name, tasks)
+
+# COMMAND ----------
+
+# /Workspace/Repos/sknecht@mazdaeur.com/databricks-mazda/poc_dbx_notebook_writer_GENERATED_PY
 result: str = dbutils.notebook.run(
-    f"poc_sql_notebook_writer",
+    f"poc_dbx_notebook_writer_GENERATED_PY",
     timeout_sec,
     # {
     #     "p_work_json": json.dumps(work_item),

@@ -53,3 +53,16 @@
 # COMMAND ----------
 
 # MAGIC %sh nc -zv prddw-scan.mle.mazdaeur.com 1521
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Test connectivity DBX to Mazda bitbucket server https://apvlcis01.mme.mazdaeur.com/bitbucket/dashboard
+
+# COMMAND ----------
+
+# MAGIC %sh nc -zv apvlcis01.mme.mazdaeur.com 80
+
+# COMMAND ----------
+
+# MAGIC %sh nc -zv apvlcis01.mme.mazdaeur.com 443
