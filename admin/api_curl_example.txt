@@ -1,0 +1,11 @@
+https://mazdaeur-mazda-bi20-nonprd.cloud.databricks.com/
+
+curl --request GET "https://${DATABRICKS_HOST}/api/2.0/clusters/get" \
+     --header "Authorization: Bearer ${DATABRICKS_TOKEN}" \
+     --data '{ "cluster_id": "${DATABRICKS_CLUSTER_ID}" }'
+
+
+
+curl --request GET "https://${DATABRICKS_HOST_NOVPC}/api/2.0/clusters/get" \
+     --header "Authorization: Bearer ${DATABRICKS_TOKEN_NOVPC}" \
+     --data '{ "cluster_id": "0718-100840-ahekrb00" }'
